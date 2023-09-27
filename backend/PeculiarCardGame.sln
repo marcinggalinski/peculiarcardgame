@@ -3,7 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.7.34031.279
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PeculiarCardGame.WebApi", "PeculiarCardGame.WebApi\PeculiarCardGame.WebApi.csproj", "{25D23B3A-5957-4658-90CA-F65AB2DB94AD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PeculiarCardGame.WebApi", "PeculiarCardGame.WebApi\PeculiarCardGame.WebApi.csproj", "{25D23B3A-5957-4658-90CA-F65AB2DB94AD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PeculiarCardGame", "PeculiarCardGame\PeculiarCardGame.csproj", "{1BE97921-4A74-43A9-9F70-6BEBD9D1D343}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PeculiarCardGame.Data", "PeculiarCardGame.Data\PeculiarCardGame.Data.csproj", "{9E120691-D0A8-4DEF-B82B-0518C0407C40}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PeculiarCardGame.Services", "PeculiarCardGame.Services\PeculiarCardGame.Services.csproj", "{D2A94ACC-E4F7-4220-A028-E65883C6FBCF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +21,18 @@ Global
 		{25D23B3A-5957-4658-90CA-F65AB2DB94AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{25D23B3A-5957-4658-90CA-F65AB2DB94AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{25D23B3A-5957-4658-90CA-F65AB2DB94AD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1BE97921-4A74-43A9-9F70-6BEBD9D1D343}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1BE97921-4A74-43A9-9F70-6BEBD9D1D343}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1BE97921-4A74-43A9-9F70-6BEBD9D1D343}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1BE97921-4A74-43A9-9F70-6BEBD9D1D343}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9E120691-D0A8-4DEF-B82B-0518C0407C40}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E120691-D0A8-4DEF-B82B-0518C0407C40}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E120691-D0A8-4DEF-B82B-0518C0407C40}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E120691-D0A8-4DEF-B82B-0518C0407C40}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D2A94ACC-E4F7-4220-A028-E65883C6FBCF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2A94ACC-E4F7-4220-A028-E65883C6FBCF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D2A94ACC-E4F7-4220-A028-E65883C6FBCF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D2A94ACC-E4F7-4220-A028-E65883C6FBCF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
