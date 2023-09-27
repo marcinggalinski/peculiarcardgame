@@ -39,7 +39,7 @@ namespace PeculiarCardGame.Services.DeckManagement
             throw new NotImplementedException();
         }
 
-        public void DeleteDeck(int id)
+        public bool DeleteDeck(int id)
         {
             throw new NotImplementedException();
         }
@@ -73,7 +73,7 @@ namespace PeculiarCardGame.Services.DeckManagement
             throw new NotImplementedException();
         }
 
-        public void DeleteCard(int id)
+        public bool DeleteCard(int id)
         {
             throw new NotImplementedException();
         }

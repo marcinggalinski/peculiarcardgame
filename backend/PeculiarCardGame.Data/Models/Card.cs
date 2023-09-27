@@ -10,9 +10,5 @@
         public virtual Deck Deck { get; set; }
     }
 
-    public enum CardType
-    {
-        Black,
-        White
-    }
+    
 }
