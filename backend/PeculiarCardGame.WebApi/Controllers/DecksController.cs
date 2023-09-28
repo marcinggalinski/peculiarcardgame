@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PeculiarCardGame.Services.DeckManagement;
+using PeculiarCardGame.WebApi.Infrastructure.Auth;
 using PeculiarCardGame.WebApi.Models.Requests;
 using PeculiarCardGame.WebApi.Models.Responses;
 
@@ -7,6 +9,7 @@ namespace PeculiarCardGame.WebApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = BearerTokenAuthenticationHandler.SchemeName)]
     public class DecksController : ControllerBase
     {
         private readonly IDeckManagementService _deckManagementService;
@@ -22,7 +25,7 @@ namespace PeculiarCardGame.WebApi.Controllers
         public ActionResult<GetDeckResponse> AddDeck(AddDeckRequest request)
         {
             var deck = _deckManagementService.AddDeck(request.Name, request.Description);
-            return Ok(new GetDeckResponse
+            return CreatedAtAction(nameof(GetDeck), new { id = deck.Id }, new GetDeckResponse
             {
                 Id = deck.Id,
                 Name = deck.Name,
@@ -31,6 +34,7 @@ namespace PeculiarCardGame.WebApi.Controllers
         }
 
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public ActionResult<GetDeckResponse> GetDeck(int id)
         {
             var deck = _deckManagementService.GetDeck(id);
@@ -45,6 +49,7 @@ namespace PeculiarCardGame.WebApi.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public ActionResult<List<GetDeckResponse>> GetAllDecks()
         {
             var decks = _deckManagementService.GetAllDecks();
@@ -57,6 +62,7 @@ namespace PeculiarCardGame.WebApi.Controllers
         }
 
         [HttpGet("search")]
+        [AllowAnonymous]
         public ActionResult<List<GetDeckResponse>> FindDecks([FromQuery] string query)
         {
             var decks = _deckManagementService.FindDecks(query);
@@ -99,7 +105,7 @@ namespace PeculiarCardGame.WebApi.Controllers
             var card = _deckManagementService.AddCard(deckId, request.Text, request.CardType);
             if (card is null)
                 return NotFound();
-            return Ok(new GetCardResponse
+            return CreatedAtAction(nameof(CardsController.GetCard), new { id = card.Id }, new GetCardResponse
             {
                 Id = card.Id,
                 Text = card.Text,
@@ -108,6 +114,7 @@ namespace PeculiarCardGame.WebApi.Controllers
         }
 
         [HttpGet("{deckId}/cards/search")]
+        [AllowAnonymous]
         public ActionResult<List<GetCardResponse>> FindCards(int deckId, [FromQuery] string query)
         {
             var cards = _deckManagementService.FindCards(deckId, query);

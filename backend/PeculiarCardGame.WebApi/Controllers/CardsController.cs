@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PeculiarCardGame.Services.DeckManagement;
+using PeculiarCardGame.WebApi.Infrastructure.Auth;
 using PeculiarCardGame.WebApi.Models.Requests;
 using PeculiarCardGame.WebApi.Models.Responses;
 
@@ -7,6 +9,7 @@ namespace PeculiarCardGame.WebApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = BearerTokenAuthenticationHandler.SchemeName)]
     public class CardsController : ControllerBase
     {
         private readonly IDeckManagementService _deckManagementService;
@@ -16,6 +19,7 @@ namespace PeculiarCardGame.WebApi.Controllers
             _deckManagementService = deckManagementService;
         }
 
+        [AllowAnonymous]
         [HttpGet("{id}")]
         public ActionResult<GetCardResponse> GetCard(int id)
         {

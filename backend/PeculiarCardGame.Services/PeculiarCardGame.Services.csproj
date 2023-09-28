@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.Web.Helpers.Crypto" Version="3.2.3" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\PeculiarCardGame.Data\PeculiarCardGame.Data.csproj" />
     <ProjectReference Include="..\PeculiarCardGame\PeculiarCardGame.csproj" />
   </ItemGroup>

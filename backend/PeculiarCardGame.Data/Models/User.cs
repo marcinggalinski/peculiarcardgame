@@ -4,6 +4,7 @@
     {
         public int Id { get; set; }
         public string Username { get; set; }
+        public string DisplayedName { get; set; }
         public string PasswordHash { get; set; }
 
         public virtual ICollection<Deck> Decks { get; set; }

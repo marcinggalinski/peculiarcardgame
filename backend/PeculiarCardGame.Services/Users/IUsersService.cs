@@ -4,11 +4,15 @@ namespace PeculiarCardGame.Services.Users
 {
     public interface IUsersService
     {
-        User? AddUser(string id, string username, string password);
-        User? GetUser(string id);
-        User? UpdateUser(string id, string? usernameUpdate, string? passwordUpdate);
-        bool DeleteUser(string id);
-
-        bool Authenticate(string id, string password);
+        /// <remarks>Requires request context to not be set.</remarks>
+        User? AddUser(string username, string displayedName, string password);
+        /// <remarks>Requires request context to be set.</remarks>
+        User? GetUser(int id);
+        /// <remarks>Requires request context to be set.</remarks>
+        User? GetUser(string username);
+        /// <remarks>Requires request context to be set.</remarks>
+        User? UpdateUser(string username, string? displayedNameUpdate, string? passwordUpdate);
+        /// <remarks>Requires request context to be set.</remarks>
+        bool DeleteUser(string username);
     }
 }
