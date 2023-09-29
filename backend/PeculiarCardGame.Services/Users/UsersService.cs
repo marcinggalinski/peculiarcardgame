@@ -52,6 +52,9 @@ namespace PeculiarCardGame.Services.Users
             if (_requestContext.CallingUser is null)
                 throw new InvalidOperationException($"{nameof(UpdateUser)} can only be called by an authenticated user.");
 
+            if (username != _requestContext.CallingUser.Username)
+                return null;
+
             var user = _dbContext.Users.SingleOrDefault(x => x.Username == username);
             if (user is null)
                 return null;
@@ -71,6 +74,9 @@ namespace PeculiarCardGame.Services.Users
         {
             if (_requestContext.CallingUser is null)
                 throw new InvalidOperationException($"{nameof(UpdateUser)} can only be called by an authenticated user.");
+
+            if (username != _requestContext.CallingUser.Username)
+                return false;
 
             var user = _dbContext.Users.SingleOrDefault(x => x.Username == username);
             if (user is null)
