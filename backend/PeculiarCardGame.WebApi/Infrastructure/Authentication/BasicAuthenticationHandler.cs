@@ -9,7 +9,7 @@ using System.Text;
 using System.Text.Encodings.Web;
 using IAuthenticationService = PeculiarCardGame.Services.Authentication.IAuthenticationService;
 
-namespace PeculiarCardGame.WebApi.Infrastructure.Auth
+namespace PeculiarCardGame.WebApi.Infrastructure.Authentication
 {
     public class BasicAuthenticationHandler : AuthenticationHandler<BasicAuthenticationSchemeOptions>
     {

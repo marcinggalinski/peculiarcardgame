@@ -5,7 +5,7 @@ using PeculiarCardGame.Services;
 using PeculiarCardGame.Services.Authentication;
 using PeculiarCardGame.Services.DeckManagement;
 using PeculiarCardGame.Services.Users;
-using PeculiarCardGame.WebApi.Infrastructure.Auth;
+using PeculiarCardGame.WebApi.Infrastructure.Authentication;
 using PeculiarCardGame.WebApi.Infrastructure.Swagger;
 
 var builder = WebApplication.CreateBuilder(args);

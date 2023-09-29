@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using PeculiarCardGame.Services;
 using PeculiarCardGame.Services.Users;
-using PeculiarCardGame.WebApi.Infrastructure.Auth;
+using PeculiarCardGame.WebApi.Infrastructure.Authentication;
 using PeculiarCardGame.WebApi.Models.Requests;
 using PeculiarCardGame.WebApi.Models.Responses;
 

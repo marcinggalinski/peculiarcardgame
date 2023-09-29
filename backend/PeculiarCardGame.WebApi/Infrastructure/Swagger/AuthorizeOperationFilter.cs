@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.OpenApi.Models;
-using PeculiarCardGame.WebApi.Infrastructure.Auth;
+using PeculiarCardGame.WebApi.Infrastructure.Authentication;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace PeculiarCardGame.WebApi.Infrastructure.Swagger
