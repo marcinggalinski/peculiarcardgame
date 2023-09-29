@@ -17,6 +17,13 @@ namespace PeculiarCardGame.Services.Users
 
         public User? AddUser(string username, string displayedName, string password)
         {
+            if (string.IsNullOrEmpty(username))
+                throw new ArgumentNullException(nameof(username));
+            if (string.IsNullOrEmpty(displayedName))
+                throw new ArgumentNullException(nameof(displayedName));
+            if (string.IsNullOrEmpty(password))
+                throw new ArgumentNullException(nameof(password));
+
             if (_requestContext.CallingUser is not null)
                 throw new InvalidOperationException($"{nameof(AddUser)} cannot be called by an authenticated user.");
 
@@ -43,12 +50,18 @@ namespace PeculiarCardGame.Services.Users
 
         public User? GetUser(string username)
         {
+            if (username is null)
+                throw new ArgumentNullException(nameof(username));
+
             var user = _dbContext.Users.SingleOrDefault(x => x.Username == username);
             return user;
         }
 
         public User? UpdateUser(string username, string? displayedNameUpdate, string? passwordUpdate)
         {
+            if (username is null)
+                throw new ArgumentNullException(nameof(username));
+
             if (_requestContext.CallingUser is null)
                 throw new InvalidOperationException($"{nameof(UpdateUser)} can only be called by an authenticated user.");
 
@@ -72,7 +85,10 @@ namespace PeculiarCardGame.Services.Users
 
         public bool DeleteUser(string username)
         {
-            if (_requestContext.CallingUser is null)
+            if (username is null)
+                throw new ArgumentNullException(nameof(username));
+
+            if(_requestContext.CallingUser is null)
                 throw new InvalidOperationException($"{nameof(UpdateUser)} can only be called by an authenticated user.");
 
             if (username != _requestContext.CallingUser.Username)

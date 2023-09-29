@@ -63,7 +63,7 @@ namespace PeculiarCardGame.WebApi.Controllers
 
         [HttpGet("search")]
         [AllowAnonymous]
-        public ActionResult<List<GetDeckResponse>> FindDecks([FromQuery] string query)
+        public ActionResult<List<GetDeckResponse>> FindDecks([FromQuery] string? query)
         {
             var decks = _deckManagementService.FindDecks(query);
             return Ok(decks.ConvertAll(x => new GetDeckResponse
@@ -115,7 +115,7 @@ namespace PeculiarCardGame.WebApi.Controllers
 
         [HttpGet("{deckId}/cards/search")]
         [AllowAnonymous]
-        public ActionResult<List<GetCardResponse>> FindCards(int deckId, [FromQuery] string query)
+        public ActionResult<List<GetCardResponse>> FindCards(int deckId, [FromQuery] string? query)
         {
             var cards = _deckManagementService.FindCards(deckId, query);
             return Ok(cards);

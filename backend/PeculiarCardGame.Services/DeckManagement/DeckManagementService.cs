@@ -16,11 +16,15 @@ namespace PeculiarCardGame.Services.DeckManagement
 
         #region decks
 
-        public Deck AddDeck(string name, string description)
+        public Deck AddDeck(string name, string? description)
         {
+            if (name is null)
+                throw new ArgumentNullException(nameof(name));
+
             if (_requestContext.CallingUser is null)
                 throw new InvalidOperationException($"{nameof(AddDeck)} can only be called by an authenticated user.");
 
+            description ??= string.Empty;
             var deck = _dbContext.Decks.Add(new Deck
             {
                 Name = name,
@@ -44,8 +48,10 @@ namespace PeculiarCardGame.Services.DeckManagement
             return decks;
         }
 
-        public List<Deck> FindDecks(string query)
+        public List<Deck> FindDecks(string? query)
         {
+            query ??= string.Empty;
+
             var decks = _dbContext.Decks.Where(x => x.Name.Contains(query) || x.Description.Contains(query)).ToList();
             return decks;
         }
@@ -91,6 +97,9 @@ namespace PeculiarCardGame.Services.DeckManagement
 
         public Card? AddCard(int deckId, string text, CardType type)
         {
+            if (text is null)
+                throw new ArgumentNullException(nameof(text));
+
             if (_requestContext.CallingUser is null)
                 throw new InvalidOperationException($"{nameof(AddCard)} can only be called by an authenticated user.");
 
@@ -125,9 +134,11 @@ namespace PeculiarCardGame.Services.DeckManagement
             return card;
         }
 
-        public List<Card> FindCards(int deckId, string query)
+        public List<Card> FindCards(int deckId, string? query)
         {
-            var deck = _dbContext.Decks.SingleOrDefault(x => x.Id == deckId && x.AuthorId == _requestContext.CallingUser.Id);
+            query ??= string.Empty;
+
+            var deck = _dbContext.Decks.SingleOrDefault(x => x.Id == deckId);
             if (deck is null)
                 return new List<Card>();
 
