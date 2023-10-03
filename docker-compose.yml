@@ -1,0 +1,36 @@
+version: '3.2'
+services:
+  peculiarcardgame-mssql:
+    container_name: peculiarcardgame-mssql
+    image: mcr.microsoft.com/mssql/server
+    ports:
+      - "11433:1433"
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD_FILE: /run/secrets/sa_password
+    secrets:
+      - sa_password
+    healthcheck:
+      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P $(cat /run/secrets/sa_password) -Q "SELECT 1" -b -o /dev/null
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+  peculiarcardgame:
+    container_name: peculiarcardgame
+    build:
+      context: backend
+      dockerfile: Dockerfile
+    ports:
+      - "15000:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - SqlServer__ConnectionString
+      - Authentication__Bearer__Key
+    depends_on:
+      peculiarcardgame-mssql:
+        condition: service_healthy
+secrets:
+  sa_password:
+    file: backend/.secrets/SqlServer/sa_password.txt
+  

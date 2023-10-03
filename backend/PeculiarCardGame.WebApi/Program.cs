@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using PeculiarCardGame.Data;
 using PeculiarCardGame.Options;
@@ -60,5 +61,12 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<PeculiarCardGameDbContext>();
+    if (dbContext.Database.GetPendingMigrations().Any())
+        dbContext.Database.Migrate();
+}
 
 app.Run();
