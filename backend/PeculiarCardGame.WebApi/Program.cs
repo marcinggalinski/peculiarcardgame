@@ -8,10 +8,19 @@ using PeculiarCardGame.Services.DeckManagement;
 using PeculiarCardGame.Services.Users;
 using PeculiarCardGame.WebApi.Infrastructure.Authentication;
 using PeculiarCardGame.WebApi.Infrastructure.Swagger;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+builder.Services.AddRouting(options =>
+{
+    options.LowercaseUrls = true;
+    options.LowercaseQueryStrings = true;
+});
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+});
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -55,7 +64,10 @@ builder.Services.AddAuthentication(options =>
 var app = builder.Build();
 
 app.UseSwagger();
-app.UseSwaggerUI();
+app.UseSwaggerUI(options =>
+{
+    options.EnablePersistAuthorization();
+});
 
 app.UseAuthentication();
 app.UseAuthorization();

@@ -122,9 +122,9 @@ namespace PeculiarCardGame.Services.DeckManagement
         {
             var deck = _dbContext.Decks.SingleOrDefault(x => x.Id == deckId);
             if (deck is null)
-                return new List<Card>();
+                return null;
 
-            var cards = deck.Cards.ToList();
+            var cards = deck.Cards!.ToList();
             return cards;
         }
 
@@ -142,7 +142,7 @@ namespace PeculiarCardGame.Services.DeckManagement
             if (deck is null)
                 return new List<Card>();
 
-            var cards = deck.Cards.Where(x => x.Text.Contains(query)).ToList();
+            var cards = deck.Cards!.Where(x => x.Text.Contains(query)).ToList();
             return cards;
         }
 
@@ -151,7 +151,7 @@ namespace PeculiarCardGame.Services.DeckManagement
             if (_requestContext.CallingUser is null)
                 throw new InvalidOperationException($"{nameof(UpdateCard)} can only be called by an authenticated user.");
 
-            var card = _dbContext.Cards.SingleOrDefault(x => x.Id == id && x.Deck.AuthorId == _requestContext.CallingUser.Id);
+            var card = _dbContext.Cards.SingleOrDefault(x => x.Id == id && x.Deck!.AuthorId == _requestContext.CallingUser.Id);
             if (card is null)
                 return null;
 
@@ -171,7 +171,7 @@ namespace PeculiarCardGame.Services.DeckManagement
             if (_requestContext.CallingUser is null)
                 throw new InvalidOperationException($"{nameof(DeleteCard)} can only be called by an authenticated user.");
 
-            var card = _dbContext.Cards.SingleOrDefault(x => x.Id == id && x.Deck.AuthorId == _requestContext.CallingUser.Id);
+            var card = _dbContext.Cards.SingleOrDefault(x => x.Id == id && x.Deck!.AuthorId == _requestContext.CallingUser.Id);
             if (card is null)
                 return false;
 

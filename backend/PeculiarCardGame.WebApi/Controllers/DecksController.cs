@@ -105,7 +105,7 @@ namespace PeculiarCardGame.WebApi.Controllers
             var card = _deckManagementService.AddCard(deckId, request.Text, request.CardType);
             if (card is null)
                 return NotFound();
-            return CreatedAtAction(nameof(CardsController.GetCard), new { id = card.Id }, new GetCardResponse
+            return CreatedAtAction(nameof(CardsController.GetCard), "cards", new { id = card.Id }, new GetCardResponse
             {
                 Id = card.Id,
                 Text = card.Text,
@@ -113,12 +113,32 @@ namespace PeculiarCardGame.WebApi.Controllers
             });
         }
 
+        [HttpGet("{deckId}/cards")]
+        [AllowAnonymous]
+        public ActionResult<List<GetCardResponse>> GetCards(int deckId)
+        {
+            var cards = _deckManagementService.GetAllCards(deckId);
+            if (cards is null)
+                return NotFound();
+            return Ok(cards.Select(x => new GetCardResponse
+            {
+                Id = x.Id,
+                Text = x.Text,
+                CardType = x.CardType
+            }));
+        }
+
         [HttpGet("{deckId}/cards/search")]
         [AllowAnonymous]
         public ActionResult<List<GetCardResponse>> FindCards(int deckId, [FromQuery] string? query)
         {
             var cards = _deckManagementService.FindCards(deckId, query);
-            return Ok(cards);
+            return Ok(cards.Select(x => new GetCardResponse
+            {
+                Id = x.Id,
+                Text = x.Text,
+                CardType = x.CardType
+            }));
         }
 
         #endregion
