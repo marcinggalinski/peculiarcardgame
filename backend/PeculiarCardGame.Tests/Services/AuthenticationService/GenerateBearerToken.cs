@@ -12,12 +12,12 @@ namespace PeculiarCardGame.UnitTests.Services.AuthenticationService
 {
     public class GenerateBearerToken
     {
-        private const string TestAudience = "test";
-        private const string TestIssuer = "test";
-        private const string TestKey = "testtesttesttest";
+        private const string Audience = "test";
+        private const string Issuer = "test";
+        private const string Key = "testtesttesttest";
 
-        private const string TestUserUsername = "test";
-        private const string TestUserDisplayedName = "test";
+        private const string Username = "test";
+        private const string DisplayedName = "test";
 
         private readonly IOptions<BearerTokenAuthenticationSchemeOptions> _options;
         private readonly PeculiarCardGameDbContext _dbContext;
@@ -28,13 +28,13 @@ namespace PeculiarCardGame.UnitTests.Services.AuthenticationService
         {
             _options = MSOptions.Create(new BearerTokenAuthenticationSchemeOptions
             {
-                Audience = TestAudience,
-                Issuer = TestIssuer,
-                Key = TestKey
+                Audience = Audience,
+                Issuer = Issuer,
+                Key = Key
             });
 
             var options = new DbContextOptionsBuilder<PeculiarCardGameDbContext>()
-                .UseInMemoryDatabase("PeculiarCardGame")
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
                 .Options;
             _dbContext = new PeculiarCardGameDbContext(options);
 
@@ -42,8 +42,8 @@ namespace PeculiarCardGame.UnitTests.Services.AuthenticationService
             _filledRequestContext = new RequestContext();
             _filledRequestContext.SetOnce(new User
             {
-                Username = TestUserUsername,
-                DisplayedName = TestUserDisplayedName,
+                Username = Username,
+                DisplayedName = DisplayedName,
                 PasswordHash = ""
             });
         }

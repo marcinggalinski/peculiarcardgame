@@ -42,12 +42,6 @@ namespace PeculiarCardGame.Services.Users
             return user;
         }
 
-        public User? GetUser(int id)
-        {
-            var user = _dbContext.Users.SingleOrDefault(x => x.Id == id);
-            return user;
-        }
-
         public User? GetUser(string username)
         {
             if (username is null)
@@ -88,7 +82,7 @@ namespace PeculiarCardGame.Services.Users
             if (username is null)
                 throw new ArgumentNullException(nameof(username));
 
-            if(_requestContext.CallingUser is null)
+            if (_requestContext.CallingUser is null)
                 throw new InvalidOperationException($"{nameof(UpdateUser)} can only be called by an authenticated user.");
 
             if (username != _requestContext.CallingUser.Username)

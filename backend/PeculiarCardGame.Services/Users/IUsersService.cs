@@ -6,9 +6,6 @@ namespace PeculiarCardGame.Services.Users
     {
         /// <remarks>Requires request context to not be set.</remarks>
         User? AddUser(string username, string displayedName, string password);
-        /// <remarks>Requires request context to be set.</remarks>
-        User? GetUser(int id);
-        /// <remarks>Requires request context to be set.</remarks>
         User? GetUser(string username);
         /// <remarks>Requires request context to be set.</remarks>
         User? UpdateUser(string username, string? displayedNameUpdate, string? passwordUpdate);
