@@ -27,6 +27,11 @@ namespace PeculiarCardGame.Services.Authentication
 
         public User? Authenticate(string username, string password)
         {
+            if (username is null)
+                throw new ArgumentNullException(nameof(username));
+            if (password is null)
+                throw new ArgumentNullException(nameof(password));
+
             var user = _dbContext.Users.SingleOrDefault(x => x.Username == username);
             if (user is null)
                 return null;
@@ -39,6 +44,9 @@ namespace PeculiarCardGame.Services.Authentication
 
         public User? Authenticate(string token)
         {
+            if (token is null)
+                throw new ArgumentNullException(nameof(token));
+
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Key));
 
