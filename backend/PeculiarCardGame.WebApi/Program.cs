@@ -43,7 +43,7 @@ builder.Services.AddSwaggerGen(options =>
     options.OperationFilter<AuthorizeOperationFilter>();
 });
 
-builder.Services.Configure<SqlServerOptions>(builder.Configuration.GetSection(SqlServerOptions.ConfigurationKey));
+builder.Services.Configure<DbOptions>(builder.Configuration.GetSection(DbOptions.ConfigurationKey));
 builder.Services.Configure<BasicAuthenticationSchemeOptions>(builder.Configuration.GetSection(BasicAuthenticationSchemeOptions.ConfigurationKey));
 builder.Services.Configure<BearerTokenAuthenticationSchemeOptions>(builder.Configuration.GetSection(BearerTokenAuthenticationSchemeOptions.ConfigurationKey));
 

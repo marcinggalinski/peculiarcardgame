@@ -1,6 +1,6 @@
 ﻿namespace PeculiarCardGame.Options
 {
-    public class SqlServerOptions
+    public class DbOptions
     {
         public const string ConfigurationKey = "SqlServer";
 
