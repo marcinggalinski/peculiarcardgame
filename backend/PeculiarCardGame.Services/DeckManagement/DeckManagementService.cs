@@ -48,7 +48,7 @@ namespace PeculiarCardGame.Services.DeckManagement
             return decks;
         }
 
-        public List<Deck> FindDecks(string? query)
+        public List<Deck> SearchDecks(string? query)
         {
             query ??= string.Empty;
 
@@ -122,7 +122,7 @@ namespace PeculiarCardGame.Services.DeckManagement
         {
             var deck = _dbContext.Decks.SingleOrDefault(x => x.Id == deckId);
             if (deck is null)
-                return null;
+                return new List<Card>();
 
             var cards = deck.Cards!.ToList();
             return cards;
@@ -134,7 +134,7 @@ namespace PeculiarCardGame.Services.DeckManagement
             return card;
         }
 
-        public List<Card> FindCards(int deckId, string? query)
+        public List<Card> SearchCards(int deckId, string? query)
         {
             query ??= string.Empty;
 
