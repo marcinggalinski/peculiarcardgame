@@ -9,12 +9,11 @@ namespace PeculiarCardGame.UnitTests.Services.UsersService
 {
     public class UpdateUser
     {
-        private const string Username = "test";
-        private const string DisplayedName = "test";
-        private const string Password = "test";
-        private const string AnotherUsername = "another";
-        private const string NewDisplayedName = "new";
-        private const string NewPassword = "new";
+        const string NewDisplayedName = "new";
+        const string NewPassword = "new";
+
+        private readonly User _user;
+        private readonly User _anotherUser;
 
         private readonly PeculiarCardGameDbContext _dbContext;
         private readonly RequestContext _emptyRequestContext;
@@ -22,6 +21,28 @@ namespace PeculiarCardGame.UnitTests.Services.UsersService
 
         public UpdateUser()
         {
+            const int UserId = 1;
+            const int AnotherUserId = 2;
+            const string Username = "test";
+            const string DisplayedName = "test";
+            const string PasswordHash = "test";
+            const string AnotherUsername = "another";
+
+            _user = new User
+            {
+                Id = UserId,
+                Username = Username,
+                DisplayedName = DisplayedName,
+                PasswordHash = PasswordHash
+            };
+            _anotherUser = new User
+            {
+                Id = AnotherUserId,
+                Username = AnotherUsername,
+                DisplayedName = DisplayedName,
+                PasswordHash = PasswordHash
+            };
+
             var options = new DbContextOptionsBuilder<PeculiarCardGameDbContext>()
                 .UseInMemoryDatabase(Guid.NewGuid().ToString())
                 .Options;
@@ -29,24 +50,7 @@ namespace PeculiarCardGame.UnitTests.Services.UsersService
 
             _emptyRequestContext = new RequestContext();
             _filledRequestContext = new RequestContext();
-            _filledRequestContext.SetOnce(new User
-            {
-                Username = Username,
-                DisplayedName = DisplayedName,
-                PasswordHash = ""
-            });
-        }
-
-        [Fact]
-        public void NullUsername_ShouldThrowArgumentNullException()
-        {
-            var service = new Service(_dbContext, _filledRequestContext);
-
-#pragma warning disable CS8625
-            var action = () => service.UpdateUser(null, DisplayedName, Password);
-#pragma warning restore CS8625
-
-            action.Should().Throw<ArgumentNullException>();
+            _filledRequestContext.SetOnce(_user);
         }
 
         [Fact]
@@ -54,99 +58,132 @@ namespace PeculiarCardGame.UnitTests.Services.UsersService
         {
             var service = new Service(_dbContext, _emptyRequestContext);
 
-            var action = () => service.UpdateUser(Username, DisplayedName, Password);
+            var action = () => service.UpdateUser(_user.Id, _user.DisplayedName, _user.PasswordHash);
 
             action.Should().Throw<InvalidOperationException>();
         }
 
         [Fact]
-        public void FilledRequestContextAndNotExistingUser_ShouldReturnNull()
+        public void EmptyRequestContext_ShouldNotUpdateUser()
+        {
+            _dbContext.SetupTest(_user);
+            var service = new Service(_dbContext, _emptyRequestContext);
+
+            try
+            {
+                service.UpdateUser(_user.Id, _user.DisplayedName, _user.PasswordHash);
+            }
+            catch { }
+            var user = _dbContext.Users.Single(x => x.Id == _user.Id);
+
+            user.Id.Should().Be(_user.Id);
+            user.Username.Should().Be(_user.Username);
+            user.DisplayedName.Should().Be(_user.DisplayedName);
+            user.PasswordHash.Should().Be(_user.PasswordHash);
+        }
+
+        [Fact]
+        public void NotExistingUser_ShouldReturnNull()
         {
             var service = new Service(_dbContext, _filledRequestContext);
 
-            var user = service.UpdateUser(Username, DisplayedName, Password);
+            var user = service.UpdateUser(_user.Id, null, null);
 
             user.Should().BeNull();
         }
 
         [Fact]
-        public void FilledRequestContextAndAnotherUser_ShouldReturnNull()
+        public void NotExistingUser_ShouldNotUpdateUser()
         {
-            _dbContext.Users.Add(new User
-            {
-                Username = Username,
-                DisplayedName = DisplayedName,
-                PasswordHash = ""
-            });
-            _dbContext.Users.Add(new User
-            {
-                Username = AnotherUsername,
-                DisplayedName = DisplayedName,
-                PasswordHash = ""
-            });
-            _dbContext.SaveChanges();
+            _dbContext.SetupTest(_user);
             var service = new Service(_dbContext, _filledRequestContext);
 
-            var user = service.UpdateUser(AnotherUsername, DisplayedName, Password);
+            service.UpdateUser(_user.Id, null, null);
+            var user = _dbContext.Users.Single(x => x.Id == _user.Id);
+
+            user.Id.Should().Be(_user.Id);
+            user.Username.Should().Be(_user.Username);
+            user.DisplayedName.Should().Be(_user.DisplayedName);
+            user.PasswordHash.Should().Be(_user.PasswordHash);
+        }
+
+        [Fact]
+        public void AnotherUser_ShouldReturnNull()
+        {
+            _dbContext.SetupTest(_user, _anotherUser);
+            var service = new Service(_dbContext, _filledRequestContext);
+
+            var user = service.UpdateUser(_anotherUser.Id, null, null);
 
             user.Should().BeNull();
         }
 
-        [Theory]
-        [InlineData(null, null)]
-        [InlineData(NewDisplayedName, null)]
-        [InlineData(null, NewPassword)]
-        [InlineData(NewDisplayedName, NewPassword)]
-        public void FilledRequestContextAndExistingUser_ShouldUpdateUser(string? displayedNameUpdate, string? passwordUpdate)
+        [Fact]
+        public void AnotherUser_ShouldNotUpdateUser()
         {
-            _dbContext.Users.Add(new User
-            {
-                Username = Username,
-                DisplayedName = DisplayedName,
-                PasswordHash = Password
-            });
-            _dbContext.SaveChanges();
-            var userCountBefore = _dbContext.Users.Count();
+            _dbContext.SetupTest(_user, _anotherUser);
             var service = new Service(_dbContext, _filledRequestContext);
 
-            service.UpdateUser(Username, displayedNameUpdate, passwordUpdate);
-            var user = _dbContext.Users.SingleOrDefault(x => x.Username == Username);
+            service.UpdateUser(_anotherUser.Id, null, null);
+            var user = _dbContext.Users.Single(x => x.Id == _user.Id);
 
-            _dbContext.Users.Should().HaveCount(userCountBefore);
-            user.Should().NotBeNull();
-            user!.Username.Should().Be(Username);
-            user!.DisplayedName.Should().Be(displayedNameUpdate ?? DisplayedName);
-            if (passwordUpdate is null)
-                user!.PasswordHash.Should().Be(Password);
-            else
-                user!.PasswordHash.Should().NotBe(Password);
+            user.Id.Should().Be(_user.Id);
+            user.Username.Should().Be(_user.Username);
+            user.DisplayedName.Should().Be(_user.DisplayedName);
+            user.PasswordHash.Should().Be(_user.PasswordHash);
         }
 
         [Theory]
-        [InlineData(null, null)]
         [InlineData(NewDisplayedName, null)]
         [InlineData(null, NewPassword)]
-        [InlineData(NewDisplayedName, NewPassword)]
-        public void FilledRequestContextAndExistingUser_ShouldReturnUpdatedUser(string? displayedNameUpdate, string? passwordUpdate)
+        public void ExistingUser_ShouldUpdateUser(string? displayedNameUpdate, string? passwordUpdate)
         {
-            _dbContext.Users.Add(new User
-            {
-                Username = Username,
-                DisplayedName = DisplayedName,
-                PasswordHash = Password
-            });
-            _dbContext.SaveChanges();
+            _dbContext.SetupTest(_user);
+            var userCountBefore = _dbContext.Users.Count();
             var service = new Service(_dbContext, _filledRequestContext);
 
-            var user = service.UpdateUser(Username, displayedNameUpdate, passwordUpdate);
+            service.UpdateUser(_user.Id, displayedNameUpdate, passwordUpdate);
+            var user = _dbContext.Users.Single(x => x.Username == _user.Username);
+
+            user!.Id.Should().Be(_user.Id);
+            user!.Username.Should().Be(_user.Username);
+            user!.DisplayedName.Should().Be(displayedNameUpdate ?? _user.DisplayedName);
+            if (passwordUpdate is null)
+                user!.PasswordHash.Should().Be(_user.PasswordHash);
+            else
+                user!.PasswordHash.Should().NotBe(_user.PasswordHash);
+        }
+
+        [Theory]
+        [InlineData(NewDisplayedName, null)]
+        [InlineData(null, NewPassword)]
+        public void ExistingUser_ShouldReturnUpdatedUser(string? displayedNameUpdate, string? passwordUpdate)
+        {
+            _dbContext.SetupTest(_user);
+            var service = new Service(_dbContext, _filledRequestContext);
+
+            var user = service.UpdateUser(_user.Id, displayedNameUpdate, passwordUpdate);
 
             user.Should().NotBeNull();
-            user!.Username.Should().Be(Username);
-            user!.DisplayedName.Should().Be(displayedNameUpdate ?? DisplayedName);
+            user!.Id.Should().Be(_user.Id);
+            user!.Username.Should().Be(_user.Username);
+            user!.DisplayedName.Should().Be(displayedNameUpdate ?? _user.DisplayedName);
             if (passwordUpdate is null)
-                user!.PasswordHash.Should().Be(Password);
+                user!.PasswordHash.Should().Be(_user.PasswordHash);
             else
-                user!.PasswordHash.Should().NotBe(Password);
+                user!.PasswordHash.Should().NotBe(_user.PasswordHash);
+        }
+
+        [Fact]
+        public void ExistingUser_ShouldNotChangeUserCount()
+        {
+            _dbContext.SetupTest(_user);
+            var userCountBefore = _dbContext.Users.Count();
+            var service = new Service(_dbContext, _filledRequestContext);
+
+            service.UpdateUser(_user.Id, _user.DisplayedName, _user.PasswordHash);
+
+            _dbContext.Users.Should().HaveCount(userCountBefore);
         }
     }
 }

@@ -42,27 +42,21 @@ namespace PeculiarCardGame.Services.Users
             return user;
         }
 
-        public User? GetUser(string username)
+        public User? GetUser(int userId)
         {
-            if (username is null)
-                throw new ArgumentNullException(nameof(username));
-
-            var user = _dbContext.Users.SingleOrDefault(x => x.Username == username);
+            var user = _dbContext.Users.SingleOrDefault(x => x.Id == userId);
             return user;
         }
 
-        public User? UpdateUser(string username, string? displayedNameUpdate, string? passwordUpdate)
+        public User? UpdateUser(int userId, string? displayedNameUpdate, string? passwordUpdate)
         {
-            if (username is null)
-                throw new ArgumentNullException(nameof(username));
-
             if (_requestContext.CallingUser is null)
                 throw new InvalidOperationException($"{nameof(UpdateUser)} can only be called by an authenticated user.");
 
-            if (username != _requestContext.CallingUser.Username)
+            if (userId != _requestContext.CallingUser.Id)
                 return null;
 
-            var user = _dbContext.Users.SingleOrDefault(x => x.Username == username);
+            var user = _dbContext.Users.SingleOrDefault(x => x.Id == userId);
             if (user is null)
                 return null;
 
@@ -77,18 +71,16 @@ namespace PeculiarCardGame.Services.Users
             return user;
         }
 
-        public bool DeleteUser(string username)
+        // TODO: Handle case when deleted user has decks
+        public bool DeleteUser(int userId)
         {
-            if (username is null)
-                throw new ArgumentNullException(nameof(username));
-
             if (_requestContext.CallingUser is null)
                 throw new InvalidOperationException($"{nameof(UpdateUser)} can only be called by an authenticated user.");
 
-            if (username != _requestContext.CallingUser.Username)
+            if (userId != _requestContext.CallingUser.Id)
                 return false;
 
-            var user = _dbContext.Users.SingleOrDefault(x => x.Username == username);
+            var user = _dbContext.Users.SingleOrDefault(x => x.Id == userId);
             if (user is null)
                 return false;
 

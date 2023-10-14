@@ -37,10 +37,10 @@ namespace PeculiarCardGame.WebApi.Controllers
             });
         }
 
-        [HttpGet("{username}")]
-        public ActionResult<GetUserResponse> GetUser(string username)
+        [HttpGet("{id}")]
+        public ActionResult<GetUserResponse> GetUser(int id)
         {
-            var user = _usersService.GetUser(username);
+            var user = _usersService.GetUser(id);
             if (user is null)
                 return NotFound();
             return Ok(new GetUserResponse
@@ -50,11 +50,11 @@ namespace PeculiarCardGame.WebApi.Controllers
             });
         }
 
-        [HttpPatch("{username}")]
+        [HttpPatch("{id}")]
         [Authorize(AuthenticationSchemes = BearerTokenAuthenticationHandler.SchemeName)]
-        public ActionResult<GetUserResponse> UpdateUser(string username, UpdateUserRequest request)
+        public ActionResult<GetUserResponse> UpdateUser(int id, UpdateUserRequest request)
         {
-            var user = _usersService.UpdateUser(username, request.DisplayedUsernameUpdate, request.PasswordUpdate);
+            var user = _usersService.UpdateUser(id, request.DisplayedUsernameUpdate, request.PasswordUpdate);
             if (user is null)
                 return NotFound();
             return Ok(new GetUserResponse
@@ -64,11 +64,11 @@ namespace PeculiarCardGame.WebApi.Controllers
             });
         }
 
-        [HttpDelete("{username}")]
+        [HttpDelete("{id}")]
         [Authorize(AuthenticationSchemes = BearerTokenAuthenticationHandler.SchemeName)]
-        public IActionResult DeleteUser(string username)
+        public IActionResult DeleteUser(int id)
         {
-            var isDeleted = _usersService.DeleteUser(username);
+            var isDeleted = _usersService.DeleteUser(id);
             return isDeleted ? Ok() : NotFound();
         }
 

@@ -13,12 +13,25 @@ namespace PeculiarCardGame.UnitTests.Services.UsersService
         private const string DisplayedName = "test";
         private const string Password = "test";
 
+        private readonly User _user;
+
         private readonly PeculiarCardGameDbContext _dbContext;
         private readonly RequestContext _emptyRequestContext;
         private readonly RequestContext _filledRequestContext;
 
         public AddUser()
         {
+            const int UserId = 1;
+            const string PasswordHash = "test";
+
+            _user = new User
+            {
+                Id = UserId,
+                Username = Username,
+                DisplayedName = DisplayedName,
+                PasswordHash = PasswordHash
+            };
+
             var options = new DbContextOptionsBuilder<PeculiarCardGameDbContext>()
                 .UseInMemoryDatabase(Guid.NewGuid().ToString())
                 .Options;
@@ -26,12 +39,7 @@ namespace PeculiarCardGame.UnitTests.Services.UsersService
 
             _emptyRequestContext = new RequestContext();
             _filledRequestContext = new RequestContext();
-            _filledRequestContext.SetOnce(new User
-            {
-                Username = Username,
-                DisplayedName = DisplayedName,
-                PasswordHash = ""
-            });
+            _filledRequestContext.SetOnce(_user);
         }
 
         [Theory]
@@ -49,59 +57,98 @@ namespace PeculiarCardGame.UnitTests.Services.UsersService
             action.Should().Throw<ArgumentNullException>();
         }
 
+        [Theory]
+        [InlineData(null, DisplayedName, Password)]
+        [InlineData(Username, null, Password)]
+        [InlineData(Username, DisplayedName, null)]
+        public void NullUsernameOrDisplayedNameOrPassword_ShouldNotAddUser(string? username, string? displayedName, string? password)
+        {
+            var userCountBefore = _dbContext.Users.Count();
+            var service = new Service(_dbContext, _emptyRequestContext);
+
+            try
+            {
+#pragma warning disable CS8604
+                service.AddUser(username, displayedName, password);
+#pragma warning restore CS8604
+            }
+            catch { }
+
+            _dbContext.Users.Should().HaveCount(userCountBefore);
+        }
+
         [Fact]
         public void FilledRequestContext_ShouldThrowInvalidOperationException()
         {
             var service = new Service(_dbContext, _filledRequestContext);
 
-            var action = () => service.AddUser(Username, DisplayedName, Password);
+            var action = () => service.AddUser(_user.Username, _user.DisplayedName, Password);
 
             action.Should().Throw<InvalidOperationException>();
         }
 
         [Fact]
-        public void EmptyRequestContextAndExistingUsername_ShouldReturnNull()
+        public void FilledRequestContext_ShouldNotAddUser()
         {
-            _dbContext.Users.Add(new User
+            var userCountBefore = _dbContext.Users.Count();
+            var service = new Service(_dbContext, _filledRequestContext);
+
+            try
             {
-                Username = Username,
-                DisplayedName = DisplayedName,
-                PasswordHash = ""
-            });
-            _dbContext.SaveChanges();
-            var service = new Service(_dbContext, _emptyRequestContext);
+                service.AddUser(_user.Username, _user.DisplayedName, Password);
+            }
+            catch { }
 
-            var user = service.AddUser(Username, DisplayedName, Password);
-
-            user.Should().BeNull();
-            _dbContext.Users.Count(x => x.Username == Username).Should().Be(1);
+            _dbContext.Users.Should().HaveCount(userCountBefore);
         }
 
         [Fact]
-        public void EmptyRequestContextAndNotExistingUsername_ShouldAddNewUser()
+        public void ExistingUsername_ShouldReturnNull()
+        {
+            _dbContext.SetupTest(_user);
+            var service = new Service(_dbContext, _emptyRequestContext);
+
+            var user = service.AddUser(_user.Username, _user.DisplayedName, Password);
+
+            user.Should().BeNull();
+        }
+
+        [Fact]
+        public void ExistingUsername_ShouldNotAddUser()
+        {
+            _dbContext.SetupTest(_user);
+            var userCountBefore = _dbContext.Users.Count();
+            var service = new Service(_dbContext, _emptyRequestContext);
+
+            service.AddUser(_user.Username, _user.DisplayedName, Password);
+
+            _dbContext.Users.Should().HaveCount(userCountBefore);
+        }
+
+        [Fact]
+        public void NotExistingUsername_ShouldAddNewUser()
         {
             var userCountBefore = _dbContext.Users.Count();
             var service = new Service(_dbContext, _emptyRequestContext);
 
-            service.AddUser(Username, DisplayedName, Password);
-            var user = _dbContext.Users.SingleOrDefault(x => x.Username == Username);
+            service.AddUser(_user.Username, _user.DisplayedName, Password);
+            var user = _dbContext.Users.Single(x => x.Username == _user.Username);
 
             _dbContext.Users.Should().HaveCount(userCountBefore + 1);
-            user.Should().NotBeNull();
-            user!.Username.Should().Be(Username);
-            user!.DisplayedName.Should().Be(DisplayedName);
+            user!.Username.Should().Be(_user.Username);
+            user!.DisplayedName.Should().Be(_user.DisplayedName);
         }
 
         [Fact]
-        public void EmptyRequestContextAndNotExistingUsername_ShouldReturnNewUser()
+        public void NotExistingUsername_ShouldReturnNewUser()
         {
             var service = new Service(_dbContext, _emptyRequestContext);
 
-            var user = service.AddUser(Username, DisplayedName, Password);
+            var user = service.AddUser(_user.Username, _user.DisplayedName, Password);
 
             user.Should().NotBeNull();
-            user!.Username.Should().Be(Username);
-            user!.DisplayedName.Should().Be(DisplayedName);
+            user!.Username.Should().Be(_user.Username);
+            user!.DisplayedName.Should().Be(_user.DisplayedName);
         }
     }
 }

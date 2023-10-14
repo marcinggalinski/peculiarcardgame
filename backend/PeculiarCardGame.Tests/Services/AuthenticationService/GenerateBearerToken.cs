@@ -16,9 +16,6 @@ namespace PeculiarCardGame.UnitTests.Services.AuthenticationService
         private const string Issuer = "test";
         private const string Key = "testtesttesttest";
 
-        private const string Username = "test";
-        private const string DisplayedName = "test";
-
         private readonly IOptions<BearerTokenAuthenticationSchemeOptions> _options;
         private readonly PeculiarCardGameDbContext _dbContext;
         private readonly RequestContext _emptyRequestContext;
@@ -26,6 +23,9 @@ namespace PeculiarCardGame.UnitTests.Services.AuthenticationService
 
         public GenerateBearerToken()
         {
+            const string Username = "test";
+            const string DisplayedName = "test";
+
             _options = MSOptions.Create(new BearerTokenAuthenticationSchemeOptions
             {
                 Audience = Audience,

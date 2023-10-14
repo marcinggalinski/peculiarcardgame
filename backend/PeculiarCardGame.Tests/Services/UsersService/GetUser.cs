@@ -9,15 +9,28 @@ namespace PeculiarCardGame.UnitTests.Services.UsersService
 {
     public class GetUser
     {
-        private const string ExistingUsername = "test";
-        private const string DisplayedName = "test";
-        private const string NotExistingUsername = "invalid";
+        private const int ExistingUserId = 1;
+        private const int NotExistingUserId = 2;
+
+        private readonly User _user;
 
         private readonly PeculiarCardGameDbContext _dbContext;
         private readonly RequestContext _requestContext;
 
         public GetUser()
         {
+            const string Username = "test";
+            const string DisplayedName = "test";
+            const string PasswordHash = "test";
+
+            _user = new User
+            {
+                Id = ExistingUserId,
+                Username = Username,
+                DisplayedName = DisplayedName,
+                PasswordHash = PasswordHash
+            };
+
             var options = new DbContextOptionsBuilder<PeculiarCardGameDbContext>()
                 .UseInMemoryDatabase(Guid.NewGuid().ToString())
                 .Options;
@@ -27,48 +40,39 @@ namespace PeculiarCardGame.UnitTests.Services.UsersService
         }
 
         [Fact]
-        public void NotExistingUsername_ShouldReturnNull()
+        public void NotExistingUserId_ShouldReturnNull()
         {
             var service = new Service(_dbContext, _requestContext);
 
-            var user = service.GetUser(NotExistingUsername);
+            var user = service.GetUser(_user.Id);
 
             user.Should().BeNull();
         }
 
         [Fact]
-        public void ExistingUsername_ShouldReturnUser()
+        public void ExistingUserId_ShouldReturnUser()
         {
-            _dbContext.Users.Add(new User
-            {
-                Username = ExistingUsername,
-                DisplayedName = DisplayedName,
-                PasswordHash = ""
-            });
-            _dbContext.SaveChanges();
+            _dbContext.SetupTest(_user);
             var service = new Service(_dbContext, _requestContext);
 
-            var user = service.GetUser(ExistingUsername);
+            var user = service.GetUser(_user.Id);
 
             user.Should().NotBeNull();
-            user!.Username.Should().Be(ExistingUsername);
-            user!.DisplayedName.Should().Be(DisplayedName);
+            user!.Username.Should().Be(_user.Username);
+            user!.DisplayedName.Should().Be(_user.DisplayedName);
+            user!.PasswordHash.Should().Be(_user.PasswordHash);
         }
 
-        [Fact]
-        public void ExistingUsername_ShouldNotChangeUserCount()
+        [Theory]
+        [InlineData(ExistingUserId)]
+        [InlineData(NotExistingUserId)]
+        public void ShouldNotChangeUserCount(int userId)
         {
-            _dbContext.Users.Add(new User
-            {
-                Username = ExistingUsername,
-                DisplayedName = DisplayedName,
-                PasswordHash = ""
-            });
-            _dbContext.SaveChanges();
+            _dbContext.SetupTest(_user);
             var userCountBefore = _dbContext.Users.Count();
             var service = new Service(_dbContext, _requestContext);
 
-            service.GetUser(ExistingUsername);
+            service.GetUser(userId);
 
             _dbContext.Users.Should().HaveCount(userCountBefore);
         }

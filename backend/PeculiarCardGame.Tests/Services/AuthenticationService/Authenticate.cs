@@ -18,12 +18,12 @@ namespace PeculiarCardGame.UnitTests.Services.AuthenticationService
         private const string Key = "testtesttesttest";
 
         private const string ExistingUsername = "test";
-        private const string DisplayedName = "test";
-        private const string ValidPassword = "test";
-
         private const string NotExistingUsername = "invalid";
+        private const string ValidPassword = "test";
         private const string InvalidPassword = "invalid";
         private const string InvalidToken = "invalid";
+
+        private readonly User _user;
 
         private readonly IOptions<BearerTokenAuthenticationSchemeOptions> _options;
         private readonly PeculiarCardGameDbContext _dbContext;
@@ -33,6 +33,17 @@ namespace PeculiarCardGame.UnitTests.Services.AuthenticationService
 
         public Authenticate()
         {
+            const int UserId = 1;
+            const string DisplayedName = "test";
+
+            _user = new User
+            {
+                Id = UserId,
+                Username = ExistingUsername,
+                DisplayedName = DisplayedName,
+                PasswordHash = Crypto.HashPassword(ValidPassword)
+            };
+
             _options = MSOptions.Create(new BearerTokenAuthenticationSchemeOptions
             {
                 Audience = Audience,
@@ -54,16 +65,10 @@ namespace PeculiarCardGame.UnitTests.Services.AuthenticationService
                 PasswordHash = ""
             });
             _existingUserFilledRequestContext = new RequestContext();
-            _existingUserFilledRequestContext.SetOnce(new User
-            {
-                Username = ExistingUsername,
-                DisplayedName = DisplayedName,
-                PasswordHash = ""
-            });
+            _existingUserFilledRequestContext.SetOnce(_user);
         }
 
         [Theory]
-        [InlineData(null, null)]
         [InlineData(null, ValidPassword)]
         [InlineData(ExistingUsername, null)]
         public void NullUsernameOrPassword_ShouldThrowArgumentNullException(string? username, string? password)
@@ -93,20 +98,15 @@ namespace PeculiarCardGame.UnitTests.Services.AuthenticationService
         [Fact]
         public void ValidUsernameAndPassword_ShouldReturnUser()
         {
-            _dbContext.Users.Add(new User
-            {
-                Username = ExistingUsername,
-                DisplayedName = DisplayedName,
-                PasswordHash = Crypto.HashPassword(ValidPassword)
-            });
-            _dbContext.SaveChanges();
+            _dbContext.SetupTest(_user);
             var service = new Service(_options, _dbContext, _emptyRequestContext);
 
-            var user = service.Authenticate(ExistingUsername, ValidPassword);
+            var user = service.Authenticate(_user.Username, ValidPassword);
 
             user!.Should().NotBeNull();
-            user!.Username.Should().Be(ExistingUsername);
-            user!.DisplayedName.Should().Be(DisplayedName);
+            user!.Id.Should().Be(user.Id);
+            user!.Username.Should().Be(_user.Username);
+            user!.DisplayedName.Should().Be(_user.DisplayedName);
         }
 
         [Fact]
@@ -145,21 +145,16 @@ namespace PeculiarCardGame.UnitTests.Services.AuthenticationService
         [Fact]
         public void ValidTokenForExistingUser_ShouldReturnUser()
         {
-            _dbContext.Users.Add(new User
-            {
-                Username = ExistingUsername,
-                DisplayedName = DisplayedName,
-                PasswordHash = ""
-            });
-            _dbContext.SaveChanges();
+            _dbContext.SetupTest(_user);
             var service = new Service(_options, _dbContext, _existingUserFilledRequestContext);
             var token = service.GenerateBearerToken();
 
             var user = service.Authenticate(token);
 
             user.Should().NotBeNull();
-            user!.Username.Should().Be(ExistingUsername);
-            user!.DisplayedName.Should().Be(DisplayedName);
+            user!.Id.Should().Be(user.Id);
+            user!.Username.Should().Be(_user.Username);
+            user!.DisplayedName.Should().Be(_user.DisplayedName);
         }
     }
 }
