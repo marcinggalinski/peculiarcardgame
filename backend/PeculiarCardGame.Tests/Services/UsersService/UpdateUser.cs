@@ -1,5 +1,4 @@
 ﻿using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
 using PeculiarCardGame.Data;
 using PeculiarCardGame.Data.Models;
 using PeculiarCardGame.Services;
@@ -43,10 +42,7 @@ namespace PeculiarCardGame.UnitTests.Services.UsersService
                 PasswordHash = PasswordHash
             };
 
-            var options = new DbContextOptionsBuilder<PeculiarCardGameDbContext>()
-                .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                .Options;
-            _dbContext = new PeculiarCardGameDbContext(options);
+            _dbContext = TestHelpers.GetDbContext();
 
             _emptyRequestContext = new RequestContext();
             _filledRequestContext = new RequestContext();
@@ -56,6 +52,7 @@ namespace PeculiarCardGame.UnitTests.Services.UsersService
         [Fact]
         public void EmptyRequestContext_ShouldThrowInvalidOperationException()
         {
+            _dbContext.SetupTest(_user);
             var service = new Service(_dbContext, _emptyRequestContext);
 
             var action = () => service.UpdateUser(_user.Id, _user.DisplayedName, _user.PasswordHash);

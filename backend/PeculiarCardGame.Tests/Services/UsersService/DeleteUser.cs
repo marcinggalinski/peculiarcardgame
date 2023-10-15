@@ -1,5 +1,4 @@
 ﻿using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
 using PeculiarCardGame.Data;
 using PeculiarCardGame.Data.Models;
 using PeculiarCardGame.Services;
@@ -40,10 +39,7 @@ namespace PeculiarCardGame.UnitTests.Services.UsersService
                 PasswordHash = PasswordHash
             };
 
-            var options = new DbContextOptionsBuilder<PeculiarCardGameDbContext>()
-                .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                .Options;
-            _dbContext = new PeculiarCardGameDbContext(options);
+            _dbContext = TestHelpers.GetDbContext();
 
             _emptyRequestContext = new RequestContext();
             _filledRequestContext = new RequestContext();

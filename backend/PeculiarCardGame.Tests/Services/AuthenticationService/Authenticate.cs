@@ -1,5 +1,4 @@
 ﻿using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using PeculiarCardGame.Data;
 using PeculiarCardGame.Data.Models;
@@ -51,10 +50,7 @@ namespace PeculiarCardGame.UnitTests.Services.AuthenticationService
                 Key = Key
             });
 
-            var options = new DbContextOptionsBuilder<PeculiarCardGameDbContext>()
-                .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                .Options;
-            _dbContext = new PeculiarCardGameDbContext(options);
+            _dbContext = TestHelpers.GetDbContext();
 
             _emptyRequestContext = new RequestContext();
             _notExistingUserFilledRequestContext = new RequestContext();
