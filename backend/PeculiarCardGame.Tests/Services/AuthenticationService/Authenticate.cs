@@ -84,6 +84,7 @@ namespace PeculiarCardGame.UnitTests.Services.AuthenticationService
         [InlineData(ExistingUsername, InvalidPassword)]
         public void InvalidUsernameOrPassword_ShouldReturnNull(string username, string password)
         {
+            _dbContext.SetupTest(_user);
             var service = new Service(_options, _dbContext, _emptyRequestContext);
 
             var user = service.Authenticate(username, password);
