@@ -74,11 +74,14 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-using (var scope = app.Services.CreateScope())
+if (!app.Environment.IsEnvironment("ApiTests"))
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<PeculiarCardGameDbContext>();
-    if (dbContext.Database.GetPendingMigrations().Any())
-        dbContext.Database.Migrate();
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbContext = scope.ServiceProvider.GetRequiredService<PeculiarCardGameDbContext>();
+        if (dbContext.Database.GetPendingMigrations().Any())
+            dbContext.Database.Migrate();
+    }
 }
 
 app.Run();

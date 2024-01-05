@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PeculiarCardGame.Data.Models;
 using PeculiarCardGame.Services.DeckManagement;
 using PeculiarCardGame.WebApi.Infrastructure.Authentication;
 using PeculiarCardGame.WebApi.Models.Requests;
@@ -25,12 +26,7 @@ namespace PeculiarCardGame.WebApi.Controllers
         public ActionResult<GetDeckResponse> AddDeck(AddDeckRequest request)
         {
             var deck = _deckManagementService.AddDeck(request.Name, request.Description);
-            return CreatedAtAction(nameof(GetDeck), new { id = deck.Id }, new GetDeckResponse
-            {
-                Id = deck.Id,
-                Name = deck.Name,
-                Description = deck.Description
-            });
+            return CreatedAtAction(nameof(GetDeck), new { id = deck.Id }, GetDeckResponse.FromDeck(deck));
         }
 
         [HttpGet("{id}")]
@@ -40,12 +36,7 @@ namespace PeculiarCardGame.WebApi.Controllers
             var deck = _deckManagementService.GetDeck(id);
             if (deck is null)
                 return NotFound();
-            return Ok(new GetDeckResponse
-            {
-                Id = deck.Id,
-                Name = deck.Name,
-                Description = deck.Description
-            });
+            return Ok(GetDeckResponse.FromDeck(deck));
         }
 
         [HttpGet]
@@ -53,12 +44,7 @@ namespace PeculiarCardGame.WebApi.Controllers
         public ActionResult<List<GetDeckResponse>> GetAllDecks()
         {
             var decks = _deckManagementService.GetAllDecks();
-            return Ok(decks.ConvertAll(x => new GetDeckResponse
-            {
-                Id = x.Id,
-                Name = x.Name,
-                Description = x.Description
-            }));
+            return Ok(decks.ConvertAll(GetDeckResponse.FromDeck));
         }
 
         [HttpGet("search")]
@@ -66,12 +52,7 @@ namespace PeculiarCardGame.WebApi.Controllers
         public ActionResult<List<GetDeckResponse>> SearchDecks([FromQuery] string? query)
         {
             var decks = _deckManagementService.SearchDecks(query);
-            return Ok(decks.ConvertAll(x => new GetDeckResponse
-            {
-                Id = x.Id,
-                Name = x.Name,
-                Description = x.Description
-            }));
+            return Ok(decks.ConvertAll(GetDeckResponse.FromDeck));
         }
 
         [HttpPatch("{id}")]
@@ -80,12 +61,7 @@ namespace PeculiarCardGame.WebApi.Controllers
             var deck = _deckManagementService.UpdateDeck(id, request.NameUpdate, request.DescriptionUpdate);
             if (deck is null)
                 return NotFound();
-            return Ok(new GetDeckResponse
-            {
-                Id = deck.Id,
-                Name = deck.Name,
-                Description = deck.Description
-            });
+            return Ok(GetDeckResponse.FromDeck(deck));
         }
 
         [HttpDelete("{id}")]
@@ -105,12 +81,7 @@ namespace PeculiarCardGame.WebApi.Controllers
             var card = _deckManagementService.AddCard(deckId, request.Text, request.CardType);
             if (card is null)
                 return NotFound();
-            return CreatedAtAction(nameof(CardsController.GetCard), "cards", new { id = card.Id }, new GetCardResponse
-            {
-                Id = card.Id,
-                Text = card.Text,
-                CardType = card.CardType
-            });
+            return CreatedAtAction(nameof(CardsController.GetCard), "cards", new { id = card.Id }, GetCardResponse.FromCard(card));
         }
 
         [HttpGet("{deckId}/cards")]
@@ -120,12 +91,7 @@ namespace PeculiarCardGame.WebApi.Controllers
             var cards = _deckManagementService.GetAllCards(deckId);
             if (cards is null)
                 return NotFound();
-            return Ok(cards.Select(x => new GetCardResponse
-            {
-                Id = x.Id,
-                Text = x.Text,
-                CardType = x.CardType
-            }));
+            return Ok(cards.Select(GetCardResponse.FromCard));
         }
 
         [HttpGet("{deckId}/cards/search")]
@@ -133,12 +99,7 @@ namespace PeculiarCardGame.WebApi.Controllers
         public ActionResult<List<GetCardResponse>> SearchCards(int deckId, [FromQuery] string? query)
         {
             var cards = _deckManagementService.SearchCards(deckId, query);
-            return Ok(cards.Select(x => new GetCardResponse
-            {
-                Id = x.Id,
-                Text = x.Text,
-                CardType = x.CardType
-            }));
+            return Ok(cards.Select(GetCardResponse.FromCard));
         }
 
         #endregion

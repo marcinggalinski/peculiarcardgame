@@ -26,12 +26,7 @@ namespace PeculiarCardGame.WebApi.Controllers
             var card = _deckManagementService.GetCard(id);
             if (card is null)
                 return NotFound();
-            return Ok(new GetCardResponse
-            {
-                Id = card.Id,
-                Text = card.Text,
-                CardType = card.CardType
-            });
+            return Ok(GetCardResponse.FromCard(card));
         }
 
         [HttpPatch("{id}")]
@@ -40,12 +35,7 @@ namespace PeculiarCardGame.WebApi.Controllers
             var card = _deckManagementService.UpdateCard(id, request.TextUpdate, request.CardTypeUpdate);
             if (card is null)
                 return NotFound();
-            return Ok(new GetCardResponse
-            {
-                Id = card.Id,
-                Text = card.Text,
-                CardType = card.CardType
-            });
+            return Ok(GetCardResponse.FromCard(card));
         }
 
         [HttpDelete]

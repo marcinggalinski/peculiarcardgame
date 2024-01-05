@@ -21,4 +21,8 @@
     <ProjectReference Include="..\PeculiarCardGame.Services\PeculiarCardGame.Services.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="PeculiarCardGame.UnitTests" />
+  </ItemGroup>
+
 </Project>

@@ -30,38 +30,26 @@ namespace PeculiarCardGame.WebApi.Controllers
             var user = _usersService.AddUser(request.Username, request.DisplayedName, request.Password);
             if (user is null)
                 return UnprocessableEntity($"User {request.Username} already exists.");
-            return CreatedAtAction(nameof(GetUser), new { username = user.Username }, new GetUserResponse
-            {
-                Username = request.Username,
-                DisplayedName = request.DisplayedName
-            });
+            return CreatedAtAction(nameof(GetUser), new { id = user.Id}, GetUserResponse.FromUser(user));
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id}", Name = "GetUser")]
         public ActionResult<GetUserResponse> GetUser(int id)
         {
             var user = _usersService.GetUser(id);
             if (user is null)
                 return NotFound();
-            return Ok(new GetUserResponse
-            {
-                Username = user.Username,
-                DisplayedName = user.DisplayedName
-            });
+            return Ok(GetUserResponse.FromUser(user));
         }
 
         [HttpPatch("{id}")]
         [Authorize(AuthenticationSchemes = BearerTokenAuthenticationHandler.SchemeName)]
         public ActionResult<GetUserResponse> UpdateUser(int id, UpdateUserRequest request)
         {
-            var user = _usersService.UpdateUser(id, request.DisplayedUsernameUpdate, request.PasswordUpdate);
+            var user = _usersService.UpdateUser(id, request.DisplayedNameUpdate, request.PasswordUpdate);
             if (user is null)
                 return NotFound();
-            return Ok(new GetUserResponse
-            {
-                DisplayedName = user.DisplayedName,
-                Username = user.Username
-            });
+            return Ok(GetUserResponse.FromUser(user));
         }
 
         [HttpDelete("{id}")]
