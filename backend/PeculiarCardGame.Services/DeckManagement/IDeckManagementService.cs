@@ -18,7 +18,7 @@ namespace PeculiarCardGame.Services.DeckManagement
         Card? AddCard(int deckId, string text, CardType type);
         Card? GetCard(int id);
         List<Card> GetAllCards(int deckId);
-        List<Card> SearchCards(int deckId, string? query);
+        List<Card>? SearchCards(int deckId, string? query);
         /// <remarks>Requires request context to be set.</remarks>
         Card? UpdateCard(int id, string? textUpdate, CardType? typeUpdate);
         /// <remarks>Requires request context to be set.</remarks>

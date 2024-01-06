@@ -44,7 +44,6 @@ namespace PeculiarCardGame.UnitTests.Controllers.UsersController
 
             _usersService = Substitute.For<IUsersService>();
             _usersService.GetUser(_existingUser.Id).Returns(_existingUser);
-            _usersService.GetUser(_notExistingUser.Id).Returns((User?)null);
             _usersService.DeleteUser(_existingUser.Id).Returns(true);
             _usersService.DeleteUser(_notExistingUser.Id).Returns(false);
 

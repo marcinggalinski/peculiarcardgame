@@ -134,13 +134,13 @@ namespace PeculiarCardGame.Services.DeckManagement
             return card;
         }
 
-        public List<Card> SearchCards(int deckId, string? query)
+        public List<Card>? SearchCards(int deckId, string? query)
         {
             query ??= string.Empty;
 
             var deck = _dbContext.Decks.SingleOrDefault(x => x.Id == deckId);
             if (deck is null)
-                return new List<Card>();
+                return null;
 
             var cards = deck.Cards!.Where(x => x.Text.Contains(query)).ToList();
             return cards;

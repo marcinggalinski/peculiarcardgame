@@ -45,7 +45,6 @@ namespace PeculiarCardGame.UnitTests.Controllers.UsersController
 
             _usersService = Substitute.For<IUsersService>();
             _usersService.GetUser(_existingUser.Id).Returns(_existingUser);
-            _usersService.GetUser(_notExistingUser.Id).Returns((User?)null);
 
             var authenticationService = Substitute.For<IAuthenticationService>();
             var deckManagementService = Substitute.For<IDeckManagementService>();

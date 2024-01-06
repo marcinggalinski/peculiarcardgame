@@ -1,4 +1,5 @@
 ﻿using PeculiarCardGame.Data.Models;
+using System.Text.Json.Serialization;
 
 namespace PeculiarCardGame.WebApi.Models.Responses
 {
@@ -6,6 +7,7 @@ namespace PeculiarCardGame.WebApi.Models.Responses
     {
         public int Id { get; set; }
         public required string Text { get; set; }
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public CardType CardType { get; set; }
 
         public static GetCardResponse FromCard(Card card)

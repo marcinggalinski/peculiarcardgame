@@ -65,7 +65,7 @@ namespace PeculiarCardGame.WebApi.Controllers
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public IActionResult DeleteDeck(int id)
         {
             var isDeleted = _deckManagementService.DeleteDeck(id);
             return isDeleted ? Ok() : NotFound();
@@ -91,7 +91,7 @@ namespace PeculiarCardGame.WebApi.Controllers
             var cards = _deckManagementService.GetAllCards(deckId);
             if (cards is null)
                 return NotFound();
-            return Ok(cards.Select(GetCardResponse.FromCard));
+            return Ok(cards.ConvertAll(GetCardResponse.FromCard));
         }
 
         [HttpGet("{deckId}/cards/search")]
@@ -99,7 +99,9 @@ namespace PeculiarCardGame.WebApi.Controllers
         public ActionResult<List<GetCardResponse>> SearchCards(int deckId, [FromQuery] string? query)
         {
             var cards = _deckManagementService.SearchCards(deckId, query);
-            return Ok(cards.Select(GetCardResponse.FromCard));
+            if (cards is null)
+                return NotFound();
+            return Ok(cards.ConvertAll(GetCardResponse.FromCard));
         }
 
         #endregion

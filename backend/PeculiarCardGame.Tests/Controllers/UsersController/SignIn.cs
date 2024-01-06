@@ -46,7 +46,6 @@ namespace PeculiarCardGame.UnitTests.Controllers.UsersController
 
             var authenticationService = Substitute.For<IAuthenticationService>();
             authenticationService.Authenticate(_existingUser.Username, _existingUser.PasswordHash).Returns(_existingUser);
-            authenticationService.Authenticate(_notExistingUser.Username, _notExistingUser.PasswordHash).Returns((User?)null);
             authenticationService.GenerateBearerToken().Returns(BearerToken);
 
             var usersService = Substitute.For<IUsersService>();
