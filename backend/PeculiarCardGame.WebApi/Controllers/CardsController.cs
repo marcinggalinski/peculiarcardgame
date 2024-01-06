@@ -38,7 +38,7 @@ namespace PeculiarCardGame.WebApi.Controllers
             return Ok(GetCardResponse.FromCard(card));
         }
 
-        [HttpDelete]
+        [HttpDelete("{id}")]
         public IActionResult DeleteCard(int id)
         {
             var isDeleted = _deckManagementService.DeleteCard(id);
