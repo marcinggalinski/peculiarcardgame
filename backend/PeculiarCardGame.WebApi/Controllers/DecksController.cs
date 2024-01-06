@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using PeculiarCardGame.Data.Models;
 using PeculiarCardGame.Services.DeckManagement;
 using PeculiarCardGame.WebApi.Infrastructure.Authentication;
 using PeculiarCardGame.WebApi.Models.Requests;
@@ -41,17 +40,9 @@ namespace PeculiarCardGame.WebApi.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public ActionResult<List<GetDeckResponse>> GetAllDecks()
+        public ActionResult<List<GetDeckResponse>> GetAllDecks([FromQuery] string? query)
         {
-            var decks = _deckManagementService.GetAllDecks();
-            return Ok(decks.ConvertAll(GetDeckResponse.FromDeck));
-        }
-
-        [HttpGet("search")]
-        [AllowAnonymous]
-        public ActionResult<List<GetDeckResponse>> SearchDecks([FromQuery] string? query)
-        {
-            var decks = _deckManagementService.SearchDecks(query);
+            var decks = string.IsNullOrEmpty(query) ? _deckManagementService.GetAllDecks() : _deckManagementService.SearchDecks(query);
             return Ok(decks.ConvertAll(GetDeckResponse.FromDeck));
         }
 
@@ -86,19 +77,9 @@ namespace PeculiarCardGame.WebApi.Controllers
 
         [HttpGet("{deckId}/cards")]
         [AllowAnonymous]
-        public ActionResult<List<GetCardResponse>> GetCards(int deckId)
+        public ActionResult<List<GetCardResponse>> GetCards(int deckId, [FromQuery] string? query)
         {
-            var cards = _deckManagementService.GetAllCards(deckId);
-            if (cards is null)
-                return NotFound();
-            return Ok(cards.ConvertAll(GetCardResponse.FromCard));
-        }
-
-        [HttpGet("{deckId}/cards/search")]
-        [AllowAnonymous]
-        public ActionResult<List<GetCardResponse>> SearchCards(int deckId, [FromQuery] string? query)
-        {
-            var cards = _deckManagementService.SearchCards(deckId, query);
+            var cards = string.IsNullOrEmpty(query) ? _deckManagementService.GetAllCards(deckId) : _deckManagementService.SearchCards(deckId, query);
             if (cards is null)
                 return NotFound();
             return Ok(cards.ConvertAll(GetCardResponse.FromCard));

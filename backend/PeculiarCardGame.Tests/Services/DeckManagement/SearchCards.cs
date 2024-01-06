@@ -86,13 +86,13 @@ namespace PeculiarCardGame.UnitTests.Services.DeckManagement
         }
 
         [Fact]
-        public void NotExistingDeckId_ShouldReturnEmptyList()
+        public void NotExistingDeckId_ShouldReturnNull()
         {
             var service = new Service(_dbContext, _requestContext);
 
             var cards = service.SearchCards(_deck.Id, Query);
 
-            cards.Should().BeEmpty();
+            cards.Should().BeNull();
         }
 
         [Fact]
