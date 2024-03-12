@@ -7,11 +7,11 @@ namespace PeculiarCardGame.UnitTests
     {
         public static PeculiarCardGameDbContext GetDbContext()
         {
-            var options = new DbContextOptionsBuilder<PeculiarCardGameDbContext>()
-                .UseLazyLoadingProxies()
-                .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                .Options;
-            var dbContext = new PeculiarCardGameDbContext(options);
+            var dbContext = new PeculiarCardGameDbContext(null, builder =>
+            {
+                builder.UseLazyLoadingProxies();
+                builder.UseInMemoryDatabase(Guid.NewGuid().ToString());
+            });
 
             return dbContext;
         }
