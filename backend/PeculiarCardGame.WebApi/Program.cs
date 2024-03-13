@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using PeculiarCardGame.Data;
@@ -43,6 +42,10 @@ builder.Services.AddSwaggerGen(options =>
     }
 
     options.OperationFilter<AuthorizeOperationFilter>();
+    options.SchemaFilter<RequireNonNullablePropertiesSchemaFilter>();
+    options.SupportNonNullableReferenceTypes();
+    options.UseAllOfToExtendReferenceSchemas();
+    options.UseAllOfForInheritance();
 });
 
 builder.Services.Configure<DbOptions>(builder.Configuration.GetSection(DbOptions.ConfigurationKey));
