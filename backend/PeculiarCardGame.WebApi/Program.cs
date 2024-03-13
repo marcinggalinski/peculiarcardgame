@@ -67,11 +67,14 @@ builder.Services.AddAuthentication(options =>
 
 var app = builder.Build();
 
-app.UseSwagger();
-app.UseSwaggerUI(options =>
+if (!app.Environment.IsProduction())
 {
-    options.EnablePersistAuthorization();
-});
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
+    {
+        options.EnablePersistAuthorization();
+    });
+}
 
 app.UseCors(builder =>
 {
