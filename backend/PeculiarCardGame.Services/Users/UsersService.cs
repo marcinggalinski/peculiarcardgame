@@ -15,12 +15,10 @@ namespace PeculiarCardGame.Services.Users
             _requestContext = requestContext;
         }
 
-        public User? AddUser(string username, string displayedName, string password)
+        public User? AddUser(string username, string? displayedName, string password)
         {
             if (string.IsNullOrEmpty(username))
                 throw new ArgumentNullException(nameof(username));
-            if (string.IsNullOrEmpty(displayedName))
-                throw new ArgumentNullException(nameof(displayedName));
             if (string.IsNullOrEmpty(password))
                 throw new ArgumentNullException(nameof(password));
 
@@ -34,7 +32,7 @@ namespace PeculiarCardGame.Services.Users
             user = _dbContext.Users.Add(new User
             {
                 Username = username,
-                DisplayedName = displayedName,
+                DisplayedName = displayedName ?? username,
                 PasswordHash = Crypto.HashPassword(password)
             }).Entity;
             _dbContext.SaveChanges();

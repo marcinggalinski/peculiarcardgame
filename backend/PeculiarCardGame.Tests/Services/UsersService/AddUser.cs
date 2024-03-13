@@ -9,7 +9,6 @@ namespace PeculiarCardGame.UnitTests.Services.UsersService
     public class AddUser
     {
         private const string Username = "test";
-        private const string DisplayedName = "test";
         private const string Password = "test";
 
         private readonly User _user;
@@ -21,6 +20,7 @@ namespace PeculiarCardGame.UnitTests.Services.UsersService
         public AddUser()
         {
             const int UserId = 1;
+            const string DisplayedName = "test";
             const string PasswordHash = "test";
 
             _user = new User
@@ -39,25 +39,23 @@ namespace PeculiarCardGame.UnitTests.Services.UsersService
         }
 
         [Theory]
-        [InlineData(null, DisplayedName, Password)]
-        [InlineData(Username, null, Password)]
-        [InlineData(Username, DisplayedName, null)]
-        public void NullUsernameOrDisplayedNameOrPassword_ShouldThrowNullArgumentException(string? username, string? displayedName, string? password)
+        [InlineData(null, Password)]
+        [InlineData(Username, null)]
+        public void NullUsernameOrPassword_ShouldThrowNullArgumentException(string? username, string? password)
         {
             var service = new Service(_dbContext, _emptyRequestContext);
 
 #pragma warning disable CS8604
-            var action = () => service.AddUser(username, displayedName, password);
+            var action = () => service.AddUser(username, _user.DisplayedName, password);
 #pragma warning restore CS8604
 
             action.Should().Throw<ArgumentNullException>();
         }
 
         [Theory]
-        [InlineData(null, DisplayedName, Password)]
-        [InlineData(Username, null, Password)]
-        [InlineData(Username, DisplayedName, null)]
-        public void NullUsernameOrDisplayedNameOrPassword_ShouldNotAddUser(string? username, string? displayedName, string? password)
+        [InlineData(null, Password)]
+        [InlineData(Username, null)]
+        public void NullUsernameOrPassword_ShouldNotAddUser(string? username, string? password)
         {
             var userCountBefore = _dbContext.Users.Count();
             var service = new Service(_dbContext, _emptyRequestContext);
@@ -65,7 +63,7 @@ namespace PeculiarCardGame.UnitTests.Services.UsersService
             try
             {
 #pragma warning disable CS8604
-                service.AddUser(username, displayedName, password);
+                service.AddUser(username, _user.DisplayedName, password);
 #pragma warning restore CS8604
             }
             catch { }
