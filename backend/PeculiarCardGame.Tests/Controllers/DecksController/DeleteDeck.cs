@@ -73,7 +73,7 @@ namespace PeculiarCardGame.UnitTests.Controllers.DecksController
                 Method = HttpMethod.Delete,
                 RequestUri = new Uri(_client.BaseAddress!, $"/api/decks/{_existingDeck.Id}")
             });
-            
+
             message.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
         }
 

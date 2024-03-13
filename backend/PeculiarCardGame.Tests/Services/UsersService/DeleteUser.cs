@@ -107,7 +107,7 @@ namespace PeculiarCardGame.UnitTests.Services.UsersService
             var service = new Service(_dbContext, _filledRequestContext);
 
             service.DeleteUser(_anotherUser.Id);
-            var deletedUser = _dbContext.Users.Single(x =>  x.Id == _user.Id);
+            var deletedUser = _dbContext.Users.Single(x => x.Id == _user.Id);
             var callingUser = _dbContext.Users.Single(x => x.Id == _anotherUser.Id);
 
             deletedUser.Should().NotBeNull();

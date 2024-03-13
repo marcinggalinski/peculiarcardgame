@@ -4,7 +4,7 @@ using PeculiarCardGame.Data.Models;
 using PeculiarCardGame.Services.Authentication;
 using PeculiarCardGame.Services.DeckManagement;
 using PeculiarCardGame.Services.Users;
-using PeculiarCardGame.UnitTests.Services.DeckManagement;
+using PeculiarCardGame.Shared;
 using System.Net;
 
 namespace PeculiarCardGame.UnitTests.Controllers.CardsController

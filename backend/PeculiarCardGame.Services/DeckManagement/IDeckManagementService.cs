@@ -1,4 +1,5 @@
 ﻿using PeculiarCardGame.Data.Models;
+using PeculiarCardGame.Shared;
 
 namespace PeculiarCardGame.Services.DeckManagement
 {

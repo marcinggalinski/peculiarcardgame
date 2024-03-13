@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 
-namespace PeculiarCardGame.Options
+namespace PeculiarCardGame.Shared.Options
 {
     public class BasicAuthenticationSchemeOptions : AuthenticationSchemeOptions
     {

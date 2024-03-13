@@ -1,13 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 
-namespace PeculiarCardGame.Options
+namespace PeculiarCardGame.Shared.Options
 {
     public class BearerTokenAuthenticationSchemeOptions : AuthenticationSchemeOptions
     {
         public const string ConfigurationKey = "Authentication:Bearer";
 
-        public string Issuer { get; set; }
-        public string Audience { get; set; }
+        public IReadOnlyList<string> Audiences { get; set; }
         public string Key { get; set; }
     }
 }

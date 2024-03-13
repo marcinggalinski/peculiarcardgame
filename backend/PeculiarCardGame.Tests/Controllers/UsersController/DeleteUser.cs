@@ -5,7 +5,6 @@ using PeculiarCardGame.Services.Authentication;
 using PeculiarCardGame.Services.DeckManagement;
 using PeculiarCardGame.Services.Users;
 using System.Net;
-using System.Net.Http.Json;
 
 namespace PeculiarCardGame.UnitTests.Controllers.UsersController
 {

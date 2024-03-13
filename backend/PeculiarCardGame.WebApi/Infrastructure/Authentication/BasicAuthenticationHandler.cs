@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
-using PeculiarCardGame.Options;
 using PeculiarCardGame.Services;
+using PeculiarCardGame.Shared.Options;
 using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text;
@@ -50,7 +50,7 @@ namespace PeculiarCardGame.WebApi.Infrastructure.Authentication
                 return Task.FromResult(AuthenticateResult.Fail("Invalid credentials"));
 
             _requestContext.SetOnce(user);
-            var bearerToken = _authenticationService.GenerateBearerToken();
+            var bearerToken = _authenticationService.GenerateBearerToken(Request.Headers["Origin"].ToString());
 
             var identity = new ClaimsIdentity(SchemeName);
             identity.AddClaim(new Claim("BearerToken", bearerToken));

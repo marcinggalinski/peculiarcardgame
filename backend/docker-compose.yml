@@ -1,7 +1,7 @@
 version: '3.2'
 services:
   peculiarcardgame-backend-mssql:
-    container_name: peculiarcardgame-mssql
+    container_name: peculiarcardgame-backend-mssql
     image: mcr.microsoft.com/mssql/server
     ports:
       - "11433:1433"

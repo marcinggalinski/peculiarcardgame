@@ -1,4 +1,4 @@
-﻿namespace PeculiarCardGame.Options
+﻿namespace PeculiarCardGame.Shared.Options
 {
     public class DbOptions
     {

@@ -2,6 +2,7 @@
 using PeculiarCardGame.Data;
 using PeculiarCardGame.Data.Models;
 using PeculiarCardGame.Services;
+using PeculiarCardGame.Shared;
 using Service = PeculiarCardGame.Services.DeckManagement.DeckManagementService;
 
 namespace PeculiarCardGame.UnitTests.Services.DeckManagement
@@ -125,7 +126,7 @@ namespace PeculiarCardGame.UnitTests.Services.DeckManagement
             _dbContext.SetupTest(_card);
             var cardCountBefore = _dbContext.Cards.Count();
             var service = new Service(_dbContext, _authorFilledRequestContext);
-            
+
             service.DeleteCard(_anotherCard.Id);
             var card = _dbContext.Cards.SingleOrDefault(x => x.Id == _card.Id);
 

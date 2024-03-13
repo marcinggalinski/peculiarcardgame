@@ -1,5 +1,4 @@
 ﻿using FluentAssertions;
-using Microsoft.AspNetCore.Identity;
 using NSubstitute;
 using PeculiarCardGame.Data.Models;
 using PeculiarCardGame.Services.Authentication;

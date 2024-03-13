@@ -24,7 +24,7 @@ services:
     ports:
       - "15000:80"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_ENVIRONMENT
       - SqlServer__ConnectionString
       - Authentication__Bearer__Key
     depends_on:

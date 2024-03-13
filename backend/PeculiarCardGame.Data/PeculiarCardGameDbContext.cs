@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using PeculiarCardGame.Data.Models;
-using PeculiarCardGame.Options;
+using PeculiarCardGame.Shared.Options;
 
 namespace PeculiarCardGame.Data
 {

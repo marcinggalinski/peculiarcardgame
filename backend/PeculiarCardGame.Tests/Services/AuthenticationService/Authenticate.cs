@@ -2,17 +2,16 @@
 using Microsoft.Extensions.Options;
 using PeculiarCardGame.Data;
 using PeculiarCardGame.Data.Models;
-using PeculiarCardGame.Options;
 using PeculiarCardGame.Services;
+using PeculiarCardGame.Shared.Options;
 using System.Web.Helpers;
-using MSOptions = Microsoft.Extensions.Options.Options;
 using Service = PeculiarCardGame.Services.Authentication.AuthenticationService;
 
 namespace PeculiarCardGame.UnitTests.Services.AuthenticationService
 {
     public class Authenticate
     {
-        private const string Audience = "test";
+        private readonly IReadOnlyList<string> Audiences = new List<string>() { "test" };
         private const string Issuer = "test";
         private const string Key = "testtesttesttest";
 
@@ -43,10 +42,10 @@ namespace PeculiarCardGame.UnitTests.Services.AuthenticationService
                 PasswordHash = Crypto.HashPassword(ValidPassword)
             };
 
-            _options = MSOptions.Create(new BearerTokenAuthenticationSchemeOptions
+            _options = Options.Create(new BearerTokenAuthenticationSchemeOptions
             {
-                Audience = Audience,
-                Issuer = Issuer,
+                Audiences = Audiences,
+                ClaimsIssuer = Issuer,
                 Key = Key
             });
 
@@ -132,7 +131,7 @@ namespace PeculiarCardGame.UnitTests.Services.AuthenticationService
         public void ValidTokenForNotExistingUser_ShouldReturnNull()
         {
             var service = new Service(_options, _dbContext, _notExistingUserFilledRequestContext);
-            var token = service.GenerateBearerToken();
+            var token = service.GenerateBearerToken(Audiences.First());
 
             var user = service.Authenticate(token);
 
@@ -144,7 +143,7 @@ namespace PeculiarCardGame.UnitTests.Services.AuthenticationService
         {
             _dbContext.SetupTest(_user);
             var service = new Service(_options, _dbContext, _existingUserFilledRequestContext);
-            var token = service.GenerateBearerToken();
+            var token = service.GenerateBearerToken(Audiences.First());
 
             var user = service.Authenticate(token);
 

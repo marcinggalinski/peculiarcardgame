@@ -1,4 +1,6 @@
-﻿namespace PeculiarCardGame.WebApi.Models.Requests
+﻿using PeculiarCardGame.Shared;
+
+namespace PeculiarCardGame.WebApi.Models.Requests
 {
     public class AddCardRequest
     {

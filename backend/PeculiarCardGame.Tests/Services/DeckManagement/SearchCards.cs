@@ -2,6 +2,7 @@
 using PeculiarCardGame.Data;
 using PeculiarCardGame.Data.Models;
 using PeculiarCardGame.Services;
+using PeculiarCardGame.Shared;
 using Service = PeculiarCardGame.Services.DeckManagement.DeckManagementService;
 
 namespace PeculiarCardGame.UnitTests.Services.DeckManagement

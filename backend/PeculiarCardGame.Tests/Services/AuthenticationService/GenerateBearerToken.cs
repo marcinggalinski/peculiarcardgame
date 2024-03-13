@@ -2,8 +2,8 @@
 using Microsoft.Extensions.Options;
 using PeculiarCardGame.Data;
 using PeculiarCardGame.Data.Models;
-using PeculiarCardGame.Options;
 using PeculiarCardGame.Services;
+using PeculiarCardGame.Shared.Options;
 using MSOptions = Microsoft.Extensions.Options.Options;
 using Service = PeculiarCardGame.Services.Authentication.AuthenticationService;
 
@@ -11,7 +11,7 @@ namespace PeculiarCardGame.UnitTests.Services.AuthenticationService
 {
     public class GenerateBearerToken
     {
-        private const string Audience = "test";
+        private readonly IReadOnlyList<string> Audiences = new List<string>() { "test" };
         private const string Issuer = "test";
         private const string Key = "testtesttesttest";
 
@@ -27,8 +27,8 @@ namespace PeculiarCardGame.UnitTests.Services.AuthenticationService
 
             _options = MSOptions.Create(new BearerTokenAuthenticationSchemeOptions
             {
-                Audience = Audience,
-                Issuer = Issuer,
+                Audiences = Audiences,
+                ClaimsIssuer = Issuer,
                 Key = Key
             });
 
@@ -49,17 +49,29 @@ namespace PeculiarCardGame.UnitTests.Services.AuthenticationService
         {
             var service = new Service(_options, _dbContext, _emptyRequestContext);
 
-            var action = () => service.GenerateBearerToken();
+            var action = () => service.GenerateBearerToken("");
 
             action.Should().Throw<InvalidOperationException>();
         }
 
         [Fact]
-        public void FilledRequestContext_ShouldReturnToken()
+        public void NullAudience_ShouldThrowArgumentNullExceptionException()
+        {
+            var service = new Service(_options, _dbContext, _emptyRequestContext);
+
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
+            var action = () => service.GenerateBearerToken(null);
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
+
+            action.Should().Throw<ArgumentNullException>();
+        }
+
+        [Fact]
+        public void FilledRequestContextAndNotNullAudience_ShouldReturnToken()
         {
             var service = new Service(_options, _dbContext, _filledRequestContext);
 
-            var token = service.GenerateBearerToken();
+            var token = service.GenerateBearerToken("");
 
             token.Should().NotBeNull();
         }

@@ -1,4 +1,6 @@
-﻿namespace PeculiarCardGame.Data.Models
+﻿using PeculiarCardGame.Shared;
+
+namespace PeculiarCardGame.Data.Models
 {
     public class Card
     {
@@ -10,5 +12,5 @@
         public virtual Deck? Deck { get; set; }
     }
 
-    
+
 }

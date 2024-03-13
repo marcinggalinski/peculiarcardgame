@@ -114,7 +114,7 @@ namespace PeculiarCardGame.UnitTests.Services.DeckManagement
             var service = new Service(_dbContext, _notAuthorFilledRequestContext);
 
             service.UpdateDeck(_deck.Id, NewName, NewDescription);
-            var deck = _dbContext.Decks.Single(x =>  x.Id == _deck.Id);
+            var deck = _dbContext.Decks.Single(x => x.Id == _deck.Id);
 
             deck.AuthorId.Should().Be(_deck.AuthorId);
             deck.Id.Should().Be(_deck.Id);

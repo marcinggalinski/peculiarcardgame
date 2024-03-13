@@ -30,7 +30,7 @@ namespace PeculiarCardGame.WebApi.Controllers
             var user = _usersService.AddUser(request.Username, request.DisplayedName, request.Password);
             if (user is null)
                 return UnprocessableEntity($"User {request.Username} already exists.");
-            return CreatedAtAction(nameof(GetUser), new { id = user.Id}, GetUserResponse.FromUser(user));
+            return CreatedAtAction(nameof(GetUser), new { id = user.Id }, GetUserResponse.FromUser(user));
         }
 
         [HttpGet("{id}", Name = "GetUser")]

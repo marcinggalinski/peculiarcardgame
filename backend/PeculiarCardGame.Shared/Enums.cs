@@ -1,4 +1,4 @@
-﻿namespace PeculiarCardGame
+﻿namespace PeculiarCardGame.Shared
 {
     public enum CardType
     {

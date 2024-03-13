@@ -8,6 +8,6 @@ namespace PeculiarCardGame.Services.Authentication
         User? Authenticate(string token);
 
         /// <remarks>Requires request context to be set.</remarks>
-        string GenerateBearerToken();
+        string GenerateBearerToken(string audience);
     }
 }

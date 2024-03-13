@@ -2,7 +2,7 @@
 using Microsoft.IdentityModel.Tokens;
 using PeculiarCardGame.Data;
 using PeculiarCardGame.Data.Models;
-using PeculiarCardGame.Options;
+using PeculiarCardGame.Shared.Options;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -60,8 +60,8 @@ namespace PeculiarCardGame.Services.Authentication
                     ValidateIssuerSigningKey = true,
                     ValidateAudience = true,
                     ValidateLifetime = true,
-                    ValidIssuer = _jwtOptions.Issuer,
-                    ValidAudience = _jwtOptions.Audience
+                    ValidIssuer = _jwtOptions.ClaimsIssuer,
+                    ValidAudiences = _jwtOptions.Audiences
                 }, out var validatedToken);
 
                 var jwtToken = (JwtSecurityToken)validatedToken;
@@ -79,8 +79,10 @@ namespace PeculiarCardGame.Services.Authentication
             return user;
         }
 
-        public string GenerateBearerToken()
+        public string GenerateBearerToken(string audience)
         {
+            if (audience is null)
+                throw new ArgumentNullException(nameof(audience));
             if (_requestContext.CallingUser is null)
                 throw new InvalidOperationException($"{nameof(GenerateBearerToken)} can only be called by an authenticated user.");
 
@@ -93,8 +95,8 @@ namespace PeculiarCardGame.Services.Authentication
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Issuer = _jwtOptions.Issuer,
-                Audience = _jwtOptions.Audience,
+                Issuer = _jwtOptions.ClaimsIssuer,
+                Audience = audience,
                 Subject = new ClaimsIdentity(claims),
                 Expires = DateTime.UtcNow.Add(TokenLifetime),
                 SigningCredentials = credentials

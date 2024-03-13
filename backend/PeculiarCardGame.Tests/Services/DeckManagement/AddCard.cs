@@ -2,6 +2,7 @@
 using PeculiarCardGame.Data;
 using PeculiarCardGame.Data.Models;
 using PeculiarCardGame.Services;
+using PeculiarCardGame.Shared;
 using Service = PeculiarCardGame.Services.DeckManagement.DeckManagementService;
 
 namespace PeculiarCardGame.UnitTests.Services.DeckManagement
@@ -9,7 +10,7 @@ namespace PeculiarCardGame.UnitTests.Services.DeckManagement
     public class AddCard
     {
         private const string CardText = "test";
-        private const CardType CardType = PeculiarCardGame.CardType.Black;
+        private const CardType CardType = PeculiarCardGame.Shared.CardType.Black;
 
         private readonly Deck _deck;
 

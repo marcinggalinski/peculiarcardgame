@@ -2,6 +2,7 @@
 using PeculiarCardGame.Data;
 using PeculiarCardGame.Data.Models;
 using PeculiarCardGame.Services;
+using PeculiarCardGame.Shared;
 using Service = PeculiarCardGame.Services.DeckManagement.DeckManagementService;
 
 namespace PeculiarCardGame.UnitTests.Services.DeckManagement
@@ -9,7 +10,7 @@ namespace PeculiarCardGame.UnitTests.Services.DeckManagement
     public class UpdateCard
     {
         private const string NewText = "new";
-        private const CardType NewCardType = PeculiarCardGame.CardType.White;
+        private const CardType NewCardType = PeculiarCardGame.Shared.CardType.White;
 
         private readonly Deck _deck;
         private readonly Card _card;
@@ -193,7 +194,7 @@ namespace PeculiarCardGame.UnitTests.Services.DeckManagement
             var service = new Service(_dbContext, _authorFilledRequestContext);
 
             service.UpdateCard(_card.Id, textUpdate, cardTypeUpdate);
-            var card = _dbContext.Cards.Single(x =>  x.Id == _card.Id);
+            var card = _dbContext.Cards.Single(x => x.Id == _card.Id);
 
             card.Id.Should().Be(_card.Id);
             card.DeckId.Should().Be(_card.DeckId);

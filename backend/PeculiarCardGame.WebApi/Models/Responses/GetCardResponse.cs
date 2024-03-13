@@ -1,4 +1,5 @@
 ﻿using PeculiarCardGame.Data.Models;
+using PeculiarCardGame.Shared;
 using System.Text.Json.Serialization;
 
 namespace PeculiarCardGame.WebApi.Models.Responses

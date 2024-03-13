@@ -1,11 +1,13 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using PeculiarCardGame.Data;
-using PeculiarCardGame.Options;
 using PeculiarCardGame.Services;
 using PeculiarCardGame.Services.Authentication;
 using PeculiarCardGame.Services.DeckManagement;
 using PeculiarCardGame.Services.Users;
+using PeculiarCardGame.Shared.Options;
 using PeculiarCardGame.WebApi.Infrastructure.Authentication;
 using PeculiarCardGame.WebApi.Infrastructure.Swagger;
 using System.Text.Json.Serialization;
@@ -54,6 +56,8 @@ builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IUsersService, UsersService>();
 builder.Services.AddScoped<IDeckManagementService, DeckManagementService>();
 
+builder.Services.AddCors();
+
 builder.Services.AddAuthentication(options =>
 {
     options.AddScheme(BasicAuthenticationHandler.SchemeName, builder => builder.HandlerType = typeof(BasicAuthenticationHandler));
@@ -67,6 +71,17 @@ app.UseSwagger();
 app.UseSwaggerUI(options =>
 {
     options.EnablePersistAuthorization();
+});
+
+app.UseCors(builder =>
+{
+    BearerTokenAuthenticationSchemeOptions bearerTokenOptions;
+    using (var scope = app.Services.CreateScope())
+        bearerTokenOptions = scope.ServiceProvider.GetRequiredService<IOptions<BearerTokenAuthenticationSchemeOptions>>().Value;
+
+    builder.WithOrigins(bearerTokenOptions.Audiences.ToArray())
+        .AllowAnyHeader()
+        .AllowAnyMethod();
 });
 
 app.UseAuthentication();
