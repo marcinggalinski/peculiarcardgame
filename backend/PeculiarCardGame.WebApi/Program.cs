@@ -72,7 +72,7 @@ builder.Services.AddAuthentication(options =>
 
 var app = builder.Build();
 
-if (!app.Environment.IsProduction())
+if (app.Environment.EnvironmentName.Contains("Development"))
 {
     app.UseSwagger();
     app.UseSwaggerUI(options =>
@@ -81,16 +81,19 @@ if (!app.Environment.IsProduction())
     });
 }
 
-app.UseCors(builder =>
+if (!app.Environment.IsEnvironment("ApiTests"))
 {
-    BearerTokenAuthenticationSchemeOptions bearerTokenOptions;
-    using (var scope = app.Services.CreateScope())
-        bearerTokenOptions = scope.ServiceProvider.GetRequiredService<IOptions<BearerTokenAuthenticationSchemeOptions>>().Value;
+    app.UseCors(builder =>
+    {
+        BearerTokenAuthenticationSchemeOptions bearerTokenOptions;
+        using (var scope = app.Services.CreateScope())
+            bearerTokenOptions = scope.ServiceProvider.GetRequiredService<IOptions<BearerTokenAuthenticationSchemeOptions>>().Value;
 
-    builder.WithOrigins(bearerTokenOptions.Audiences.ToArray())
-        .AllowAnyHeader()
-        .AllowAnyMethod();
-});
+        builder.WithOrigins(bearerTokenOptions.Audiences.ToArray())
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+}
 
 app.UseAuthentication();
 app.UseAuthorization();
