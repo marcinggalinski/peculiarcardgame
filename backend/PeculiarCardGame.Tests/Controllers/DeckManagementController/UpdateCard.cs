@@ -5,20 +5,24 @@ using PeculiarCardGame.Services.Authentication;
 using PeculiarCardGame.Services.DeckManagement;
 using PeculiarCardGame.Services.Users;
 using PeculiarCardGame.Shared;
+using PeculiarCardGame.WebApi.Models.Requests;
+using PeculiarCardGame.WebApi.Models.Responses;
 using System.Net;
+using System.Net.Http.Json;
 
-namespace PeculiarCardGame.UnitTests.Controllers.CardsController
+namespace PeculiarCardGame.UnitTests.Controllers.DeckManagementController
 {
-    public class DeleteCard
+    public class UpdateCard
     {
         private readonly Card _existingCard;
         private readonly Card _notExistingCard;
+        private readonly Card _updatedCard;
 
         private readonly IDeckManagementService _deckManagementService;
 
         private readonly HttpClient _client;
 
-        public DeleteCard()
+        public UpdateCard()
         {
             const int ExistingCardId = 1;
             const int NotExistingCardId = 2;
@@ -28,7 +32,9 @@ namespace PeculiarCardGame.UnitTests.Controllers.CardsController
             const string Username = "test";
             const string DisplayedName = "test";
             const string PasswordHash = "test";
+            const string TextUpdate = "updated";
             const CardType CardType = CardType.White;
+            const CardType CardTypeUpdate = CardType.Black;
 
             _existingCard = new Card
             {
@@ -44,6 +50,13 @@ namespace PeculiarCardGame.UnitTests.Controllers.CardsController
                 CardType = CardType,
                 Text = Text
             };
+            _updatedCard = new Card
+            {
+                Id = ExistingCardId,
+                DeckId = DeckId,
+                CardType = CardTypeUpdate,
+                Text = TextUpdate
+            };
 
             var user = new User
             {
@@ -55,8 +68,7 @@ namespace PeculiarCardGame.UnitTests.Controllers.CardsController
 
             _deckManagementService = Substitute.For<IDeckManagementService>();
             _deckManagementService.GetCard(_existingCard.Id).Returns(_existingCard);
-            _deckManagementService.DeleteCard(Arg.Any<int>()).Returns(false);
-            _deckManagementService.DeleteCard(_existingCard.Id).Returns(true);
+            _deckManagementService.UpdateCard(_existingCard.Id, TextUpdate, CardTypeUpdate).Returns(_updatedCard);
 
             var authenticationService = Substitute.For<IAuthenticationService>();
             authenticationService.Authenticate(Arg.Any<string>()).Returns(user);
@@ -72,8 +84,13 @@ namespace PeculiarCardGame.UnitTests.Controllers.CardsController
         {
             var message = await _client.SendAsync(new HttpRequestMessage
             {
-                Method = HttpMethod.Delete,
-                RequestUri = new Uri(_client.BaseAddress!, $"/api/cards/{_existingCard.Id}")
+                Method = HttpMethod.Patch,
+                RequestUri = new Uri(_client.BaseAddress!, $"/api/cards/{_existingCard.Id}"),
+                Content = JsonContent.Create(new UpdateCardRequest
+                {
+                    CardTypeUpdate = _updatedCard.CardType,
+                    TextUpdate = _updatedCard.Text
+                })
             });
 
             message.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -84,8 +101,13 @@ namespace PeculiarCardGame.UnitTests.Controllers.CardsController
         {
             var message = await _client.SendAsync(new HttpRequestMessage
             {
-                Method = HttpMethod.Delete,
+                Method = HttpMethod.Patch,
                 RequestUri = new Uri(_client.BaseAddress!, $"/api/cards/{_notExistingCard.Id}"),
+                Content = JsonContent.Create(new UpdateCardRequest
+                {
+                    CardTypeUpdate = _updatedCard.CardType,
+                    TextUpdate = _updatedCard.Text
+                }),
                 Headers =
                 {
                     { HttpRequestHeader.Authorization.ToString(), "Bearer token" }
@@ -96,35 +118,48 @@ namespace PeculiarCardGame.UnitTests.Controllers.CardsController
         }
 
         [Fact]
-        public async Task ExistingCardId_ShouldReturnOk()
+        public async Task ExistingCardId_ShouldReturnOkWithUpdatedCard()
         {
             var message = await _client.SendAsync(new HttpRequestMessage
             {
-                Method = HttpMethod.Delete,
+                Method = HttpMethod.Patch,
                 RequestUri = new Uri(_client.BaseAddress!, $"/api/cards/{_existingCard.Id}"),
+                Content = JsonContent.Create(new UpdateCardRequest
+                {
+                    CardTypeUpdate = _updatedCard.CardType,
+                    TextUpdate = _updatedCard.Text
+                }),
                 Headers =
                 {
                     { HttpRequestHeader.Authorization.ToString(), "Bearer token" }
                 }
             });
+            var response = await message.Content.ReadFromJsonAsync<GetCardResponse>();
 
             message.StatusCode.Should().Be(HttpStatusCode.OK);
+            response.Should().NotBeNull();
+            response.Should().BeEquivalentTo(GetCardResponse.FromCard(_updatedCard));
         }
 
         [Fact]
-        public async Task ExistingCardId_ShouldCallDeleteCard()
+        public async Task ExistingCardId_ShouldCallUpdateCard()
         {
             await _client.SendAsync(new HttpRequestMessage
             {
-                Method = HttpMethod.Delete,
+                Method = HttpMethod.Patch,
                 RequestUri = new Uri(_client.BaseAddress!, $"/api/cards/{_existingCard.Id}"),
+                Content = JsonContent.Create(new UpdateCardRequest
+                {
+                    CardTypeUpdate = _updatedCard.CardType,
+                    TextUpdate = _updatedCard.Text
+                }),
                 Headers =
                 {
                     { HttpRequestHeader.Authorization.ToString(), "Bearer token" }
                 }
             });
 
-            _deckManagementService.Received().DeleteCard(_existingCard.Id);
+            _deckManagementService.Received().UpdateCard(_existingCard.Id, _updatedCard.Text, _updatedCard.CardType);
         }
     }
 }

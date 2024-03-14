@@ -9,7 +9,7 @@ using PeculiarCardGame.WebApi.Models.Responses;
 using System.Net;
 using System.Net.Http.Json;
 
-namespace PeculiarCardGame.UnitTests.Controllers.CardsController
+namespace PeculiarCardGame.UnitTests.Controllers.DeckManagementController
 {
     public class GetCard
     {

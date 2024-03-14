@@ -10,52 +10,52 @@ using PeculiarCardGame.WebApi.Models.Responses;
 using System.Net;
 using System.Net.Http.Json;
 
-namespace PeculiarCardGame.UnitTests.Controllers.CardsController
+namespace PeculiarCardGame.UnitTests.Controllers.DeckManagementController
 {
-    public class UpdateCard
+    public class AddCard
     {
-        private readonly Card _existingCard;
-        private readonly Card _notExistingCard;
-        private readonly Card _updatedCard;
+        private readonly Deck _existingDeck;
+        private readonly Deck _notExistingDeck;
+        private readonly Card _card;
 
         private readonly IDeckManagementService _deckManagementService;
 
         private readonly HttpClient _client;
 
-        public UpdateCard()
+        public AddCard()
         {
-            const int ExistingCardId = 1;
-            const int NotExistingCardId = 2;
-            const int DeckId = 1;
+            const int ExistingDeckId = 1;
+            const int NotExistingDeckId = 2;
+            const int CardId = 1;
             const int UserId = 1;
+            const string Name = "test";
+            const string Description = "test";
             const string Text = "test";
             const string Username = "test";
             const string DisplayedName = "test";
             const string PasswordHash = "test";
-            const string TextUpdate = "updated";
-            const CardType CardType = CardType.White;
-            const CardType CardTypeUpdate = CardType.Black;
+            const CardType CardType = CardType.Black;
 
-            _existingCard = new Card
+            _existingDeck = new Deck
             {
-                Id = ExistingCardId,
-                DeckId = DeckId,
+                Id = ExistingDeckId,
+                AuthorId = UserId,
+                Name = Name,
+                Description = Description
+            };
+            _notExistingDeck = new Deck
+            {
+                Id = NotExistingDeckId,
+                AuthorId = UserId,
+                Name = Name,
+                Description = Description
+            };
+            _card = new Card
+            {
+                Id = CardId,
+                DeckId = ExistingDeckId,
                 CardType = CardType,
                 Text = Text
-            };
-            _notExistingCard = new Card
-            {
-                Id = NotExistingCardId,
-                DeckId = DeckId,
-                CardType = CardType,
-                Text = Text
-            };
-            _updatedCard = new Card
-            {
-                Id = ExistingCardId,
-                DeckId = DeckId,
-                CardType = CardTypeUpdate,
-                Text = TextUpdate
             };
 
             var user = new User
@@ -67,8 +67,8 @@ namespace PeculiarCardGame.UnitTests.Controllers.CardsController
             };
 
             _deckManagementService = Substitute.For<IDeckManagementService>();
-            _deckManagementService.GetCard(_existingCard.Id).Returns(_existingCard);
-            _deckManagementService.UpdateCard(_existingCard.Id, TextUpdate, CardTypeUpdate).Returns(_updatedCard);
+            _deckManagementService.GetDeck(_existingDeck.Id).Returns(_existingDeck);
+            _deckManagementService.AddCard(_existingDeck.Id, _card.Text, _card.CardType).Returns(_card);
 
             var authenticationService = Substitute.For<IAuthenticationService>();
             authenticationService.Authenticate(Arg.Any<string>()).Returns(user);
@@ -84,12 +84,12 @@ namespace PeculiarCardGame.UnitTests.Controllers.CardsController
         {
             var message = await _client.SendAsync(new HttpRequestMessage
             {
-                Method = HttpMethod.Patch,
-                RequestUri = new Uri(_client.BaseAddress!, $"/api/cards/{_existingCard.Id}"),
-                Content = JsonContent.Create(new UpdateCardRequest
+                Method = HttpMethod.Post,
+                RequestUri = new Uri(_client.BaseAddress!, $"/api/decks/{_existingDeck.Id}/cards"),
+                Content = JsonContent.Create(new AddCardRequest
                 {
-                    CardTypeUpdate = _updatedCard.CardType,
-                    TextUpdate = _updatedCard.Text
+                    Text = _card.Text,
+                    CardType = _card.CardType
                 })
             });
 
@@ -97,16 +97,16 @@ namespace PeculiarCardGame.UnitTests.Controllers.CardsController
         }
 
         [Fact]
-        public async Task NotExistingCardId_ShouldReturnNotFound()
+        public async Task NotExistingDeckId_ShouldReturnNotFound()
         {
             var message = await _client.SendAsync(new HttpRequestMessage
             {
-                Method = HttpMethod.Patch,
-                RequestUri = new Uri(_client.BaseAddress!, $"/api/cards/{_notExistingCard.Id}"),
-                Content = JsonContent.Create(new UpdateCardRequest
+                Method = HttpMethod.Post,
+                RequestUri = new Uri(_client.BaseAddress!, $"/api/decks/{_notExistingDeck.Id}/cards"),
+                Content = JsonContent.Create(new AddCardRequest
                 {
-                    CardTypeUpdate = _updatedCard.CardType,
-                    TextUpdate = _updatedCard.Text
+                    Text = _card.Text,
+                    CardType = _card.CardType
                 }),
                 Headers =
                 {
@@ -118,16 +118,16 @@ namespace PeculiarCardGame.UnitTests.Controllers.CardsController
         }
 
         [Fact]
-        public async Task ExistingCardId_ShouldReturnOkWithUpdatedCard()
+        public async Task ExistingDeckId_ShouldReturnCreatedWithAddedCard()
         {
             var message = await _client.SendAsync(new HttpRequestMessage
             {
-                Method = HttpMethod.Patch,
-                RequestUri = new Uri(_client.BaseAddress!, $"/api/cards/{_existingCard.Id}"),
-                Content = JsonContent.Create(new UpdateCardRequest
+                Method = HttpMethod.Post,
+                RequestUri = new Uri(_client.BaseAddress!, $"/api/decks/{_existingDeck.Id}/cards"),
+                Content = JsonContent.Create(new AddCardRequest
                 {
-                    CardTypeUpdate = _updatedCard.CardType,
-                    TextUpdate = _updatedCard.Text
+                    Text = _card.Text,
+                    CardType = _card.CardType
                 }),
                 Headers =
                 {
@@ -136,22 +136,22 @@ namespace PeculiarCardGame.UnitTests.Controllers.CardsController
             });
             var response = await message.Content.ReadFromJsonAsync<GetCardResponse>();
 
-            message.StatusCode.Should().Be(HttpStatusCode.OK);
+            message.StatusCode.Should().Be(HttpStatusCode.Created);
             response.Should().NotBeNull();
-            response.Should().BeEquivalentTo(GetCardResponse.FromCard(_updatedCard));
+            response.Should().BeEquivalentTo(GetCardResponse.FromCard(_card));
         }
 
         [Fact]
-        public async Task ExistingCardId_ShouldCallUpdateCard()
+        public async Task ExistingDeckId_ShouldCallAddCard()
         {
             await _client.SendAsync(new HttpRequestMessage
             {
-                Method = HttpMethod.Patch,
-                RequestUri = new Uri(_client.BaseAddress!, $"/api/cards/{_existingCard.Id}"),
-                Content = JsonContent.Create(new UpdateCardRequest
+                Method = HttpMethod.Post,
+                RequestUri = new Uri(_client.BaseAddress!, $"/api/decks/{_existingDeck.Id}/cards"),
+                Content = JsonContent.Create(new AddCardRequest
                 {
-                    CardTypeUpdate = _updatedCard.CardType,
-                    TextUpdate = _updatedCard.Text
+                    Text = _card.Text,
+                    CardType = _card.CardType
                 }),
                 Headers =
                 {
@@ -159,7 +159,7 @@ namespace PeculiarCardGame.UnitTests.Controllers.CardsController
                 }
             });
 
-            _deckManagementService.Received().UpdateCard(_existingCard.Id, _updatedCard.Text, _updatedCard.CardType);
+            _deckManagementService.Received().AddCard(_existingDeck.Id, _card.Text, _card.CardType);
         }
     }
 }

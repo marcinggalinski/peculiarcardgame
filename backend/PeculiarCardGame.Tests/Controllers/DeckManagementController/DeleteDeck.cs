@@ -4,37 +4,29 @@ using PeculiarCardGame.Data.Models;
 using PeculiarCardGame.Services.Authentication;
 using PeculiarCardGame.Services.DeckManagement;
 using PeculiarCardGame.Services.Users;
-using PeculiarCardGame.Shared;
-using PeculiarCardGame.WebApi.Models.Requests;
-using PeculiarCardGame.WebApi.Models.Responses;
 using System.Net;
-using System.Net.Http.Json;
 
-namespace PeculiarCardGame.UnitTests.Controllers.DecksController
+namespace PeculiarCardGame.UnitTests.Controllers.DeckManagementController
 {
-    public class AddCard
+    public class DeleteDeck
     {
         private readonly Deck _existingDeck;
         private readonly Deck _notExistingDeck;
-        private readonly Card _card;
 
         private readonly IDeckManagementService _deckManagementService;
 
         private readonly HttpClient _client;
 
-        public AddCard()
+        public DeleteDeck()
         {
             const int ExistingDeckId = 1;
             const int NotExistingDeckId = 2;
-            const int CardId = 1;
             const int UserId = 1;
             const string Name = "test";
             const string Description = "test";
-            const string Text = "test";
             const string Username = "test";
             const string DisplayedName = "test";
             const string PasswordHash = "test";
-            const CardType CardType = CardType.Black;
 
             _existingDeck = new Deck
             {
@@ -50,13 +42,6 @@ namespace PeculiarCardGame.UnitTests.Controllers.DecksController
                 Name = Name,
                 Description = Description
             };
-            _card = new Card
-            {
-                Id = CardId,
-                DeckId = ExistingDeckId,
-                CardType = CardType,
-                Text = Text
-            };
 
             var user = new User
             {
@@ -68,7 +53,8 @@ namespace PeculiarCardGame.UnitTests.Controllers.DecksController
 
             _deckManagementService = Substitute.For<IDeckManagementService>();
             _deckManagementService.GetDeck(_existingDeck.Id).Returns(_existingDeck);
-            _deckManagementService.AddCard(_existingDeck.Id, _card.Text, _card.CardType).Returns(_card);
+            _deckManagementService.DeleteDeck(_existingDeck.Id).Returns(true);
+            _deckManagementService.DeleteDeck(_notExistingDeck.Id).Returns(false);
 
             var authenticationService = Substitute.For<IAuthenticationService>();
             authenticationService.Authenticate(Arg.Any<string>()).Returns(user);
@@ -84,13 +70,8 @@ namespace PeculiarCardGame.UnitTests.Controllers.DecksController
         {
             var message = await _client.SendAsync(new HttpRequestMessage
             {
-                Method = HttpMethod.Post,
-                RequestUri = new Uri(_client.BaseAddress!, $"/api/decks/{_existingDeck.Id}/cards"),
-                Content = JsonContent.Create(new AddCardRequest
-                {
-                    Text = _card.Text,
-                    CardType = _card.CardType
-                })
+                Method = HttpMethod.Delete,
+                RequestUri = new Uri(_client.BaseAddress!, $"/api/decks/{_existingDeck.Id}")
             });
 
             message.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -101,13 +82,8 @@ namespace PeculiarCardGame.UnitTests.Controllers.DecksController
         {
             var message = await _client.SendAsync(new HttpRequestMessage
             {
-                Method = HttpMethod.Post,
-                RequestUri = new Uri(_client.BaseAddress!, $"/api/decks/{_notExistingDeck.Id}/cards"),
-                Content = JsonContent.Create(new AddCardRequest
-                {
-                    Text = _card.Text,
-                    CardType = _card.CardType
-                }),
+                Method = HttpMethod.Delete,
+                RequestUri = new Uri(_client.BaseAddress!, $"/api/decks/{_notExistingDeck.Id}"),
                 Headers =
                 {
                     { HttpRequestHeader.Authorization.ToString(), "Bearer token" }
@@ -118,48 +94,35 @@ namespace PeculiarCardGame.UnitTests.Controllers.DecksController
         }
 
         [Fact]
-        public async Task ExistingDeckId_ShouldReturnCreatedWithAddedCard()
+        public async Task ExistingDeckId_ShouldReturnOk()
         {
             var message = await _client.SendAsync(new HttpRequestMessage
             {
-                Method = HttpMethod.Post,
-                RequestUri = new Uri(_client.BaseAddress!, $"/api/decks/{_existingDeck.Id}/cards"),
-                Content = JsonContent.Create(new AddCardRequest
-                {
-                    Text = _card.Text,
-                    CardType = _card.CardType
-                }),
+                Method = HttpMethod.Delete,
+                RequestUri = new Uri(_client.BaseAddress!, $"/api/decks/{_existingDeck.Id}"),
                 Headers =
                 {
                     { HttpRequestHeader.Authorization.ToString(), "Bearer token" }
                 }
             });
-            var response = await message.Content.ReadFromJsonAsync<GetCardResponse>();
 
-            message.StatusCode.Should().Be(HttpStatusCode.Created);
-            response.Should().NotBeNull();
-            response.Should().BeEquivalentTo(GetCardResponse.FromCard(_card));
+            message.StatusCode.Should().Be(HttpStatusCode.OK);
         }
 
         [Fact]
-        public async Task ExistingDeckId_ShouldCallAddCard()
+        public async Task ExistingDeckId_ShouldCallDeleteDeck()
         {
             await _client.SendAsync(new HttpRequestMessage
             {
-                Method = HttpMethod.Post,
-                RequestUri = new Uri(_client.BaseAddress!, $"/api/decks/{_existingDeck.Id}/cards"),
-                Content = JsonContent.Create(new AddCardRequest
-                {
-                    Text = _card.Text,
-                    CardType = _card.CardType
-                }),
+                Method = HttpMethod.Delete,
+                RequestUri = new Uri(_client.BaseAddress!, $"/api/decks/{_existingDeck.Id}"),
                 Headers =
                 {
                     { HttpRequestHeader.Authorization.ToString(), "Bearer token" }
                 }
             });
 
-            _deckManagementService.Received().AddCard(_existingDeck.Id, _card.Text, _card.CardType);
+            _deckManagementService.Received().DeleteDeck(_existingDeck.Id);
         }
     }
 }

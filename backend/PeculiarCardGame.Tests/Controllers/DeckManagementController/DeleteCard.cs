@@ -4,37 +4,45 @@ using PeculiarCardGame.Data.Models;
 using PeculiarCardGame.Services.Authentication;
 using PeculiarCardGame.Services.DeckManagement;
 using PeculiarCardGame.Services.Users;
-using PeculiarCardGame.WebApi.Models.Requests;
-using PeculiarCardGame.WebApi.Models.Responses;
+using PeculiarCardGame.Shared;
 using System.Net;
-using System.Net.Http.Json;
 
-namespace PeculiarCardGame.UnitTests.Controllers.DecksController
+namespace PeculiarCardGame.UnitTests.Controllers.DeckManagementController
 {
-    public class AddDeck
+    public class DeleteCard
     {
-        private readonly Deck _deck;
+        private readonly Card _existingCard;
+        private readonly Card _notExistingCard;
 
         private readonly IDeckManagementService _deckManagementService;
 
         private readonly HttpClient _client;
 
-        public AddDeck()
+        public DeleteCard()
         {
+            const int ExistingCardId = 1;
+            const int NotExistingCardId = 2;
             const int DeckId = 1;
             const int UserId = 1;
-            const string Name = "test";
-            const string Description = "test";
+            const string Text = "test";
             const string Username = "test";
             const string DisplayedName = "test";
             const string PasswordHash = "test";
+            const CardType CardType = CardType.White;
 
-            _deck = new Deck
+            _existingCard = new Card
             {
-                Id = DeckId,
-                AuthorId = UserId,
-                Description = Description,
-                Name = Name
+                Id = ExistingCardId,
+                DeckId = DeckId,
+                CardType = CardType,
+                Text = Text
+            };
+            _notExistingCard = new Card
+            {
+                Id = NotExistingCardId,
+                DeckId = DeckId,
+                CardType = CardType,
+                Text = Text
             };
 
             var user = new User
@@ -46,8 +54,9 @@ namespace PeculiarCardGame.UnitTests.Controllers.DecksController
             };
 
             _deckManagementService = Substitute.For<IDeckManagementService>();
-            _deckManagementService.GetDeck(_deck.Id).Returns(_deck);
-            _deckManagementService.AddDeck(_deck.Name, _deck.Description).Returns(_deck);
+            _deckManagementService.GetCard(_existingCard.Id).Returns(_existingCard);
+            _deckManagementService.DeleteCard(Arg.Any<int>()).Returns(false);
+            _deckManagementService.DeleteCard(_existingCard.Id).Returns(true);
 
             var authenticationService = Substitute.For<IAuthenticationService>();
             authenticationService.Authenticate(Arg.Any<string>()).Returns(user);
@@ -63,81 +72,59 @@ namespace PeculiarCardGame.UnitTests.Controllers.DecksController
         {
             var message = await _client.SendAsync(new HttpRequestMessage
             {
-                Method = HttpMethod.Post,
-                RequestUri = new Uri(_client.BaseAddress!, "/api/decks"),
-                Content = JsonContent.Create(new AddDeckRequest
-                {
-                    Name = _deck.Name,
-                    Description = _deck.Description
-                })
+                Method = HttpMethod.Delete,
+                RequestUri = new Uri(_client.BaseAddress!, $"/api/cards/{_existingCard.Id}")
             });
 
             message.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
         }
 
         [Fact]
-        public async Task NullName_ShouldReturnBadRequest()
+        public async Task NotExistingCardId_ShouldReturnNotFound()
         {
             var message = await _client.SendAsync(new HttpRequestMessage
             {
-                Method = HttpMethod.Post,
-                RequestUri = new Uri(_client.BaseAddress!, "/api/decks"),
-                Content = JsonContent.Create(new AddDeckRequest
-                {
-                    Description = _deck.Description
-                }),
+                Method = HttpMethod.Delete,
+                RequestUri = new Uri(_client.BaseAddress!, $"/api/cards/{_notExistingCard.Id}"),
                 Headers =
                 {
                     { HttpRequestHeader.Authorization.ToString(), "Bearer token" }
                 }
             });
 
-            message.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+            message.StatusCode.Should().Be(HttpStatusCode.NotFound);
         }
 
         [Fact]
-        public async Task EverythingOk_ShouldReturnCreatedWithDeck()
+        public async Task ExistingCardId_ShouldReturnOk()
         {
             var message = await _client.SendAsync(new HttpRequestMessage
             {
-                Method = HttpMethod.Post,
-                RequestUri = new Uri(_client.BaseAddress!, "/api/decks"),
-                Content = JsonContent.Create(new AddDeckRequest
-                {
-                    Name = _deck.Name,
-                    Description = _deck.Description
-                }),
+                Method = HttpMethod.Delete,
+                RequestUri = new Uri(_client.BaseAddress!, $"/api/cards/{_existingCard.Id}"),
                 Headers =
                 {
                     { HttpRequestHeader.Authorization.ToString(), "Bearer token" }
                 }
             });
-            var response = await message.Content.ReadFromJsonAsync<GetDeckResponse>();
 
-            message.StatusCode.Should().Be(HttpStatusCode.Created);
-            response.Should().NotBeNull();
-            response.Should().BeEquivalentTo(GetDeckResponse.FromDeck(_deck));
+            message.StatusCode.Should().Be(HttpStatusCode.OK);
         }
 
         [Fact]
-        public async Task EverythingOk_ShouldCallAddDeck()
+        public async Task ExistingCardId_ShouldCallDeleteCard()
         {
             await _client.SendAsync(new HttpRequestMessage
             {
-                Method = HttpMethod.Post,
-                RequestUri = new Uri(_client.BaseAddress!, "/api/decks"),
-                Content = JsonContent.Create(new AddDeckRequest
-                {
-                    Name = _deck.Name,
-                    Description = _deck.Description
-                }),
+                Method = HttpMethod.Delete,
+                RequestUri = new Uri(_client.BaseAddress!, $"/api/cards/{_existingCard.Id}"),
                 Headers =
                 {
                     { HttpRequestHeader.Authorization.ToString(), "Bearer token" }
                 }
             });
 
-            _deckManagementService.Received().AddDeck(_deck.Name, _deck.Description);
+            _deckManagementService.Received().DeleteCard(_existingCard.Id);
         }
     }
 }
