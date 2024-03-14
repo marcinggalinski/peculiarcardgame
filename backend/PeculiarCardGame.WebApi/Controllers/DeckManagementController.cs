@@ -50,7 +50,7 @@ namespace PeculiarCardGame.WebApi.Controllers
         [HttpGet("decks")]
         [AllowAnonymous]
         [SwaggerOperation("Gets all decks that match given query.", "Doesn't require any authentication data. Only returns information about decks, not the cards they consist of. Does not support paging.")]
-        [SwaggerResponse(200, "Decks found", typeof(GetDeckResponse))]
+        [SwaggerResponse(200, "Decks found", typeof(List<GetDeckResponse>))]
         public ActionResult<List<GetDeckResponse>> GetAllDecks([FromQuery] string? query)
         {
             var decks = string.IsNullOrEmpty(query) ? _deckManagementService.GetAllDecks() : _deckManagementService.SearchDecks(query);
@@ -72,7 +72,7 @@ namespace PeculiarCardGame.WebApi.Controllers
 
         [HttpDelete("decks/{id}")]
         [SwaggerOperation("Deletes specified deck.", "Requires valid bearer token authentication data to be sent in 'Authorization' header. Doesn't allow deleting other users' decks.")]
-        [SwaggerResponse(200, "Deck deleted", typeof(GetDeckResponse))]
+        [SwaggerResponse(200, "Deck deleted")]
         [SwaggerResponse(401, "Invalid authentication data", typeof(string))]
         [SwaggerResponse(404, "Deck not found")]
         public IActionResult DeleteDeck(int id)
@@ -87,7 +87,7 @@ namespace PeculiarCardGame.WebApi.Controllers
 
         [HttpPost("decks/{deckId}/cards")]
         [SwaggerOperation("Adds a new card to the specified deck.", "Requires valid bearer token authentication data to be sent in 'Authorization' header. Doesn't allow adding cards to other users' decks.")]
-        [SwaggerResponse(201, "Card created", typeof(GetDeckResponse))]
+        [SwaggerResponse(201, "Card created", typeof(GetCardResponse))]
         [SwaggerResponse(401, "Invalid authentication data", typeof(string))]
         [SwaggerResponse(404, "Deck not found")]
         public ActionResult<GetCardResponse> AddCard(int deckId, AddCardRequest request)
@@ -114,7 +114,7 @@ namespace PeculiarCardGame.WebApi.Controllers
         [HttpGet("decks/{deckId}/cards")]
         [AllowAnonymous]
         [SwaggerOperation("Gets all cards belonging to the specified deck that match given query.", "Doesn't require any authentication data. Does not support paging.")]
-        [SwaggerResponse(200, "Cards found", typeof(GetDeckResponse))]
+        [SwaggerResponse(200, "Cards found", typeof(List<GetCardResponse>))]
         [SwaggerResponse(404, "Deck not found")]
         public ActionResult<List<GetCardResponse>> GetCards(int deckId, [FromQuery] string? query)
         {
@@ -139,7 +139,7 @@ namespace PeculiarCardGame.WebApi.Controllers
 
         [HttpDelete("cards/{id}")]
         [SwaggerOperation("Deletes specified card.", "Requires valid bearer token authentication data to be sent in 'Authorization' header. Doesn't allow deleting cards from other users' decks.")]
-        [SwaggerResponse(200, "Card deleted", typeof(GetDeckResponse))]
+        [SwaggerResponse(200, "Card deleted")]
         [SwaggerResponse(401, "Invalid authentication data", typeof(string))]
         [SwaggerResponse(404, "Card not found")]
         public IActionResult DeleteCard(int id)

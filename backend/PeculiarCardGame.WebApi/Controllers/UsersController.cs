@@ -68,7 +68,7 @@ namespace PeculiarCardGame.WebApi.Controllers
         [HttpDelete("{id}")]
         [Authorize(AuthenticationSchemes = BearerTokenAuthenticationHandler.SchemeName)]
         [SwaggerOperation("Deletes specified used.", "Requires valid bearer token authentication data to be sent in 'Authorization' header. Doesn't allow deleting other users.")]
-        [SwaggerResponse(200, "User deleted", typeof(GetUserResponse))]
+        [SwaggerResponse(200, "User deleted")]
         [SwaggerResponse(401, "Invalid authentication data", typeof(string))]
         [SwaggerResponse(404, "User not found")]
         public IActionResult DeleteUser(int id)
