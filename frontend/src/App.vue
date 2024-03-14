@@ -1,18 +1,22 @@
 <template>
-  <header>
-    <div class="wrapper">
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/deck-management">Deck management</RouterLink>
-      </nav>
-    </div>
-  </header>
-
-  <RouterView />
+  <Toast />
+  <Suspense>
+    <RouterView />
+  </Suspense>
 </template>
 
 <script setup lang="ts">
-import { RouterLink, RouterView } from "vue-router";
+import Toast from "primevue/toast";
+import { provide } from "vue";
+import { RouterView } from "vue-router";
+import { DeckManagementApiServiceKey, UsersApiServiceKey } from "@/keys";
+import DeckManagementApiService from "@/services/deck-management/apiService";
+import UsersApiService from "@/services/users/apiService";
+
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL as string;
+
+provide(DeckManagementApiServiceKey, new DeckManagementApiService(apiBaseUrl));
+provide(UsersApiServiceKey, new UsersApiService(apiBaseUrl));
 </script>
 
 <style scoped></style>

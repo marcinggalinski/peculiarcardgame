@@ -10,7 +10,7 @@ import type {
 import ApiError from "@/models/apiError";
 import ApiServiceBase from "@/services/apiServiceBase";
 
-export default class DeckManagementApiService extends ApiServiceBase {
+export default class ApiService extends ApiServiceBase {
   async addCard(deckId: number, text: string, cardType: CardType) {
     const request: AddCardRequest = {
       cardType,

@@ -2,7 +2,7 @@ import type { GetUserResponse, AddUserRequest, SignInResponse } from "@/models/u
 import ApiError from "@/models/apiError";
 import ApiServiceBase from "@/services/apiServiceBase";
 
-export default class UsersApiService extends ApiServiceBase {
+export default class ApiService extends ApiServiceBase {
   async addUser(username: string, password: string, displayedName?: string) {
     const request: AddUserRequest = {
       displayedName,
