@@ -40,9 +40,11 @@ builder.Services.AddSwaggerGen(options =>
             }
         });
     }
+    options.EnableAnnotations();
 
     options.OperationFilter<AuthorizeOperationFilter>();
     options.SchemaFilter<RequireNonNullablePropertiesSchemaFilter>();
+
     options.SupportNonNullableReferenceTypes();
     options.UseAllOfToExtendReferenceSchemas();
     options.UseAllOfForInheritance();

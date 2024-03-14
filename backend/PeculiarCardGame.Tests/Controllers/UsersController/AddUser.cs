@@ -83,7 +83,7 @@ namespace PeculiarCardGame.UnitTests.Controllers.UsersController
         }
 
         [Fact]
-        public async Task UsernameInUse_ShouldReturnUnprocessableEntity()
+        public async Task UsernameInUse_ShouldReturnConflict()
         {
             var message = await _client.SendAsync(new HttpRequestMessage
             {
@@ -97,7 +97,7 @@ namespace PeculiarCardGame.UnitTests.Controllers.UsersController
                 })
             });
 
-            message.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+            message.StatusCode.Should().Be(HttpStatusCode.Conflict);
         }
 
         [Fact]
