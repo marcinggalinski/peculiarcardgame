@@ -19,13 +19,15 @@ namespace PeculiarCardGame.Services.DeckManagement
 
         public Deck AddDeck(string name, string? description)
         {
-            if (name is null)
+            if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentNullException(nameof(name));
 
             if (_requestContext.CallingUser is null)
                 throw new InvalidOperationException($"{nameof(AddDeck)} can only be called by an authenticated user.");
 
-            description ??= string.Empty;
+            name = name.Trim();
+            description = description?.Trim() ?? string.Empty;
+
             var deck = _dbContext.Decks.Add(new Deck
             {
                 Name = name,
@@ -66,9 +68,12 @@ namespace PeculiarCardGame.Services.DeckManagement
             if (deck is null)
                 return null;
 
-            if (nameUpdate is not null)
+            nameUpdate = nameUpdate?.Trim();
+            descriptionUpdate = descriptionUpdate?.Trim();
+
+            if (!string.IsNullOrEmpty(nameUpdate))
                 deck.Name = nameUpdate;
-            if (descriptionUpdate is not null)
+            if (!string.IsNullOrEmpty(descriptionUpdate))
                 deck.Description = descriptionUpdate;
 
             deck = _dbContext.Decks.Update(deck).Entity;
@@ -98,7 +103,7 @@ namespace PeculiarCardGame.Services.DeckManagement
 
         public Card? AddCard(int deckId, string text, CardType type)
         {
-            if (text is null)
+            if (string.IsNullOrWhiteSpace(text))
                 throw new ArgumentNullException(nameof(text));
 
             if (_requestContext.CallingUser is null)
@@ -107,6 +112,8 @@ namespace PeculiarCardGame.Services.DeckManagement
             var deck = _dbContext.Decks.SingleOrDefault(x => x.Id == deckId && x.AuthorId == _requestContext.CallingUser.Id);
             if (deck is null)
                 return null;
+
+            text = text.Trim();
 
             var card = _dbContext.Cards.Add(new Card
             {
@@ -156,7 +163,9 @@ namespace PeculiarCardGame.Services.DeckManagement
             if (card is null)
                 return null;
 
-            if (textUpdate is not null)
+            textUpdate = textUpdate?.Trim();
+
+            if (!string.IsNullOrEmpty(textUpdate))
                 card.Text = textUpdate;
             if (typeUpdate is not null)
                 card.CardType = typeUpdate.Value;

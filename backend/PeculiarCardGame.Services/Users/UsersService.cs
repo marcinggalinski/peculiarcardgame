@@ -17,13 +17,16 @@ namespace PeculiarCardGame.Services.Users
 
         public User? AddUser(string username, string? displayedName, string password)
         {
-            if (string.IsNullOrEmpty(username))
+            if (string.IsNullOrWhiteSpace(username))
                 throw new ArgumentNullException(nameof(username));
-            if (string.IsNullOrEmpty(password))
+            if (string.IsNullOrWhiteSpace(password))
                 throw new ArgumentNullException(nameof(password));
 
             if (_requestContext.CallingUser is not null)
                 throw new InvalidOperationException($"{nameof(AddUser)} cannot be called by an authenticated user.");
+
+            username = username.Trim();
+            displayedName = displayedName?.Trim();
 
             var user = _dbContext.Users.SingleOrDefault(x => x.Username == username);
             if (user is not null)
@@ -58,9 +61,12 @@ namespace PeculiarCardGame.Services.Users
             if (user is null)
                 return null;
 
-            if (displayedNameUpdate is not null)
+            displayedNameUpdate = displayedNameUpdate?.Trim();
+            passwordUpdate = passwordUpdate?.Trim();
+
+            if (!string.IsNullOrEmpty(displayedNameUpdate))
                 user.DisplayedName = displayedNameUpdate;
-            if (passwordUpdate is not null)
+            if (!string.IsNullOrEmpty(passwordUpdate))
                 user.PasswordHash = Crypto.HashPassword(passwordUpdate);
 
             user = _dbContext.Users.Update(user).Entity;

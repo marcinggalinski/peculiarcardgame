@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using PeculiarCardGame.Data.Models;
 using PeculiarCardGame.Services.DeckManagement;
 using PeculiarCardGame.WebApi.Infrastructure.Authentication;
 using PeculiarCardGame.WebApi.Models.Requests;
@@ -25,13 +24,21 @@ namespace PeculiarCardGame.WebApi.Controllers
         #region decks
 
         [HttpPost("decks")]
-        [SwaggerOperation("Creates a new deck.", "Requires valid bearer token authentication data to be sent in 'Authorization' header.")]
+        [SwaggerOperation("Creates a new deck.", "Requires valid bearer token authentication data to be sent in 'Authorization' header. Deck name and description are trimmed of any leading or trailing whitespaces.")]
         [SwaggerResponse(201, "Deck created", typeof(GetDeckResponse))]
         [SwaggerResponse(401, "Invalid authentication data", typeof(string))]
+        [SwaggerResponse(422, "Deck name null, empty or consisting only of whitespaces")]
         public ActionResult<GetDeckResponse> AddDeck(AddDeckRequest request)
         {
-            var deck = _deckManagementService.AddDeck(request.Name, request.Description);
-            return CreatedAtAction(nameof(GetDeck), new { id = deck.Id }, GetDeckResponse.FromDeck(deck));
+            try
+            {
+                var deck = _deckManagementService.AddDeck(request.Name, request.Description);
+                return CreatedAtAction(nameof(GetDeck), new { id = deck.Id }, GetDeckResponse.FromDeck(deck));
+            }
+            catch (ArgumentNullException ex)
+            {
+                return UnprocessableEntity(ex.Message);
+            }
         }
 
         [HttpGet("decks/{id}")]
@@ -58,7 +65,7 @@ namespace PeculiarCardGame.WebApi.Controllers
         }
 
         [HttpPatch("decks/{id}")]
-        [SwaggerOperation("Updates specified deck.", "Requires valid bearer token authentication data to be sent in 'Authorization' header. Only updates basic information about the deck, to add, delete or modify cards the deck consists of use other endpoints. Doesn't allow modyfying other users' decks.")]
+        [SwaggerOperation("Updates specified deck.", "Requires valid bearer token authentication data to be sent in 'Authorization' header. Only updates basic information about the deck, to add, delete or modify cards the deck consists of use other endpoints. Doesn't allow modyfying other users' decks. Deck name and description are trimmed of any leading or trailing whitespaces.")]
         [SwaggerResponse(200, "Deck updated", typeof(GetDeckResponse))]
         [SwaggerResponse(401, "Invalid authentication data", typeof(string))]
         [SwaggerResponse(404, "Deck not found")]
@@ -86,16 +93,24 @@ namespace PeculiarCardGame.WebApi.Controllers
         #region cards
 
         [HttpPost("decks/{deckId}/cards")]
-        [SwaggerOperation("Adds a new card to the specified deck.", "Requires valid bearer token authentication data to be sent in 'Authorization' header. Doesn't allow adding cards to other users' decks.")]
+        [SwaggerOperation("Adds a new card to the specified deck.", "Requires valid bearer token authentication data to be sent in 'Authorization' header. Doesn't allow adding cards to other users' decks. Card text is trimmed of any leading or trailing whitespaces.")]
         [SwaggerResponse(201, "Card created", typeof(GetCardResponse))]
         [SwaggerResponse(401, "Invalid authentication data", typeof(string))]
         [SwaggerResponse(404, "Deck not found")]
+        [SwaggerResponse(422, "Card text null, empty or consisting only of whitespaces")]
         public ActionResult<GetCardResponse> AddCard(int deckId, AddCardRequest request)
         {
-            var card = _deckManagementService.AddCard(deckId, request.Text, request.CardType);
-            if (card is null)
-                return NotFound();
-            return CreatedAtAction(nameof(GetCard), new { id = card.Id }, GetCardResponse.FromCard(card));
+            try
+            {
+                var card = _deckManagementService.AddCard(deckId, request.Text, request.CardType);
+                if (card is null)
+                    return NotFound();
+                return CreatedAtAction(nameof(GetCard), new { id = card.Id }, GetCardResponse.FromCard(card));
+            }
+            catch (ArgumentNullException ex)
+            {
+                return UnprocessableEntity(ex.Message);
+            }
         }
 
         [AllowAnonymous]
@@ -125,7 +140,7 @@ namespace PeculiarCardGame.WebApi.Controllers
         }
 
         [HttpPatch("cards/{id}")]
-        [SwaggerOperation("Updates specified card.", "Requires valid bearer token authentication data to be sent in 'Authorization' header. Doesn't allow modyfying cards from other users' decks.")]
+        [SwaggerOperation("Updates specified card.", "Requires valid bearer token authentication data to be sent in 'Authorization' header. Doesn't allow modyfying cards from other users' decks. Card text is trimmed of any leading or trailing whitespaces.")]
         [SwaggerResponse(200, "Card updated", typeof(GetDeckResponse))]
         [SwaggerResponse(401, "Invalid authentication data", typeof(string))]
         [SwaggerResponse(404, "Card not found")]
