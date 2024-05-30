@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="PeculiarCardGame.UnitTests" />
+    <InternalsVisibleTo Include="PeculiarCardGame.Tests" />
   </ItemGroup>
 
 </Project>

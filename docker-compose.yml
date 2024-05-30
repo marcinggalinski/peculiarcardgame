@@ -1,6 +1,5 @@
-version: '3.2'
 services:
-  peculiarcardgame-mssql:
+  mssql:
     container_name: peculiarcardgame-mssql
     image: mcr.microsoft.com/mssql/server
     ports:
@@ -16,8 +15,8 @@ services:
       timeout: 3s
       retries: 10
       start_period: 10s
-  peculiarcardgame:
-    container_name: peculiarcardgame
+  backend:
+    container_name: peculiarcardgame-backend
     build:
       context: backend
       dockerfile: Dockerfile
@@ -28,7 +27,7 @@ services:
       - SqlServer__ConnectionString
       - Authentication__Bearer__Key
     depends_on:
-      peculiarcardgame-mssql:
+      mssql:
         condition: service_healthy
 secrets:
   sa_password:

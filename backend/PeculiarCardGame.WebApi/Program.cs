@@ -85,9 +85,8 @@ if (!app.Environment.IsEnvironment("ApiTests"))
 {
     app.UseCors(builder =>
     {
-        BearerTokenAuthenticationSchemeOptions bearerTokenOptions;
-        using (var scope = app.Services.CreateScope())
-            bearerTokenOptions = scope.ServiceProvider.GetRequiredService<IOptions<BearerTokenAuthenticationSchemeOptions>>().Value;
+        using var scope = app.Services.CreateScope();
+        var bearerTokenOptions = scope.ServiceProvider.GetRequiredService<IOptions<BearerTokenAuthenticationSchemeOptions>>().Value;
 
         builder.WithOrigins(bearerTokenOptions.Audiences.ToArray())
             .AllowAnyHeader()

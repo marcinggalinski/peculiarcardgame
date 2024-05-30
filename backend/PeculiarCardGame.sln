@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PeculiarCardGame.Data", "Pe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PeculiarCardGame.Services", "PeculiarCardGame.Services\PeculiarCardGame.Services.csproj", "{D2A94ACC-E4F7-4220-A028-E65883C6FBCF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PeculiarCardGame.UnitTests", "PeculiarCardGame.Tests\PeculiarCardGame.UnitTests.csproj", "{EA786CF8-5AD7-4B77-86C9-910C1A365A8A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PeculiarCardGame.Tests", "PeculiarCardGame.Tests\PeculiarCardGame.Tests.csproj", "{EA786CF8-5AD7-4B77-86C9-910C1A365A8A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
