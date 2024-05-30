@@ -15,8 +15,14 @@ const router = createRouter({
       // route level code-splitting
       // this generates a separate chunk (About.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
-      component: () => import("../views/DeckManagement.vue"),
+      component: () => import("../views/deck-management/DeckManagement.vue"),
     },
+    {
+      path: "/deck-management/:id",
+      name: "deck-editor",
+      props: route => ({ id: Number(route.params.id) }),
+      component: () => import("../views/deck-management/DeckEditor.vue")
+    }
   ],
 });
 

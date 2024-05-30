@@ -1,5 +1,6 @@
 <template>
-  <div v-if="deck" class="deck-preview">
+  <RouterLink :to="{ name: 'deck-editor', params: { id: deck.id } }" v-if="deck" class="deck-preview">
+    <!-- <div v-if="deck" class="deck-preview"> -->
     <div class="deck-preview-header">
       <span class="deck-preview-name">{{ deck.name }}</span>
       <!-- <br> -->
@@ -14,7 +15,8 @@
         ({{ deck.blackCardCount }} black, {{ deck.whiteCardCount }} white)
       </div>
     </div>
-  </div>
+    <!-- </div> -->
+  </RouterLink>
 </template>
 <script setup lang="ts">
 import type { GetDeckResponse } from '@/models/deck-management/api';
@@ -27,6 +29,9 @@ defineProps<{
 
 <style scoped lang="stylus">
 .deck-preview
+  text-decoration unset
+  color unset
+
   flex 1 0 20%
   max-width 250px
   max-height 250px
