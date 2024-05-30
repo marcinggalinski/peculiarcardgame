@@ -1,14 +1,18 @@
 <template>
   <header>
-    <h1>Deck Management</h1>
+    <h1>Peculiar Card Game</h1>
+    <h1 class="move-right">Deck Management</h1>
   </header>
-  <main>{{ decks }}</main>
+  <main>
+    <DeckPreview v-for="deck in decks" :deck="deck" />
+  </main>
 </template>
 
 <script setup lang="ts">
 import { inject } from "vue";
 import { DeckManagementApiServiceKey } from "@/keys";
 import DeckManagementApiService from "@/services/deck-management/apiService";
+import DeckPreview from "@/components/deck-management/DeckPreview.vue"
 
 const deckManagementApiService = inject<DeckManagementApiService>(DeckManagementApiServiceKey);
 if (!deckManagementApiService) {
@@ -18,4 +22,10 @@ if (!deckManagementApiService) {
 const decks = await deckManagementApiService.getDecks();
 </script>
 
-<style scoped></style>
+<style scoped lang="stylus">
+header
+  display flex
+
+  .move-right
+    margin-left auto
+</style>
