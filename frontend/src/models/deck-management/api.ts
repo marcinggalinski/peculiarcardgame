@@ -17,6 +17,7 @@ export interface GetCardResponse {
   text: string;
 }
 export interface GetDeckResponse {
+  author: string;
   description: string;
   id: number;
   name: string;
