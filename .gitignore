@@ -16,7 +16,6 @@ obj/
 !.vscode/extensions.json
 *.code-workspace
 
-docker/
-
+.docker/
 .secrets/
 .env
