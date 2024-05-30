@@ -3,9 +3,9 @@
     <h1>Peculiar Card Game</h1>
     <h1 class="move-right">Deck Management</h1>
   </header>
-  <main>
+  <div id="decks-list">
     <DeckPreview v-for="deck in decks" :deck="deck" />
-  </main>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -25,7 +25,18 @@ const decks = await deckManagementApiService.getDecks();
 <style scoped lang="stylus">
 header
   display flex
+  background-color black
+  color white
+  text-align center
+  padding 10px
+
+  h1
+    margin 0
 
   .move-right
     margin-left auto
+
+#decks-list
+  display flex
+  flex-wrap wrap
 </style>

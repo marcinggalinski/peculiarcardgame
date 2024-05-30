@@ -1,13 +1,25 @@
 <template>
-  <main class="deck-preview">
-    <a class="deck-preview-name">{{ deck.name }}</a> by {{ deck.author }}
-    <div class="deck-preview-description">{{ deck.description }}</div>
-  </main>
+  <div v-if="deck" class="deck-preview">
+    <div class="deck-preview-header">
+      <span class="deck-preview-name">{{ deck.name }}</span>
+      <!-- <br> -->
+      <small class="deck-preview-author">by {{ deck.author }}</small>
+    </div>
+    <div class="deck-preview-content">
+      <div class="deck-preview-description">{{ deck.description || 'No description' }}</div>
+    </div>
+    <div class="deck-preview-footer">
+      <div>
+        {{ deck.blackCardCount + deck.whiteCardCount }} cards
+        ({{ deck.blackCardCount }} black, {{ deck.whiteCardCount }} white)
+      </div>
+    </div>
+  </div>
 </template>
 <script setup lang="ts">
 import type { GetDeckResponse } from '@/models/deck-management/api';
 
-const props = defineProps<{
+defineProps<{
   deck: GetDeckResponse
 }>();
 
@@ -15,12 +27,50 @@ const props = defineProps<{
 
 <style scoped lang="stylus">
 .deck-preview
+  flex 1 0 20%
+  max-width 250px
+  max-height 250px
+  aspect-ratio 1
+
+  display flex
+  flex-direction column
+
   border 1px black solid
-  border-radius 10px
-  padding 15px
+  border-radius 15px
+
   margin 5px
 
-  .deck-preview-name
-    font-weight bold
+  .deck-preview-header
+    border-radius 15px 15px 0 0
 
+    margin -1px
+    padding 15px
+
+    background black
+    color white
+
+    .deck-preview-name
+      font-weight bold
+      display block
+
+    .deck-preview-author
+      display block
+
+  .deck-preview-content
+    height 100%
+
+    margin -1px
+    padding 15px
+
+    .deck-preview-description
+      font-style italic
+
+  .deck-preview-footer
+    border-radius 0 0 15px 15px
+
+    margin auto -1px -1px -1px
+    padding 15px
+
+    background black
+    color white
 </style>

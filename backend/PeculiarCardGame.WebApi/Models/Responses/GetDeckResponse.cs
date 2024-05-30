@@ -8,6 +8,8 @@ namespace PeculiarCardGame.WebApi.Models.Responses
         public required string Name { get; set; }
         public required string Description { get; set; }
         public required string Author { get; set; }
+        public required int BlackCardCount { get; set; }
+        public required int WhiteCardCount { get; set; }
 
         public static GetDeckResponse FromDeck(Deck deck)
         {
@@ -16,7 +18,9 @@ namespace PeculiarCardGame.WebApi.Models.Responses
                 Id = deck.Id,
                 Name = deck.Name,
                 Description = deck.Description,
-                Author = deck.Author.DisplayedName
+                Author = deck.Author.DisplayedName,
+                BlackCardCount = deck.Cards.Count(x => x.CardType is Shared.CardType.Black),
+                WhiteCardCount = deck.Cards.Count(x => x.CardType is Shared.CardType.White)
             };
         }
     }

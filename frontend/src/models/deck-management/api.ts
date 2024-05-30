@@ -18,9 +18,11 @@ export interface GetCardResponse {
 }
 export interface GetDeckResponse {
   author: string;
+  blackCardCount: number;
   description: string;
   id: number;
   name: string;
+  whiteCardCount: number;
 }
 export interface UpdateCardRequest {
   cardTypeUpdate?: CardType;
