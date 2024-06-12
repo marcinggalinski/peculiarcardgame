@@ -15,11 +15,10 @@
     <div id="deck-management-user" class="topbar-item">
       <h1>
         <div v-if="userStore.isSignedIn">
-          {{ userStore.username }}
+          Signed in as {{ userStore.username }} | <a @click="signOut()" id="sign-out">Sign out</a>
         </div>
         <div v-else>
-          {{ route.path }}
-          <RouterLink :to="{ name: 'sign-in', query: { returnUrl: '/decks' } }" class="clear">Sign in</RouterLink>
+          <RouterLink :to="{ name: 'sign-in', query: { returnUrl: route.path } }" class="clear">Sign in</RouterLink>
         </div>
       </h1>
     </div>
@@ -28,11 +27,25 @@
 </template>
 
 <script setup lang="ts">
-import { useUserStore } from "@/stores/user";
 import { RouterLink, useRoute } from "vue-router";
 
+import { useToast } from "primevue/usetoast";
+
+import { useUserStore } from "@/stores/user";
+
 const route = useRoute();
+const toast = useToast();
 const userStore = useUserStore();
+
+const signOut = () => {
+  userStore.signOut();
+  toast.add({
+    summary: "Success",
+    detail: "You are now signed out.",
+    severity: "success",
+    life: 3000,
+  });
+};
 </script>
 
 <style scoped lang="stylus">
@@ -60,4 +73,7 @@ header
 #decks-list
   display flex
   flex-wrap wrap
+
+#sign-out
+  cursor pointer
 </style>
