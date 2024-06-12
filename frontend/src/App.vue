@@ -19,4 +19,8 @@ provide(DeckManagementApiServiceKey, new DeckManagementApiService(apiBaseUrl));
 provide(UsersApiServiceKey, new UsersApiService(apiBaseUrl));
 </script>
 
-<style scoped></style>
+<style lang="stylus">
+.clear
+  text-decoration unset
+  color unset
+</style>

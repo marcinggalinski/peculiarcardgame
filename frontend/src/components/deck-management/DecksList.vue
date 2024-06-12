@@ -1,22 +1,20 @@
 <template>
-  {{ deck }}
-  {{ cards }}
+  <div id="decks-list">
+    <DeckPreview v-if="decks.length" v-for="deck in decks" :deck="deck" />
+    <span v-else>No decks yet!</span>
+  </div>
 </template>
+
 <script setup lang="ts">
 import { inject } from "vue";
 import { DeckManagementApiServiceKey } from "@/keys";
 import DeckManagementApiService from "@/services/deck-management/apiService";
-
-const { id } = defineProps<{
-  id: number;
-}>();
+import DeckPreview from "@/components/deck-management/DeckPreview.vue";
 
 const deckManagementApiService = inject<DeckManagementApiService>(DeckManagementApiServiceKey);
 if (!deckManagementApiService) {
   throw new Error("DeckManagementApiService not initialized");
 }
 
-const deck = await deckManagementApiService.getDeck(id);
-const cards = await deckManagementApiService.getCards(id);
+const decks = (await deckManagementApiService.getDecks()) ?? [];
 </script>
-<style lang="stylus"></style>

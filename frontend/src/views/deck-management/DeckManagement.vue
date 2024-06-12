@@ -1,40 +1,32 @@
 <template>
   <header>
-    <h1>Peculiar Card Game</h1>
-    <h1 class="move-right">Deck Management</h1>
+    <RouterLink :to="{ name: 'decks-list' }" class="clear topbar-item">
+      <h1 id="deck-management-logo">Deck Management test</h1>
+    </RouterLink>
+    <RouterLink :to="{ name: 'home' }" class="clear topbar-item">
+      <h1 id="deck-management-pcg-logo">Peculiar Card Game</h1>
+    </RouterLink>
+    <h1 id="deck-management-filler" />
   </header>
-  <div id="decks-list">
-    <DeckPreview v-for="deck in decks" :deck="deck" />
-  </div>
+  <RouterView />
 </template>
 
-<script setup lang="ts">
-import { inject } from "vue";
-import { DeckManagementApiServiceKey } from "@/keys";
-import DeckManagementApiService from "@/services/deck-management/apiService";
-import DeckPreview from "@/components/deck-management/DeckPreview.vue"
-
-const deckManagementApiService = inject<DeckManagementApiService>(DeckManagementApiServiceKey);
-if (!deckManagementApiService) {
-  throw new Error("DeckManagementApiService not initialized");
-}
-
-const decks = await deckManagementApiService.getDecks();
-</script>
+<script setup lang="ts"></script>
 
 <style scoped lang="stylus">
 header
   display flex
+  justify-content center
   background-color black
   color white
-  text-align center
   padding 10px
 
-  h1
+  .topbar-item, h1
+    flex 1
     margin 0
 
-  .move-right
-    margin-left auto
+  #deck-management-pcg-logo
+    text-align center
 
 #decks-list
   display flex

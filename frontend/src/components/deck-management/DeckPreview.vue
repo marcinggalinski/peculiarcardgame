@@ -1,5 +1,5 @@
 <template>
-  <RouterLink :to="{ name: 'deck-editor', params: { id: deck.id } }" v-if="deck" class="deck-preview">
+  <RouterLink :to="{ name: 'deck-editor', params: { id: deck.id } }" v-if="deck" class="deck-preview clear">
     <!-- <div v-if="deck" class="deck-preview"> -->
     <div class="deck-preview-header">
       <span class="deck-preview-name">{{ deck.name }}</span>
@@ -7,31 +7,28 @@
       <small class="deck-preview-author">by {{ deck.author }}</small>
     </div>
     <div class="deck-preview-content">
-      <div class="deck-preview-description">{{ deck.description || 'No description' }}</div>
+      <div class="deck-preview-description">{{ deck.description || "No description" }}</div>
     </div>
     <div class="deck-preview-footer">
       <div>
-        {{ deck.blackCardCount + deck.whiteCardCount }} cards
-        ({{ deck.blackCardCount }} black, {{ deck.whiteCardCount }} white)
+        {{ deck.blackCardCount + deck.whiteCardCount }} cards ({{ deck.blackCardCount }} black,
+        {{ deck.whiteCardCount }} white)
       </div>
     </div>
     <!-- </div> -->
   </RouterLink>
 </template>
+
 <script setup lang="ts">
-import type { GetDeckResponse } from '@/models/deck-management/api';
+import type { GetDeckResponse } from "@/models/deck-management/api";
 
 defineProps<{
-  deck: GetDeckResponse
+  deck: GetDeckResponse;
 }>();
-
 </script>
 
 <style scoped lang="stylus">
 .deck-preview
-  text-decoration unset
-  color unset
-
   flex 1 0 20%
   max-width 250px
   max-height 250px

@@ -76,9 +76,7 @@ export default class ApiService extends ApiServiceBase {
   }
 
   async getDecks(query?: string) {
-    const response = await this.instance.get<GetDeckResponse[]>(
-      query ? `decks?query=${query}` : "decks"
-    );
+    const response = await this.instance.get<GetDeckResponse[]>(query ? `decks?query=${query}` : "decks");
     if (response.status !== 200) {
       throw new ApiError(response.status, response.statusText);
     }
