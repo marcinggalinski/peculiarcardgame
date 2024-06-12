@@ -1,4 +1,3 @@
-import type { GetUserResponse } from "@/models/users/api";
 import { defineStore } from "pinia";
 import { ref } from "vue";
 
@@ -15,7 +14,7 @@ export const useUserStore = defineStore("user", () => {
     displayedName.value = name;
   }
 
-  function signIn(user: GetUserResponse, token: string) {
+  function signIn(user: { id: number; username: string; displayedName: string }, token: string) {
     isSignedIn.value = true;
     id.value = user.id;
     username.value = user.username;
