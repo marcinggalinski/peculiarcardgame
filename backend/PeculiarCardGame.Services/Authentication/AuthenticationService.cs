@@ -65,7 +65,7 @@ namespace PeculiarCardGame.Services.Authentication
                 }, out var validatedToken);
 
                 var jwtToken = (JwtSecurityToken)validatedToken;
-                username = jwtToken.Claims.Single(x => x.Type == "username").Value;
+                username = jwtToken.Claims.Single(x => x.Type == "name").Value;
             }
             catch
             {
@@ -88,7 +88,9 @@ namespace PeculiarCardGame.Services.Authentication
 
             var claims = new List<Claim>
             {
-                new Claim("username", _requestContext.CallingUser.Username)
+                new Claim("id", _requestContext.CallingUser.Id.ToString()),
+                new Claim("name", _requestContext.CallingUser.Username),
+                new Claim("nickname", _requestContext.CallingUser.DisplayedName)
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Key));
