@@ -7,6 +7,6 @@
         public required string DisplayedName { get; set; }
         public required string PasswordHash { get; set; }
 
-        public virtual ICollection<Deck>? Decks { get; set; }
+        public virtual ICollection<Deck> Decks { get; set; } = new List<Deck>();
     }
 }
