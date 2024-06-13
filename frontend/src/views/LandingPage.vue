@@ -4,7 +4,9 @@
     <h1>Peculiar Card Game</h1>
     <h3>A <a href="https://www.cardsagainsthumanity.com">Cards Against Humanity</a> clone</h3>
   </header>
-  <main></main>
+  <main>
+    <RouterLink :to="{ name: 'decks-list' }">Deck Management</RouterLink>
+  </main>
 </template>
 
 <script setup lang="ts"></script>

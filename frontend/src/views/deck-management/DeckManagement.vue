@@ -7,7 +7,7 @@
     </div>
 
     <div id="deck-management-pcg-logo" class="topbar-item">
-      <RouterLink :to="{ name: 'decks-list' }" class="clear">
+      <RouterLink :to="{ name: 'home' }" class="clear">
         <h1>Peculiar Card Game</h1>
       </RouterLink>
     </div>

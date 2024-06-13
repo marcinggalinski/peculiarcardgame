@@ -1,6 +1,5 @@
 <template>
   <header>Sign In</header>
-  {{ returnUrl }}
   <div id="sign-in-form">
     <div>Username <InputText v-model="username" /></div>
     <div>Password <InputText type="password" v-model="password" /></div>
