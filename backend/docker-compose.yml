@@ -5,10 +5,5 @@ services:
     ports:
       - "11433:1433"
     environment:
-      ACCEPT_EULA: "Y"
-      MSSQL_SA_PASSWORD_FILE: /run/secrets/sa_password
-    secrets:
-      - sa_password
-secrets:
-  sa_password:
-    file: .secrets/SqlServer/sa_password.txt
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD

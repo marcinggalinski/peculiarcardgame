@@ -5,33 +5,34 @@ services:
     ports:
       - "11433:1433"
     environment:
-      ACCEPT_EULA: "Y"
-      MSSQL_SA_PASSWORD_FILE: /run/secrets/sa_password
-    secrets:
-      - sa_password
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD
     volumes:
       - "./.docker/mssql/data/:/var/opt/mssql/data/"
       - "./.docker/mssql/log/:/var/opt/mssql/log/"
     healthcheck:
-      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P $(cat /run/secrets/sa_password) -Q "SELECT 1" -b -o /dev/null
-      interval: 10s
+      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "${MSSQL_SA_PASSWORD}" -Q "SELECT 1" -b -o /dev/null
+      interval: 5s
       timeout: 3s
-      retries: 10
-      start_period: 10s
+      retries: 12
+      start_period: 5s
   backend:
     container_name: peculiarcardgame-backend
     build:
       context: backend
       dockerfile: Dockerfile
     ports:
-      - "15000:80"
+      - "15000:443"
     environment:
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/peculiarcardgame.pfx
+      - ASPNETCORE_HTTPS_PORTS=443
+      - ASPNETCORE_URLS=https://+
       - ASPNETCORE_ENVIRONMENT
-      - SqlServer__ConnectionString
+      - ASPNETCORE_Kestrel__Certificates__Default__Password
       - Authentication__Bearer__Key
+      - SqlServer__ConnectionString
+    volumes:
+      - "./.docker/https/:/https/"
     depends_on:
       mssql:
         condition: service_healthy
-secrets:
-  sa_password:
-    file: backend/.secrets/SqlServer/sa_password.txt
