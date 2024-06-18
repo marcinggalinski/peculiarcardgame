@@ -31,8 +31,8 @@ defineProps<{
 .deck-preview
   flex 1 0 20%
   max-width 250px
-  max-height 250px
-  aspect-ratio 1
+  max-height 350px
+  aspect-ratio 5 / 7
 
   display flex
   flex-direction column
@@ -54,6 +54,10 @@ defineProps<{
     .deck-preview-name
       font-weight bold
       display block
+
+      overflow hidden
+      text-overflow ellipsis
+      white-space nowrap
 
     .deck-preview-author
       display block
