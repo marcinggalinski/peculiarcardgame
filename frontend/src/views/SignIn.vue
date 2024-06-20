@@ -43,11 +43,11 @@ let password = "";
 const signIn = async () => {
   try {
     const token = (await usersApiService.signIn(username, password)).token;
-    const decodedToken = jwtDecode<{ id: number; name: string; nickname: string }>(token);
+    const decodedToken = jwtDecode<{ id: string; name: string; nickname: string }>(token);
 
     userStore.signIn(
       {
-        id: decodedToken.id,
+        id: Number(decodedToken.id),
         username: decodedToken.name,
         displayedName: decodedToken.nickname,
       },

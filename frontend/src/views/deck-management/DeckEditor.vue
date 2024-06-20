@@ -1,6 +1,9 @@
 <template>
   <h1 class="deck-title">{{ deck.name }}</h1>
-  <small class="deck-author">by {{ deck.author }}</small>
+  <small class="deck-author">
+    by {{ deck.author }}
+    <span v-if="userStore.isSignedIn && userStore.id == deck.authorId">(you)</span>
+  </small>
   <div class="deck-description">{{ deck.description }}</div>
 
   <CardsList :type="CardType.Black" :cards="blackCards" />
@@ -14,6 +17,7 @@ import CardsList from "@/components/deck-management/CardsList.vue";
 import { DeckManagementApiServiceKey } from "@/keys";
 import { CardType } from "@/models/deck-management/api";
 import DeckManagementApiService from "@/services/deck-management/apiService";
+import { useUserStore } from "@/stores/user";
 
 const { id } = defineProps<{
   id: number;
@@ -23,6 +27,8 @@ const deckManagementApiService = inject<DeckManagementApiService>(DeckManagement
 if (!deckManagementApiService) {
   throw new Error("DeckManagementApiService not initialized");
 }
+
+const userStore = useUserStore();
 
 const deck = await deckManagementApiService.getDeck(id);
 const cards = await deckManagementApiService.getCards(id);

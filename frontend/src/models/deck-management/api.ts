@@ -18,6 +18,7 @@ export interface GetCardResponse {
 }
 export interface GetDeckResponse {
   author: string;
+  authorId: number;
   blackCardCount: number;
   description: string;
   id: number;
