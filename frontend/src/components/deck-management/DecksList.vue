@@ -18,3 +18,9 @@ if (!deckManagementApiService) {
 
 const decks = (await deckManagementApiService.getDecks()) ?? [];
 </script>
+
+<style lang="stylus">
+#decks-list
+  display flex
+  flex-wrap wrap
+</style>

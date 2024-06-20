@@ -20,7 +20,6 @@ export default defineConfig({
     },
     hmr: {
       host: "localhost",
-      protocol: "wss",
     },
   },
 });

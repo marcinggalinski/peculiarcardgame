@@ -70,10 +70,6 @@ header
   #deck-management-user
     text-align right
 
-#decks-list
-  display flex
-  flex-wrap wrap
-
 #sign-out
   cursor pointer
 </style>
