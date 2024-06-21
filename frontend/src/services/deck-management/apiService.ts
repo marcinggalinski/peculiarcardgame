@@ -83,7 +83,7 @@ export default class ApiService extends ApiServiceBase {
     return response.data;
   }
 
-  async updateCard(cardId: number, textUpdate?: string) {
+  async updateCard(cardId: number, textUpdate: string) {
     const request: UpdateCardRequest = {
       textUpdate,
     };
@@ -94,7 +94,7 @@ export default class ApiService extends ApiServiceBase {
     return response.data;
   }
 
-  async updateDeck(deckId: number, descriptionUpdate?: string, nameUpdate?: string) {
+  async updateDeck(deckId: number, nameUpdate?: string, descriptionUpdate?: string) {
     const request: UpdateDeckRequest = {
       descriptionUpdate,
       nameUpdate,

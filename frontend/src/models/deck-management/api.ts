@@ -26,7 +26,7 @@ export interface GetDeckResponse {
   whiteCardCount: number;
 }
 export interface UpdateCardRequest {
-  textUpdate?: string;
+  textUpdate: string;
 }
 export interface UpdateDeckRequest {
   descriptionUpdate?: string;

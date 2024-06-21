@@ -154,7 +154,7 @@ namespace PeculiarCardGame.Services.DeckManagement
             return cards;
         }
 
-        public Card? UpdateCard(int id, string? textUpdate)
+        public Card? UpdateCard(int id, string textUpdate)
         {
             if (_requestContext.CallingUser is null)
                 throw new InvalidOperationException($"{nameof(UpdateCard)} can only be called by an authenticated user.");
