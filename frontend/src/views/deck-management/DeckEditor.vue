@@ -30,15 +30,21 @@
     :authorId="deck.authorId"
     :type="CardType.Black"
     :cards="blackCards"
+    :deleted-ids="updates.deletedCards"
     @add="(text, type) => addCard(text, type)"
     @update="(id, text) => updateCard(id, text)"
+    @delete="id => deleteCard(id)"
+    @restore="id => restoreCard(id)"
   />
   <CardsList
     :authorId="deck.authorId"
     :type="CardType.White"
     :cards="whiteCards"
+    :deleted-ids="updates.deletedCards"
     @add="(text, type) => addCard(text, type)"
     @update="(id, text) => updateCard(id, text)"
+    @delete="id => deleteCard(id)"
+    @restore="id => restoreCard(id)"
   />
 
   <Dialog modal class="dialog" v-model:visible="isEditNameDialogVisible" header="Edit deck name" :closable="false">
@@ -86,7 +92,8 @@ import Toast from "primevue/toast";
 
 import CardsList from "@/components/deck-management/CardsList.vue";
 import { DeckManagementApiServiceKey } from "@/keys";
-import { CardType, type GetCardResponse, type GetDeckResponse } from "@/models/deck-management/api";
+import type { GetCardResponse, GetDeckResponse } from "@/models/deck-management/api";
+import { CardType } from "@/models/deck-management/api";
 import DeckManagementApiService from "@/services/deck-management/apiService";
 import { useUserStore } from "@/stores/user";
 import { useToast } from "primevue/usetoast";
@@ -118,10 +125,12 @@ const updates = reactive<{
   name?: string;
   description?: string;
   cards: { id: number; text: string }[];
-  newCards: GetCardResponse[];
+  addedCards: GetCardResponse[];
+  deletedCards: Set<number>;
 }>({
   cards: [],
-  newCards: [],
+  addedCards: [],
+  deletedCards: new Set<number>(),
 });
 
 const deck = computed<GetDeckResponse>(() => {
@@ -136,7 +145,7 @@ const deck = computed<GetDeckResponse>(() => {
   };
 });
 const cards = computed<GetCardResponse[]>(() => {
-  const cards = data.cards.concat(updates.newCards);
+  const cards = data.cards.concat(updates.addedCards);
   for (const update of updates.cards) {
     cards.find(x => x.id == update.id)!.text = update.text;
   }
@@ -147,7 +156,12 @@ const whiteCards = computed(() => cards.value.filter(x => x.cardType === CardTyp
 const blackCards = computed(() => cards.value.filter(x => x.cardType === CardType.Black));
 
 const isChanged = computed<boolean>(
-  () => Boolean(updates.name) || Boolean(updates.description) || updates.cards.length > 0 || updates.newCards.length > 0
+  () =>
+    Boolean(updates.name) ||
+    Boolean(updates.description) ||
+    updates.cards.length > 0 ||
+    updates.addedCards.length > 0 ||
+    updates.deletedCards.size > 0
 );
 
 const isEditNameDialogVisible = ref(false);
@@ -181,7 +195,7 @@ const hideEditDescriptionDialog = (save: boolean) => {
 };
 
 const addCard = (text: string, cardType: CardType) => {
-  updates.newCards.push({ id: newCardId--, text, cardType });
+  updates.addedCards.push({ id: newCardId--, text, cardType });
 };
 
 const updateCard = (id: number, text: string) => {
@@ -191,7 +205,7 @@ const updateCard = (id: number, text: string) => {
     return;
   }
 
-  card = updates.newCards.find(x => x.id == id);
+  card = updates.addedCards.find(x => x.id == id);
   if (card) {
     card.text = text;
     return;
@@ -200,22 +214,38 @@ const updateCard = (id: number, text: string) => {
   updates.cards.push({ id, text });
 };
 
+const deleteCard = (id: number) => {
+  const index = updates.addedCards.findIndex(x => x.id == id);
+  if (index > -1) {
+    updates.addedCards.splice(index, 1);
+    return;
+  }
+
+  updates.deletedCards.add(id);
+};
+
+const restoreCard = (id: number) => {
+  updates.deletedCards.delete(id);
+};
+
 const updateDeck = async () => {
   isUpdating.value = true;
 
   try {
-    if (updates.name || updates.description) {
-      await deckManagementApiService.updateDeck(id, updates.name, updates.description);
-    }
-    await Promise.all(updates.cards.map(x => deckManagementApiService.updateCard(x.id, x.text)));
-    await Promise.all(updates.newCards.map(x => deckManagementApiService.addCard(deck.value.id, x.text, x.cardType)));
+    await Promise.all([
+      deckManagementApiService.updateDeck(id, updates.name, updates.description),
+      ...updates.cards.map(x => deckManagementApiService.updateCard(x.id, x.text)),
+      ...updates.addedCards.map(x => deckManagementApiService.addCard(deck.value.id, x.text, x.cardType)),
+      ...Array.from(updates.deletedCards).map(x => deckManagementApiService.deleteCard(x)),
+    ]);
 
     await getData();
 
     delete updates.name;
     delete updates.description;
     updates.cards = [];
-    updates.newCards = [];
+    updates.addedCards = [];
+    updates.deletedCards.clear();
 
     toast.add({
       summary: "Success",
@@ -223,7 +253,6 @@ const updateDeck = async () => {
       severity: "success",
       life: 3000,
     });
-    toast.removeGroup("save-toast");
   } catch (error: unknown) {
     toast.add({
       summary: "An error has occurred",
@@ -245,6 +274,8 @@ watch(isChanged, () => {
       severity: "warn",
       closable: false,
     });
+  } else {
+    toast.removeGroup("save-toast");
   }
 });
 

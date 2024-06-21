@@ -15,7 +15,10 @@
       v-for="card in cards"
       :author-id="authorId"
       :card="card"
+      :deleted="deletedIds.has(card.id)"
       @update="(id, text) => updateCard(id, text)"
+      @delete="id => deleteCard(id)"
+      @restore="id => restoreCard(id)"
     />
   </div>
   <div v-else>No {{ type.toLocaleLowerCase() }} cards yet.</div>
@@ -50,11 +53,14 @@ const { type } = defineProps<{
   authorId: number;
   cards: GetCardResponse[];
   type: CardType;
+  deletedIds: Set<number>;
 }>();
 
 const emit = defineEmits<{
   (event: "add", text: string, type: CardType): void;
   (event: "update", id: number, text: string): void;
+  (event: "delete", id: number): void;
+  (event: "restore", id: number): void;
 }>();
 
 const userStore = useUserStore();
@@ -76,6 +82,14 @@ const hideAddCardDialog = (save: boolean) => {
 
 const updateCard = (id: number, text: string) => {
   emit("update", id, text);
+};
+
+const deleteCard = (id: number) => {
+  emit("delete", id);
+};
+
+const restoreCard = (id: number) => {
+  emit("restore", id);
 };
 </script>
 

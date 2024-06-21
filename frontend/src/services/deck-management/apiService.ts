@@ -95,6 +95,8 @@ export default class ApiService extends ApiServiceBase {
   }
 
   async updateDeck(deckId: number, nameUpdate?: string, descriptionUpdate?: string) {
+    if (!nameUpdate && !descriptionUpdate) return;
+
     const request: UpdateDeckRequest = {
       descriptionUpdate,
       nameUpdate,

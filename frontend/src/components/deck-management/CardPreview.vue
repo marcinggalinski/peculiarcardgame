@@ -1,15 +1,35 @@
 <template>
-  <div class="card-preview" :class="className">
-    <div class="card-preview-text">{{ card.text.replaceAll("_", "_____") }}</div>
-    <div v-if="card.cardType === CardType.Black" class="card-preview-picks">Pick {{ picks }}</div>
+  <div class="card-preview" :class="colorClass">
+    <div class="card-preview-content" :class="deletedClass">
+      <div class="card-preview-text">{{ card.text.replaceAll("_", "_____") }}</div>
+      <div v-if="card.cardType === CardType.Black" class="card-preview-picks">Pick {{ picks }}</div>
+    </div>
     <Button
-      v-if="userStore.id == authorId"
+      v-if="userStore.id == authorId && !deleted"
+      rounded
+      text
+      icon="pi pi-trash"
+      class="card-preview-delete-button"
+      :class="colorClass"
+      @click="deleteCard()"
+    />
+    <Button
+      v-if="userStore.id == authorId && !deleted"
       rounded
       text
       icon="pi pi-pencil"
       class="card-preview-edit-button"
-      :class="className"
+      :class="colorClass"
       @click="showEditTextDialog()"
+    />
+    <Button
+      v-if="userStore.id == authorId && deleted"
+      rounded
+      text
+      icon="pi pi-refresh"
+      class="card-preview-restore-button"
+      :class="colorClass"
+      @click="restoreCard()"
     />
 
     <Dialog
@@ -29,7 +49,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, toRefs } from "vue";
+import { computed, ref, toRefs } from "vue";
 
 import Button from "primevue/button";
 import Dialog from "primevue/dialog";
@@ -42,21 +62,33 @@ import { useUserStore } from "@/stores/user";
 const props = defineProps<{
   authorId: number;
   card: GetCardResponse;
+  deleted: boolean;
 }>();
 
-const { card } = toRefs(props);
+const { card, deleted } = toRefs(props);
 
 const emit = defineEmits<{
   (event: "update", id: number, text: string): void;
+  (event: "delete", id: number): void;
+  (event: "restore", id: number): void;
 }>();
 
 const userStore = useUserStore();
 
-const className = card.value.cardType === CardType.Black ? "black" : "white";
+const colorClass = card.value.cardType.toLocaleLowerCase();
+const deletedClass = computed(() => (deleted.value ? "blurred" : ""));
 const picks = card.value.cardType === CardType.Black ? card.value.text.split("_").length - 1 || 1 : 0;
 
 const isEditCardDialogVisible = ref(false);
 const tempText = ref(card.value.text);
+
+const deleteCard = () => {
+  emit("delete", card.value.id);
+};
+
+const restoreCard = () => {
+  emit("restore", card.value.id);
+};
 
 const showEditTextDialog = () => {
   tempText.value = card.value.text;
@@ -73,10 +105,6 @@ const hideEditTextDialog = (save: boolean) => {
 
 <style lang="stylus">
 .card-preview
-  display flex
-  flex-direction column
-  position relative
-
   flex 1 0 20%
   max-width 150px
   max-height 210px
@@ -87,26 +115,62 @@ const hideEditTextDialog = (save: boolean) => {
 
   margin 5px
   padding 15px
+  position relative
 
-  white-space: pre-wrap
+  .card-preview-content
+    width 100%
+    height 100%
+    display flex
+    flex-direction column
 
-  .card-preview-picks
-    margin-top auto
-    text-align right
+    white-space: pre-wrap
 
-  .card-preview-edit-button
+    transition 0.3s ease
+
+    .card-preview-content
+      height 100%
+
+    .card-preview-picks
+      margin-top auto
+      text-align right
+
+  .card-preview-delete-button
     position absolute
     top 0
     right 0
 
     background none
-    visibility hidden
+    transition 0.3s ease
+    opacity 0
+
+  .card-preview-edit-button
+    position absolute
+    top 30px
+    right 0
+
+    background none
+    transition 0.3s ease
+    opacity 0
+
+  .card-preview-restore-button
+    position absolute
+    top 0
+    right 0
+
+    background none
     transition 0.3s ease
     opacity 0
 
 .card-preview:hover
+  .card-preview-delete-button
+    transition 0.3s ease
+    opacity 1
+
   .card-preview-edit-button
-    visibility visible
+    transition 0.3s ease
+    opacity 1
+
+  .card-preview-restore-button
     transition 0.3s ease
     opacity 1
 
@@ -117,6 +181,10 @@ const hideEditTextDialog = (save: boolean) => {
 .white
   background white
   color black
+
+.blurred
+  transition 0.3s ease
+  filter blur(3px)
 
 #edit-card-dialog
   width 50%
