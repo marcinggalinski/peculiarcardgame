@@ -76,6 +76,7 @@
         <span class="p-toast-summary">{{ slotProps.message.summary }}</span>
         <div class="p-toast-detail">{{ slotProps.message.detail }}</div>
       </div>
+      <Button label="Discard" severity="secondary" @click="discardChanges()" />
       <Button label="Save" :loading="isUpdating" @click="updateDeck()" />
     </template>
   </Toast>
@@ -228,6 +229,14 @@ const restoreCard = (id: number) => {
   updates.deletedCards.delete(id);
 };
 
+const discardChanges = () => {
+  delete updates.name;
+  delete updates.description;
+  updates.cards = [];
+  updates.addedCards = [];
+  updates.deletedCards.clear();
+};
+
 const updateDeck = async () => {
   isUpdating.value = true;
 
@@ -313,6 +322,12 @@ await getData();
     width 100%
 
 #pending-changes-toast
+  width fit-content
+  min-width 25rem
+
+  .p-button
+    margin-left 12px
+
   i.p-toast-message-icon
     font-size 18px
 </style>
