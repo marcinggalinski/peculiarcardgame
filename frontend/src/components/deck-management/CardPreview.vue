@@ -12,7 +12,13 @@
       @click="showEditTextDialog()"
     />
 
-    <Dialog modal id="edit-card-dialog" v-model:visible="isEditCardDialogVisible" :closable="false">
+    <Dialog
+      modal
+      id="edit-card-dialog"
+      v-model:visible="isEditCardDialogVisible"
+      :closable="false"
+      header="Edit card text"
+    >
       <Textarea v-model="tempText" class="edit-input" />
       <template #footer>
         <Button class="float-left" severity="secondary" label="Cancel" @click="hideEditTextDialog(false)" />
@@ -23,7 +29,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, toRefs } from "vue";
 
 import Button from "primevue/button";
 import Dialog from "primevue/dialog";
@@ -33,10 +39,12 @@ import type { GetCardResponse } from "@/models/deck-management/api";
 import { CardType } from "@/models/deck-management/api";
 import { useUserStore } from "@/stores/user";
 
-const { card } = defineProps<{
+const props = defineProps<{
   authorId: number;
   card: GetCardResponse;
 }>();
+
+const { card } = toRefs(props);
 
 const emit = defineEmits<{
   (event: "update", id: number, text: string): void;
@@ -44,20 +52,20 @@ const emit = defineEmits<{
 
 const userStore = useUserStore();
 
-const className = card.cardType === CardType.Black ? "black" : "white";
-const picks = card.cardType === CardType.Black ? card.text.split("_").length - 1 || 1 : 0;
+const className = card.value.cardType === CardType.Black ? "black" : "white";
+const picks = card.value.cardType === CardType.Black ? card.value.text.split("_").length - 1 || 1 : 0;
 
 const isEditCardDialogVisible = ref(false);
-const tempText = ref(card.text);
+const tempText = ref(card.value.text);
 
 const showEditTextDialog = () => {
-  tempText.value = card.text;
+  tempText.value = card.value.text;
   isEditCardDialogVisible.value = true;
 };
 
 const hideEditTextDialog = (save: boolean) => {
   if (save) {
-    emit("update", card.id, tempText.value.trim());
+    emit("update", card.value.id, tempText.value.trim());
   }
   isEditCardDialogVisible.value = false;
 };
@@ -115,5 +123,4 @@ const hideEditTextDialog = (save: boolean) => {
 
   .edit-input
     width 100%
-    margin-bottom 15px
 </style>

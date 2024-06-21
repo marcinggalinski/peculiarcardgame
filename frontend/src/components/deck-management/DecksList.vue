@@ -23,4 +23,6 @@ const decks = (await deckManagementApiService.getDecks()) ?? [];
 #decks-list
   display flex
   flex-wrap wrap
+  padding 10px
+  align-items flex-start
 </style>
