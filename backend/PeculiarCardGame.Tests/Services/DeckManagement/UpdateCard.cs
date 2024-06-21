@@ -86,7 +86,7 @@ namespace PeculiarCardGame.UnitTests.Services.DeckManagement
             _dbContext.SetupTest(_card);
             var service = new Service(_dbContext, _emptyRequestContext);
 
-            var action = () => service.UpdateCard(_card.Id, NewText, NewCardType);
+            var action = () => service.UpdateCard(_card.Id, NewText);
 
             action.Should().Throw<InvalidOperationException>();
         }
@@ -100,7 +100,7 @@ namespace PeculiarCardGame.UnitTests.Services.DeckManagement
 
             try
             {
-                service.UpdateCard(_card.Id, NewText, NewCardType);
+                service.UpdateCard(_card.Id, NewText);
             }
             catch { }
             var card = _dbContext.Cards.Single(x => x.Id == _card.Id);
@@ -117,7 +117,7 @@ namespace PeculiarCardGame.UnitTests.Services.DeckManagement
             _dbContext.SetupTest(_deck);
             var service = new Service(_dbContext, _authorFilledRequestContext);
 
-            var card = service.UpdateCard(_card.Id, NewText, NewCardType);
+            var card = service.UpdateCard(_card.Id, NewText);
 
             card.Should().BeNull();
         }
@@ -129,7 +129,7 @@ namespace PeculiarCardGame.UnitTests.Services.DeckManagement
             _dbContext.SetupTest(_card);
             var service = new Service(_dbContext, _authorFilledRequestContext);
 
-            service.UpdateCard(_anotherCard.Id, NewText, NewCardType);
+            service.UpdateCard(_anotherCard.Id, NewText);
             var card = _dbContext.Cards.Single(x => x.Id == _card.Id);
 
             card.Id.Should().Be(_card.Id);
@@ -145,7 +145,7 @@ namespace PeculiarCardGame.UnitTests.Services.DeckManagement
             _dbContext.SetupTest(_card);
             var service = new Service(_dbContext, _notAuthorFilledRequestContext);
 
-            var card = service.UpdateCard(_card.Id, NewText, NewCardType);
+            var card = service.UpdateCard(_card.Id, NewText);
 
             card.Should().BeNull();
         }
@@ -157,7 +157,7 @@ namespace PeculiarCardGame.UnitTests.Services.DeckManagement
             _dbContext.SetupTest(_card);
             var service = new Service(_dbContext, _notAuthorFilledRequestContext);
 
-            service.UpdateCard(_card.Id, NewText, NewCardType);
+            service.UpdateCard(_card.Id, NewText);
             var card = _dbContext.Cards.Single(x => x.Id == _card.Id);
 
             card.Id.Should().Be(_card.Id);
@@ -166,40 +166,34 @@ namespace PeculiarCardGame.UnitTests.Services.DeckManagement
             card.CardType.Should().Be(_card.CardType);
         }
 
-        [Theory]
-        [InlineData(NewText, null)]
-        [InlineData(null, NewCardType)]
-        public void ExistingCardId_ShouldReturnUpdatedCard(string? textUpdate, CardType? cardTypeUpdate)
+        [Fact]
+        public void ExistingCardId_ShouldReturnUpdatedCard()
         {
             _dbContext.SetupTest(_deck);
             _dbContext.SetupTest(_card);
             var service = new Service(_dbContext, _authorFilledRequestContext);
 
-            var card = service.UpdateCard(_card.Id, textUpdate, cardTypeUpdate);
+            var card = service.UpdateCard(_card.Id, NewText);
 
             card.Should().NotBeNull();
             card!.Id.Should().Be(_card.Id);
             card!.DeckId.Should().Be(_card.DeckId);
-            card!.Text.Should().Be(textUpdate ?? _card.Text);
-            card!.CardType.Should().Be(cardTypeUpdate ?? _card.CardType);
+            card!.Text.Should().Be(NewText ?? _card.Text);
         }
 
-        [Theory]
-        [InlineData(NewText, null)]
-        [InlineData(null, NewCardType)]
-        public void ExistingCardId_ShouldUpdateCard(string? textUpdate, CardType? cardTypeUpdate)
+        [Fact]
+        public void ExistingCardId_ShouldUpdateCard()
         {
             _dbContext.SetupTest(_deck);
             _dbContext.SetupTest(_card);
             var service = new Service(_dbContext, _authorFilledRequestContext);
 
-            service.UpdateCard(_card.Id, textUpdate, cardTypeUpdate);
+            service.UpdateCard(_card.Id, NewText);
             var card = _dbContext.Cards.Single(x => x.Id == _card.Id);
 
             card.Id.Should().Be(_card.Id);
             card.DeckId.Should().Be(_card.DeckId);
-            card.Text.Should().Be(textUpdate ?? _card.Text);
-            card.CardType.Should().Be(cardTypeUpdate ?? _card.CardType);
+            card.Text.Should().Be(NewText ?? _card.Text);
         }
 
         [Fact]
@@ -211,7 +205,7 @@ namespace PeculiarCardGame.UnitTests.Services.DeckManagement
             var cardCountBefore = _dbContext.Cards.Count();
             var service = new Service(_dbContext, _authorFilledRequestContext);
 
-            service.UpdateCard(_card.Id, NewText, NewCardType);
+            service.UpdateCard(_card.Id, NewText);
 
             _dbContext.Cards.Should().HaveCount(cardCountBefore);
         }

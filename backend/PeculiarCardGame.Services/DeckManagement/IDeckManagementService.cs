@@ -21,7 +21,7 @@ namespace PeculiarCardGame.Services.DeckManagement
         List<Card> GetAllCards(int deckId);
         List<Card>? SearchCards(int deckId, string? query);
         /// <remarks>Requires request context to be set.</remarks>
-        Card? UpdateCard(int id, string? textUpdate, CardType? typeUpdate);
+        Card? UpdateCard(int id, string? textUpdate);
         /// <remarks>Requires request context to be set.</remarks>
         bool DeleteCard(int id);
     }

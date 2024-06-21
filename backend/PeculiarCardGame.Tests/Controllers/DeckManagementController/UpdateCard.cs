@@ -68,7 +68,7 @@ namespace PeculiarCardGame.UnitTests.Controllers.DeckManagementController
 
             _deckManagementService = Substitute.For<IDeckManagementService>();
             _deckManagementService.GetCard(_existingCard.Id).Returns(_existingCard);
-            _deckManagementService.UpdateCard(_existingCard.Id, TextUpdate, CardTypeUpdate).Returns(_updatedCard);
+            _deckManagementService.UpdateCard(_existingCard.Id, TextUpdate).Returns(_updatedCard);
 
             var authenticationService = Substitute.For<IAuthenticationService>();
             authenticationService.Authenticate(Arg.Any<string>()).Returns(user);
@@ -88,7 +88,6 @@ namespace PeculiarCardGame.UnitTests.Controllers.DeckManagementController
                 RequestUri = new Uri(_client.BaseAddress!, $"/api/cards/{_existingCard.Id}"),
                 Content = JsonContent.Create(new UpdateCardRequest
                 {
-                    CardTypeUpdate = _updatedCard.CardType,
                     TextUpdate = _updatedCard.Text
                 })
             });
@@ -105,7 +104,6 @@ namespace PeculiarCardGame.UnitTests.Controllers.DeckManagementController
                 RequestUri = new Uri(_client.BaseAddress!, $"/api/cards/{_notExistingCard.Id}"),
                 Content = JsonContent.Create(new UpdateCardRequest
                 {
-                    CardTypeUpdate = _updatedCard.CardType,
                     TextUpdate = _updatedCard.Text
                 }),
                 Headers =
@@ -126,7 +124,6 @@ namespace PeculiarCardGame.UnitTests.Controllers.DeckManagementController
                 RequestUri = new Uri(_client.BaseAddress!, $"/api/cards/{_existingCard.Id}"),
                 Content = JsonContent.Create(new UpdateCardRequest
                 {
-                    CardTypeUpdate = _updatedCard.CardType,
                     TextUpdate = _updatedCard.Text
                 }),
                 Headers =
@@ -150,7 +147,6 @@ namespace PeculiarCardGame.UnitTests.Controllers.DeckManagementController
                 RequestUri = new Uri(_client.BaseAddress!, $"/api/cards/{_existingCard.Id}"),
                 Content = JsonContent.Create(new UpdateCardRequest
                 {
-                    CardTypeUpdate = _updatedCard.CardType,
                     TextUpdate = _updatedCard.Text
                 }),
                 Headers =
@@ -159,7 +155,7 @@ namespace PeculiarCardGame.UnitTests.Controllers.DeckManagementController
                 }
             });
 
-            _deckManagementService.Received().UpdateCard(_existingCard.Id, _updatedCard.Text, _updatedCard.CardType);
+            _deckManagementService.Received().UpdateCard(_existingCard.Id, _updatedCard.Text);
         }
     }
 }

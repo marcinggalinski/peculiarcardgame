@@ -23,14 +23,26 @@ namespace PeculiarCardGame.UnitTests.Controllers.DeckManagementController
         {
             const int ExistingDeckId = 1;
             const int NotExistingDeckId = 2;
-            const int AuthorId = 1;
+            const int UserId = 1;
             const string Name = "test";
             const string Description = "test";
+            const string Username = "test";
+            const string DisplayedName = "test";
+            const string PasswordHash = "test";
+
+            var user = new User
+            {
+                Id = UserId,
+                Username = Username,
+                DisplayedName = DisplayedName,
+                PasswordHash = PasswordHash
+            };
 
             _existingDeck = new Deck
             {
                 Id = ExistingDeckId,
-                AuthorId = AuthorId,
+                AuthorId = user.Id,
+                Author = user,
                 Description = Description,
                 Name = Name
             };

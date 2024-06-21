@@ -146,7 +146,7 @@ namespace PeculiarCardGame.WebApi.Controllers
         [SwaggerResponse(404, "Card not found")]
         public ActionResult<GetCardResponse> UpdateCard(int id, UpdateCardRequest request)
         {
-            var card = _deckManagementService.UpdateCard(id, request.TextUpdate, request.CardTypeUpdate);
+            var card = _deckManagementService.UpdateCard(id, request.TextUpdate);
             if (card is null)
                 return NotFound();
             return Ok(GetCardResponse.FromCard(card));

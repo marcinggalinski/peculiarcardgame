@@ -29,20 +29,21 @@ namespace PeculiarCardGame.UnitTests.Controllers.DeckManagementController
             const string DisplayedName = "test";
             const string PasswordHash = "test";
 
-            _deck = new Deck
-            {
-                Id = DeckId,
-                AuthorId = UserId,
-                Description = Description,
-                Name = Name
-            };
-
             var user = new User
             {
                 Id = UserId,
                 Username = Username,
                 DisplayedName = DisplayedName,
                 PasswordHash = PasswordHash
+            };
+
+            _deck = new Deck
+            {
+                Id = DeckId,
+                AuthorId = user.Id,
+                Author = user,
+                Description = Description,
+                Name = Name
             };
 
             _deckManagementService = Substitute.For<IDeckManagementService>();

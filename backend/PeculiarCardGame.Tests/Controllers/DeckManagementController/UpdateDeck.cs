@@ -34,34 +34,37 @@ namespace PeculiarCardGame.UnitTests.Controllers.DeckManagementController
             const string DisplayedName = "test";
             const string PasswordHash = "test";
 
-            _existingDeck = new Deck()
-            {
-                Id = ExistingDeckId,
-                AuthorId = UserId,
-                Name = Name,
-                Description = Description
-            };
-            _notExistingDeck = new Deck
-            {
-                Id = NotExistingDeckId,
-                AuthorId = UserId,
-                Name = Name,
-                Description = Description
-            };
-            _updatedDeck = new Deck()
-            {
-                Id = ExistingDeckId,
-                AuthorId = UserId,
-                Name = UpdatedName,
-                Description = UpdatedDescription
-            };
-
             var user = new User
             {
                 Id = UserId,
                 Username = Username,
                 DisplayedName = DisplayedName,
                 PasswordHash = PasswordHash
+            };
+
+            _existingDeck = new Deck()
+            {
+                Id = ExistingDeckId,
+                AuthorId = user.Id,
+                Author = user,
+                Name = Name,
+                Description = Description
+            };
+            _notExistingDeck = new Deck
+            {
+                Id = NotExistingDeckId,
+                AuthorId = user.Id,
+                Author = user,
+                Name = Name,
+                Description = Description
+            };
+            _updatedDeck = new Deck()
+            {
+                Id = ExistingDeckId,
+                AuthorId = user.Id,
+                Author = user,
+                Name = UpdatedName,
+                Description = UpdatedDescription
             };
 
             _deckManagementService = Substitute.For<IDeckManagementService>();

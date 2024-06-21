@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using Microsoft.AspNetCore.Identity;
 using NSubstitute;
 using PeculiarCardGame.Data.Models;
 using PeculiarCardGame.Services.Authentication;
@@ -25,23 +26,36 @@ namespace PeculiarCardGame.UnitTests.Controllers.DeckManagementController
         {
             const int DeckId = 1;
             const int AnotherDeckId = 2;
-            const int AuthorId = 1;
+            const int UserId = 1;
             const string Name = "test";
             const string Description = "test";
+            const string Username = "test";
+            const string DisplayedName = "test";
+            const string PasswordHash = "test";
+
+            var user = new User
+            {
+                Id = UserId,
+                Username = Username,
+                DisplayedName = DisplayedName,
+                PasswordHash = PasswordHash
+            };
 
             var decks = new List<Deck>
             {
                 new Deck
                 {
                     Id = DeckId,
-                    AuthorId = AuthorId,
+                    AuthorId = user.Id,
+                    Author = user,
                     Description = Description,
                     Name = Name
                 },
                 new Deck
                 {
                     Id = AnotherDeckId,
-                    AuthorId = AuthorId,
+                    AuthorId = user.Id,
+                    Author = user,
                     Description = Description,
                     Name = Name
                 }

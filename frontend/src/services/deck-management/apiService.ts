@@ -83,9 +83,8 @@ export default class ApiService extends ApiServiceBase {
     return response.data;
   }
 
-  async updateCard(cardId: number, cardTypeUpdate?: CardType, textUpdate?: string) {
+  async updateCard(cardId: number, textUpdate?: string) {
     const request: UpdateCardRequest = {
-      cardTypeUpdate,
       textUpdate,
     };
     const response = await this.instance.patch<GetCardResponse>(`cards/${cardId}`, request);
