@@ -100,7 +100,7 @@ export default class ApiService extends ApiServiceBase {
       descriptionUpdate,
       nameUpdate,
     };
-    const response = await this.instance.patch<GetCardResponse>(`decks/${deckId}`, request);
+    const response = await this.instance.patch<GetDeckResponse>(`decks/${deckId}`, request);
     if (response.status !== 200) {
       throw new ApiError(response.status, response.statusText);
     }

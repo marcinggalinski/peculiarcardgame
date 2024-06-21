@@ -8,4 +8,10 @@ export default abstract class ApiServiceBase {
       baseURL: this.baseUrl,
     });
   }
+
+  setBearerToken(token: string) {
+    this.instance.defaults.headers.post.Authorization = `Bearer ${token}`;
+    this.instance.defaults.headers.patch.Authorization = `Bearer ${token}`;
+    this.instance.defaults.headers.delete.Authorization = `Bearer ${token}`;
+  }
 }

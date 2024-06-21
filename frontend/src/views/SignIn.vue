@@ -8,7 +8,7 @@
 </template>
 
 <script setup lang="ts">
-import { inject } from "vue";
+import { inject, ref } from "vue";
 
 import { AxiosError } from "axios";
 import { jwtDecode } from "jwt-decode";
@@ -16,7 +16,8 @@ import Button from "primevue/button";
 import InputText from "primevue/inputtext";
 import { useToast } from "primevue/usetoast";
 
-import { UsersApiServiceKey } from "@/keys";
+import { DeckManagementApiServiceKey, UsersApiServiceKey } from "@/keys";
+import DeckManagementApiService from "@/services/deck-management/apiService";
 import UsersApiService from "@/services/users/apiService";
 import { useUserStore } from "@/stores/user";
 import { useRouter } from "vue-router";
@@ -28,6 +29,11 @@ const { returnUrl } = defineProps({
   },
 });
 
+const deckManagementApiService = inject<DeckManagementApiService>(DeckManagementApiServiceKey);
+if (!deckManagementApiService) {
+  throw new Error("DeckManagementApiService not initialized");
+}
+
 const usersApiService = inject<UsersApiService>(UsersApiServiceKey);
 if (!usersApiService) {
   throw new Error("UsersApiService not initialized");
@@ -37,12 +43,12 @@ const router = useRouter();
 const toast = useToast();
 const userStore = useUserStore();
 
-let username = "";
-let password = "";
+const username = ref("");
+const password = ref("");
 
 const signIn = async () => {
   try {
-    const token = (await usersApiService.signIn(username, password)).token;
+    const token = (await usersApiService.signIn(username.value, password.value)).token;
     const decodedToken = jwtDecode<{ id: string; name: string; nickname: string }>(token);
 
     userStore.signIn(
@@ -53,6 +59,9 @@ const signIn = async () => {
       },
       token
     );
+
+    deckManagementApiService.setBearerToken(token);
+    usersApiService.setBearerToken(token);
 
     router.push(returnUrl);
     toast.add({
