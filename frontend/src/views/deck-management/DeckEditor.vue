@@ -18,8 +18,18 @@
     />
   </div>
 
-  <CardsList :authorId="deck.authorId" :type="CardType.Black" :cards="blackCards" />
-  <CardsList :authorId="deck.authorId" :type="CardType.White" :cards="whiteCards" />
+  <CardsList
+    :authorId="deck.authorId"
+    :type="CardType.Black"
+    :cards="blackCards"
+    @update="(id, text) => markCardUpdated(id, text)"
+  />
+  <CardsList
+    :authorId="deck.authorId"
+    :type="CardType.White"
+    :cards="whiteCards"
+    @update="(id, text) => markCardUpdated(id, text)"
+  />
 
   <Dialog modal class="dialog" v-model:visible="isEditNameDialogVisible" header="Edit deck name" :closable="false">
     <InputText v-model="tempDeckName" class="edit-input" />
@@ -50,13 +60,13 @@
         <span class="p-toast-summary">{{ slotProps.message.summary }}</span>
         <div class="p-toast-detail">{{ slotProps.message.detail }}</div>
       </div>
-      <Button label="Save" @click="updateDeck()" />
+      <Button label="Save" :loading="isUpdating" @click="updateDeck()" />
     </template>
   </Toast>
 </template>
 
 <script setup lang="ts">
-import { computed, inject, reactive, ref, watch } from "vue";
+import { computed, inject, reactive, ref, watch, watchEffect } from "vue";
 
 import Button from "primevue/button";
 import Dialog from "primevue/dialog";
@@ -89,12 +99,23 @@ const cards = reactive(await deckManagementApiService.getCards(id));
 const whiteCards = computed(() => cards.filter(x => x.cardType === CardType.White));
 const blackCards = computed(() => cards.filter(x => x.cardType === CardType.Black));
 
-const isChanged = ref(false);
-
 const isEditNameDialogVisible = ref(false);
 const isEditDescriptionDialogVisible = ref(false);
 const tempDeckName = ref(deck.name);
 const tempDeckDescription = ref(deck.description);
+
+const isUpdated = reactive<{
+  name: boolean;
+  description: boolean;
+  cards: number[];
+}>({
+  name: false,
+  description: false,
+  cards: [],
+});
+
+const isChanged = computed(() => isUpdated.name || isUpdated.description || isUpdated.cards.length > 0);
+const isUpdating = ref(false);
 
 const showEditNameDialog = () => {
   tempDeckName.value = deck.name;
@@ -104,7 +125,7 @@ const showEditNameDialog = () => {
 const hideEditNameDialog = (save: boolean) => {
   if (save) {
     deck.name = tempDeckName.value.trim();
-    isChanged.value = true;
+    isUpdated.name = true;
   }
   isEditNameDialogVisible.value = false;
 };
@@ -117,20 +138,45 @@ const showEditDescriptionDialog = () => {
 const hideEditDescriptionDialog = (save: boolean) => {
   if (save) {
     deck.description = tempDeckDescription.value.trim();
-    isChanged.value = true;
+    isUpdated.description = true;
   }
   isEditDescriptionDialogVisible.value = false;
 };
 
+const markCardUpdated = (id: number, text: string) => {
+  cards.find(x => x.id == id)!.text = text;
+  isUpdated.cards.push(id);
+};
+
 const updateDeck = async () => {
+  isUpdating.value = true;
+
   try {
-    await deckManagementApiService.updateDeck(id, deck.description, deck.name);
+    const nameUpdate = isUpdated.name ? deck.name : undefined;
+    const descriptionUpdate = isUpdated.description ? deck.description : undefined;
+
+    if (nameUpdate || descriptionUpdate) {
+      await deckManagementApiService.updateDeck(id, descriptionUpdate, nameUpdate);
+      isUpdated.name = false;
+      isUpdated.description = false;
+    }
+
+    if (isUpdated.cards.length > 0) {
+      await Promise.all(
+        isUpdated.cards
+          .map(x => cards.find(y => y.id == x)!)
+          .map(x => deckManagementApiService.updateCard(x.id, x.text))
+      );
+      isUpdated.cards = [];
+    }
+
     toast.add({
       summary: "Success",
       detail: "Deck updated",
       severity: "success",
       life: 3000,
     });
+    toast.removeGroup("save-toast");
   } catch (error: unknown) {
     toast.add({
       summary: "An error has occurred",
@@ -139,17 +185,20 @@ const updateDeck = async () => {
       life: 3000,
     });
   }
-  toast.removeGroup("save-toast");
+
+  isUpdating.value = false;
 };
 
 watch(isChanged, () => {
-  toast.add({
-    summary: "Pending changes",
-    detail: "You have unsaved changes.",
-    group: "save-toast",
-    severity: "warn",
-    closable: false,
-  });
+  if (isChanged.value) {
+    toast.add({
+      summary: "Pending changes",
+      detail: "You have unsaved changes.",
+      group: "save-toast",
+      severity: "warn",
+      closable: false,
+    });
+  }
 });
 </script>
 
@@ -172,9 +221,9 @@ watch(isChanged, () => {
 .dialog
   width 50%
 
-.edit-input
-  width 100%
-  margin-bottom 15px
+  .edit-input
+    width 100%
+    margin-bottom 15px
 
 #pending-changes-toast
   i.p-toast-message-icon

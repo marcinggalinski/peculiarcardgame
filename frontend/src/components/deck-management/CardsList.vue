@@ -4,7 +4,12 @@
     <Button v-if="userStore.id == authorId" icon="pi pi-plus" rounded text @click="addCard()" />
   </h2>
   <div v-if="cards.length" class="cards-list">
-    <CardPreview v-for="card in cards" :card="card" />
+    <CardPreview
+      v-for="card in cards"
+      :author-id="authorId"
+      :card="card"
+      @update="(id, text) => updateCard(id, text)"
+    />
   </div>
   <div v-else>No {{ type.toLocaleLowerCase() }} cards yet.</div>
 </template>
@@ -22,10 +27,18 @@ defineProps<{
   type: CardType;
 }>();
 
+const emit = defineEmits<{
+  (event: "update", id: number, text: string): void;
+}>();
+
 const userStore = useUserStore();
 
 const addCard = () => {
   alert("adding card");
+};
+
+const updateCard = (id: number, text: string) => {
+  emit("update", id, text);
 };
 </script>
 
