@@ -1,9 +1,7 @@
 <template>
   <RouterLink :to="{ name: 'deck-editor', params: { id: deck.id } }" v-if="deck" class="deck-preview clear">
-    <!-- <div v-if="deck" class="deck-preview"> -->
     <div class="deck-preview-header">
       <span class="deck-preview-name">{{ deck.name }}</span>
-      <!-- <br> -->
       <small class="deck-preview-author">by {{ deck.author }}</small>
     </div>
     <div class="deck-preview-content">
@@ -15,7 +13,6 @@
         {{ deck.whiteCardCount }} white)
       </div>
     </div>
-    <!-- </div> -->
   </RouterLink>
 </template>
 
@@ -70,6 +67,7 @@ defineProps<{
 
     .deck-preview-description
       font-style italic
+      white-space pre-wrap
 
   .deck-preview-footer
     border-radius 0 0 15px 15px
