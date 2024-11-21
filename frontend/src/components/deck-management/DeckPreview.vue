@@ -26,10 +26,10 @@ defineProps<{
 
 <style scoped lang="stylus">
 .deck-preview
-  flex 1 0 20%
   max-width 250px
   max-height 350px
-  aspect-ratio 5 / 7
+  width 250px
+  height 350px
 
   display flex
   flex-direction column
@@ -61,13 +61,22 @@ defineProps<{
 
   .deck-preview-content
     height 100%
+    max-height 237px
 
     margin -1px
     padding 15px
 
     .deck-preview-description
-      font-style italic
+      display -webkit-box
+      -webkit-box-orient vertical
+      -webkit-line-clamp 10
+
       white-space pre-wrap
+      overflow hidden
+      text-overflow ellipsis
+
+      max-height 100%
+      font-style italic
 
   .deck-preview-footer
     border-radius 0 0 15px 15px
