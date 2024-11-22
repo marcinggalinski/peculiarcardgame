@@ -19,3 +19,6 @@ obj/
 .docker/
 .secrets/
 .env
+
+.idea/
+

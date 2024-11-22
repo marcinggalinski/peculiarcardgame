@@ -48,8 +48,6 @@ namespace PeculiarCardGame.WebApi.Infrastructure.Swagger
                     }
                 }
             };
-
-            return;
         }
     }
 }

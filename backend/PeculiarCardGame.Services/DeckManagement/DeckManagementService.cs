@@ -1,4 +1,5 @@
-﻿using PeculiarCardGame.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using PeculiarCardGame.Data;
 using PeculiarCardGame.Data.Models;
 using PeculiarCardGame.Shared;
 
@@ -128,11 +129,11 @@ namespace PeculiarCardGame.Services.DeckManagement
 
         public List<Card> GetAllCards(int deckId)
         {
-            var deck = _dbContext.Decks.SingleOrDefault(x => x.Id == deckId);
+            var deck = _dbContext.Decks.Include(deck => deck.Cards).SingleOrDefault(x => x.Id == deckId);
             if (deck is null)
                 return new List<Card>();
 
-            var cards = deck.Cards!.ToList();
+            var cards = deck.Cards.ToList();
             return cards;
         }
 
@@ -146,24 +147,27 @@ namespace PeculiarCardGame.Services.DeckManagement
         {
             query ??= string.Empty;
 
-            var deck = _dbContext.Decks.SingleOrDefault(x => x.Id == deckId);
+            var deck = _dbContext.Decks.Include(deck => deck.Cards).SingleOrDefault(x => x.Id == deckId);
             if (deck is null)
                 return null;
 
-            var cards = deck.Cards!.Where(x => x.Text.Contains(query)).ToList();
+            var cards = deck.Cards.Where(x => x.Text.Contains(query)).ToList();
             return cards;
         }
 
         public Card? UpdateCard(int id, string textUpdate)
         {
+            if (string.IsNullOrWhiteSpace(textUpdate))
+                throw new ArgumentNullException(nameof(textUpdate));
+            
             if (_requestContext.CallingUser is null)
                 throw new InvalidOperationException($"{nameof(UpdateCard)} can only be called by an authenticated user.");
 
-            var card = _dbContext.Cards.SingleOrDefault(x => x.Id == id && x.Deck!.AuthorId == _requestContext.CallingUser.Id);
+            var card = _dbContext.Cards.SingleOrDefault(x => x.Id == id && x.Deck.AuthorId == _requestContext.CallingUser.Id);
             if (card is null)
                 return null;
 
-            textUpdate = textUpdate?.Trim();
+            textUpdate = textUpdate.Trim();
 
             if (!string.IsNullOrEmpty(textUpdate))
                 card.Text = textUpdate;
@@ -179,7 +183,7 @@ namespace PeculiarCardGame.Services.DeckManagement
             if (_requestContext.CallingUser is null)
                 throw new InvalidOperationException($"{nameof(DeleteCard)} can only be called by an authenticated user.");
 
-            var card = _dbContext.Cards.SingleOrDefault(x => x.Id == id && x.Deck!.AuthorId == _requestContext.CallingUser.Id);
+            var card = _dbContext.Cards.SingleOrDefault(x => x.Id == id && x.Deck.AuthorId == _requestContext.CallingUser.Id);
             if (card is null)
                 return false;
 

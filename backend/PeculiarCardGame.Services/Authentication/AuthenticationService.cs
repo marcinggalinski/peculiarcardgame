@@ -12,7 +12,7 @@ namespace PeculiarCardGame.Services.Authentication
 {
     public class AuthenticationService : IAuthenticationService
     {
-        private readonly TimeSpan TokenLifetime = TimeSpan.FromHours(1);
+        private readonly TimeSpan _tokenLifetime = TimeSpan.FromHours(1);
 
         private readonly BearerTokenAuthenticationSchemeOptions _jwtOptions;
         private readonly PeculiarCardGameDbContext _dbContext;
@@ -100,7 +100,7 @@ namespace PeculiarCardGame.Services.Authentication
                 Issuer = _jwtOptions.ClaimsIssuer,
                 Audience = audience,
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.Add(TokenLifetime),
+                Expires = DateTime.UtcNow.Add(_tokenLifetime),
                 SigningCredentials = credentials
             };
             var tokenHandler = new JwtSecurityTokenHandler();

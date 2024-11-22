@@ -65,7 +65,7 @@ namespace PeculiarCardGame.WebApi.Controllers
         }
 
         [HttpPatch("decks/{id}")]
-        [SwaggerOperation("Updates specified deck.", "Requires valid bearer token authentication data to be sent in 'Authorization' header. Only updates basic information about the deck, to add, delete or modify cards the deck consists of use other endpoints. Doesn't allow modyfying other users' decks. Deck name and description are trimmed of any leading or trailing whitespaces.")]
+        [SwaggerOperation("Updates specified deck.", "Requires valid bearer token authentication data to be sent in 'Authorization' header. Only updates basic information about the deck, to add, delete or modify cards the deck consists of use other endpoints. Doesn't allow modifying other users' decks. Deck name and description are trimmed of any leading or trailing whitespaces.")]
         [SwaggerResponse(200, "Deck updated", typeof(GetDeckResponse))]
         [SwaggerResponse(401, "Invalid authentication data", typeof(string))]
         [SwaggerResponse(404, "Deck not found")]
@@ -140,7 +140,7 @@ namespace PeculiarCardGame.WebApi.Controllers
         }
 
         [HttpPatch("cards/{id}")]
-        [SwaggerOperation("Updates specified card.", "Requires valid bearer token authentication data to be sent in 'Authorization' header. Doesn't allow modyfying cards from other users' decks. Card text is trimmed of any leading or trailing whitespaces.")]
+        [SwaggerOperation("Updates specified card.", "Requires valid bearer token authentication data to be sent in 'Authorization' header. Doesn't allow modifying cards from other users' decks. Card text is trimmed of any leading or trailing whitespaces.")]
         [SwaggerResponse(200, "Card updated", typeof(GetDeckResponse))]
         [SwaggerResponse(401, "Invalid authentication data", typeof(string))]
         [SwaggerResponse(404, "Card not found")]

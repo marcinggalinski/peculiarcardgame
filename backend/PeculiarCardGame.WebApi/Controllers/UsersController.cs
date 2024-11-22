@@ -27,7 +27,7 @@ namespace PeculiarCardGame.WebApi.Controllers
         [SwaggerOperation("Signs user up.", "Requires no authentication data to be sent. Username for each user must be unique. If displayed name is null, username will be used. Username and displayed name are trimmed of any leading or trailing whitespace characters.")]
         [SwaggerResponse(201, Description = "User created", Type = typeof(GetUserResponse))]
         [SwaggerResponse(409, "Username already in use", typeof(string))]
-        [SwaggerResponse(422, "Enpoint invoked with authentication data", typeof(string))]
+        [SwaggerResponse(422, "Endpoint invoked with authentication data", typeof(string))]
         [SwaggerResponse(422, "Username or password null, empty or consisting of only whitespace characters")]
         public ActionResult<GetUserResponse> AddUser(AddUserRequest request)
         {
@@ -61,7 +61,7 @@ namespace PeculiarCardGame.WebApi.Controllers
 
         [HttpPatch("{id}")]
         [Authorize(AuthenticationSchemes = BearerTokenAuthenticationHandler.SchemeName)]
-        [SwaggerOperation("Updates specified used.", "Requires valid bearer token authentication data to be sent in 'Authorization' header. Doesn't allow modyfying other users. Displayed name is trimmed of any leading or trailing whitespace characters.")]
+        [SwaggerOperation("Updates specified used.", "Requires valid bearer token authentication data to be sent in 'Authorization' header. Doesn't allow modifying other users. Displayed name is trimmed of any leading or trailing whitespace characters.")]
         [SwaggerResponse(200, "User updated", typeof(GetUserResponse))]
         [SwaggerResponse(401, "Invalid authentication data", typeof(string))]
         [SwaggerResponse(404, "User not found")]
