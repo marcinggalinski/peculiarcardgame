@@ -1,4 +1,6 @@
-﻿using FluentAssertions;
+﻿using System.Net;
+using System.Net.Http.Json;
+using FluentAssertions;
 using NSubstitute;
 using PeculiarCardGame.Data.Models;
 using PeculiarCardGame.Services.Authentication;
@@ -6,10 +8,8 @@ using PeculiarCardGame.Services.DeckManagement;
 using PeculiarCardGame.Services.Users;
 using PeculiarCardGame.Shared;
 using PeculiarCardGame.WebApi.Models.Responses;
-using System.Net;
-using System.Net.Http.Json;
 
-namespace PeculiarCardGame.UnitTests.Controllers.DeckManagementController
+namespace PeculiarCardGame.Tests.Controllers.DeckManagementController
 {
     public class GetCards
     {
@@ -34,9 +34,6 @@ namespace PeculiarCardGame.UnitTests.Controllers.DeckManagementController
             const string Name = "test";
             const string Description = "test";
             const string Text = "test";
-            const string Username = "test";
-            const string DisplayedName = "test";
-            const string PasswordHash = "test";
             const CardType CardType = CardType.White;
 
             _existingDeck = new Deck
@@ -72,14 +69,6 @@ namespace PeculiarCardGame.UnitTests.Controllers.DeckManagementController
                 }
             };
             _cards = cards;
-
-            var user = new User
-            {
-                Id = UserId,
-                Username = Username,
-                DisplayedName = DisplayedName,
-                PasswordHash = PasswordHash
-            };
 
             _deckManagementService = Substitute.For<IDeckManagementService>();
             _deckManagementService.GetDeck(_existingDeck.Id).Returns(_existingDeck);

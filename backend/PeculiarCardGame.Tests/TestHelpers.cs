@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PeculiarCardGame.Data;
 
-namespace PeculiarCardGame.UnitTests
+namespace PeculiarCardGame.Tests
 {
     internal static class TestHelpers
     {

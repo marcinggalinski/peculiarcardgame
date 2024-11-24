@@ -5,12 +5,11 @@ using PeculiarCardGame.Services;
 using PeculiarCardGame.Shared;
 using Service = PeculiarCardGame.Services.DeckManagement.DeckManagementService;
 
-namespace PeculiarCardGame.UnitTests.Services.DeckManagement
+namespace PeculiarCardGame.Tests.Services.DeckManagement
 {
     public class UpdateCard
     {
         private const string NewText = "new";
-        private const CardType NewCardType = PeculiarCardGame.Shared.CardType.White;
 
         private readonly Deck _deck;
         private readonly Card _card;
@@ -102,7 +101,7 @@ namespace PeculiarCardGame.UnitTests.Services.DeckManagement
             {
                 service.UpdateCard(_card.Id, NewText);
             }
-            catch { }
+            catch (InvalidOperationException) { }
             var card = _dbContext.Cards.Single(x => x.Id == _card.Id);
 
             card.Id.Should().Be(_card.Id);
@@ -177,8 +176,8 @@ namespace PeculiarCardGame.UnitTests.Services.DeckManagement
 
             card.Should().NotBeNull();
             card!.Id.Should().Be(_card.Id);
-            card!.DeckId.Should().Be(_card.DeckId);
-            card!.Text.Should().Be(NewText ?? _card.Text);
+            card.DeckId.Should().Be(_card.DeckId);
+            card.Text.Should().Be(NewText);
         }
 
         [Fact]
@@ -193,7 +192,7 @@ namespace PeculiarCardGame.UnitTests.Services.DeckManagement
 
             card.Id.Should().Be(_card.Id);
             card.DeckId.Should().Be(_card.DeckId);
-            card.Text.Should().Be(NewText ?? _card.Text);
+            card.Text.Should().Be(NewText);
         }
 
         [Fact]

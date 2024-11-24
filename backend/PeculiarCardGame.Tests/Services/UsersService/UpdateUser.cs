@@ -4,7 +4,7 @@ using PeculiarCardGame.Data.Models;
 using PeculiarCardGame.Services;
 using Service = PeculiarCardGame.Services.Users.UsersService;
 
-namespace PeculiarCardGame.UnitTests.Services.UsersService
+namespace PeculiarCardGame.Tests.Services.UsersService
 {
     public class UpdateUser
     {
@@ -70,7 +70,7 @@ namespace PeculiarCardGame.UnitTests.Services.UsersService
             {
                 service.UpdateUser(_user.Id, _user.DisplayedName, _user.PasswordHash);
             }
-            catch { }
+            catch (InvalidOperationException) { }
             var user = _dbContext.Users.Single(x => x.Id == _user.Id);
 
             user.Id.Should().Be(_user.Id);
@@ -136,19 +136,18 @@ namespace PeculiarCardGame.UnitTests.Services.UsersService
         public void ExistingUser_ShouldUpdateUser(string? displayedNameUpdate, string? passwordUpdate)
         {
             _dbContext.SetupTest(_user);
-            var userCountBefore = _dbContext.Users.Count();
             var service = new Service(_dbContext, _filledRequestContext);
 
             service.UpdateUser(_user.Id, displayedNameUpdate, passwordUpdate);
             var user = _dbContext.Users.Single(x => x.Username == _user.Username);
 
-            user!.Id.Should().Be(_user.Id);
-            user!.Username.Should().Be(_user.Username);
-            user!.DisplayedName.Should().Be(displayedNameUpdate ?? _user.DisplayedName);
+            user.Id.Should().Be(_user.Id);
+            user.Username.Should().Be(_user.Username);
+            user.DisplayedName.Should().Be(displayedNameUpdate ?? _user.DisplayedName);
             if (passwordUpdate is null)
-                user!.PasswordHash.Should().Be(_user.PasswordHash);
+                user.PasswordHash.Should().Be(_user.PasswordHash);
             else
-                user!.PasswordHash.Should().NotBe(_user.PasswordHash);
+                user.PasswordHash.Should().NotBe(_user.PasswordHash);
         }
 
         [Theory]
@@ -163,12 +162,12 @@ namespace PeculiarCardGame.UnitTests.Services.UsersService
 
             user.Should().NotBeNull();
             user!.Id.Should().Be(_user.Id);
-            user!.Username.Should().Be(_user.Username);
-            user!.DisplayedName.Should().Be(displayedNameUpdate ?? _user.DisplayedName);
+            user.Username.Should().Be(_user.Username);
+            user.DisplayedName.Should().Be(displayedNameUpdate ?? _user.DisplayedName);
             if (passwordUpdate is null)
-                user!.PasswordHash.Should().Be(_user.PasswordHash);
+                user.PasswordHash.Should().Be(_user.PasswordHash);
             else
-                user!.PasswordHash.Should().NotBe(_user.PasswordHash);
+                user.PasswordHash.Should().NotBe(_user.PasswordHash);
         }
 
         [Fact]

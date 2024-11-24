@@ -4,7 +4,7 @@ using PeculiarCardGame.Data.Models;
 using PeculiarCardGame.Services;
 using Service = PeculiarCardGame.Services.DeckManagement.DeckManagementService;
 
-namespace PeculiarCardGame.UnitTests.Services.DeckManagement
+namespace PeculiarCardGame.Tests.Services.DeckManagement
 {
     public class AddDeck
     {
@@ -58,7 +58,7 @@ namespace PeculiarCardGame.UnitTests.Services.DeckManagement
                 service.AddDeck(null, DeckDescription);
 #pragma warning restore CS8625
             }
-            catch { }
+            catch (ArgumentNullException) { }
 
             _dbContext.Decks.Should().HaveCount(deckCountBefore);
         }
@@ -83,7 +83,7 @@ namespace PeculiarCardGame.UnitTests.Services.DeckManagement
             {
                 service.AddDeck(DeckName, DeckDescription);
             }
-            catch { }
+            catch (InvalidOperationException) { }
 
             _dbContext.Decks.Should().HaveCount(deckCountBefore);
         }

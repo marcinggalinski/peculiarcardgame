@@ -5,7 +5,7 @@ using PeculiarCardGame.Services;
 using PeculiarCardGame.Shared;
 using Service = PeculiarCardGame.Services.DeckManagement.DeckManagementService;
 
-namespace PeculiarCardGame.UnitTests.Services.DeckManagement
+namespace PeculiarCardGame.Tests.Services.DeckManagement
 {
     public class DeleteCard
     {
@@ -100,7 +100,7 @@ namespace PeculiarCardGame.UnitTests.Services.DeckManagement
             {
                 service.DeleteCard(_card.Id);
             }
-            catch { }
+            catch (InvalidOperationException) { }
             var card = _dbContext.Cards.SingleOrDefault(x => x.Id == _card.Id);
 
             _dbContext.Cards.Should().HaveCount(cardCountBefore);

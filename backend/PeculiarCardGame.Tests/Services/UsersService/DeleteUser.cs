@@ -4,7 +4,7 @@ using PeculiarCardGame.Data.Models;
 using PeculiarCardGame.Services;
 using Service = PeculiarCardGame.Services.Users.UsersService;
 
-namespace PeculiarCardGame.UnitTests.Services.UsersService
+namespace PeculiarCardGame.Tests.Services.UsersService
 {
     public class DeleteUser
     {
@@ -68,7 +68,7 @@ namespace PeculiarCardGame.UnitTests.Services.UsersService
             {
                 service.DeleteUser(_user.Id);
             }
-            catch { }
+            catch (InvalidOperationException) { }
             var user = _dbContext.Users.Single(x => x.Id == _user.Id);
 
             user.Should().NotBeNull();

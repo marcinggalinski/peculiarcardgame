@@ -1,13 +1,13 @@
-﻿using FluentAssertions;
+﻿using System.Web.Helpers;
+using FluentAssertions;
 using Microsoft.Extensions.Options;
 using PeculiarCardGame.Data;
 using PeculiarCardGame.Data.Models;
 using PeculiarCardGame.Services;
 using PeculiarCardGame.Shared.Options;
-using System.Web.Helpers;
 using Service = PeculiarCardGame.Services.Authentication.AuthenticationService;
 
-namespace PeculiarCardGame.UnitTests.Services.AuthenticationService
+namespace PeculiarCardGame.Tests.Services.AuthenticationService
 {
     public class Authenticate
     {
@@ -101,8 +101,8 @@ namespace PeculiarCardGame.UnitTests.Services.AuthenticationService
 
             user!.Should().NotBeNull();
             user!.Id.Should().Be(user.Id);
-            user!.Username.Should().Be(_user.Username);
-            user!.DisplayedName.Should().Be(_user.DisplayedName);
+            user.Username.Should().Be(_user.Username);
+            user.DisplayedName.Should().Be(_user.DisplayedName);
         }
 
         [Fact]
@@ -149,8 +149,8 @@ namespace PeculiarCardGame.UnitTests.Services.AuthenticationService
 
             user.Should().NotBeNull();
             user!.Id.Should().Be(user.Id);
-            user!.Username.Should().Be(_user.Username);
-            user!.DisplayedName.Should().Be(_user.DisplayedName);
+            user.Username.Should().Be(_user.Username);
+            user.DisplayedName.Should().Be(_user.DisplayedName);
         }
     }
 }

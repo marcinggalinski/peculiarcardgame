@@ -1,13 +1,13 @@
-﻿using FluentAssertions;
+﻿using System.Net;
+using FluentAssertions;
 using NSubstitute;
 using PeculiarCardGame.Data.Models;
 using PeculiarCardGame.Services.Authentication;
 using PeculiarCardGame.Services.DeckManagement;
 using PeculiarCardGame.Services.Users;
 using PeculiarCardGame.Shared;
-using System.Net;
 
-namespace PeculiarCardGame.UnitTests.Controllers.DeckManagementController
+namespace PeculiarCardGame.Tests.Controllers.DeckManagementController
 {
     public class DeleteCard
     {

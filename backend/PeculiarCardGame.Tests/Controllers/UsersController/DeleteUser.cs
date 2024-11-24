@@ -1,12 +1,12 @@
-﻿using FluentAssertions;
+﻿using System.Net;
+using FluentAssertions;
 using NSubstitute;
 using PeculiarCardGame.Data.Models;
 using PeculiarCardGame.Services.Authentication;
 using PeculiarCardGame.Services.DeckManagement;
 using PeculiarCardGame.Services.Users;
-using System.Net;
 
-namespace PeculiarCardGame.UnitTests.Controllers.UsersController
+namespace PeculiarCardGame.Tests.Controllers.UsersController
 {
     public class DeleteUser
     {

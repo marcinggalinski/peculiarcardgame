@@ -4,12 +4,12 @@ using PeculiarCardGame.Data.Models;
 using PeculiarCardGame.Services;
 using Service = PeculiarCardGame.Services.DeckManagement.DeckManagementService;
 
-namespace PeculiarCardGame.UnitTests.Services.DeckManagement
+namespace PeculiarCardGame.Tests.Services.DeckManagement
 {
     public class GetDeck
     {
-        const int ExistingDeckId = 1;
-        const int NotExistingDeckId = 2;
+        private const int ExistingDeckId = 1;
+        private const int NotExistingDeckId = 2;
 
         private readonly Deck _deck;
 
@@ -55,9 +55,9 @@ namespace PeculiarCardGame.UnitTests.Services.DeckManagement
 
             deck.Should().NotBeNull();
             deck!.Id.Should().Be(_deck.Id);
-            deck!.AuthorId.Should().Be(_deck.AuthorId);
-            deck!.Name.Should().Be(_deck.Name);
-            deck!.Description.Should().Be(_deck.Description);
+            deck.AuthorId.Should().Be(_deck.AuthorId);
+            deck.Name.Should().Be(_deck.Name);
+            deck.Description.Should().Be(_deck.Description);
         }
 
         [Theory]
@@ -69,7 +69,7 @@ namespace PeculiarCardGame.UnitTests.Services.DeckManagement
             var deckCountBefore = _dbContext.Decks.Count();
             var service = new Service(_dbContext, _requestContext);
 
-            var deck = service.GetDeck(deckId);
+            service.GetDeck(deckId);
 
             _dbContext.Decks.Should().HaveCount(deckCountBefore);
         }

@@ -7,7 +7,7 @@ using PeculiarCardGame.Shared.Options;
 using MSOptions = Microsoft.Extensions.Options.Options;
 using Service = PeculiarCardGame.Services.Authentication.AuthenticationService;
 
-namespace PeculiarCardGame.UnitTests.Services.AuthenticationService
+namespace PeculiarCardGame.Tests.Services.AuthenticationService
 {
     public class GenerateBearerToken
     {

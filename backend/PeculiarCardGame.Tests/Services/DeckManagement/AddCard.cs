@@ -5,7 +5,7 @@ using PeculiarCardGame.Services;
 using PeculiarCardGame.Shared;
 using Service = PeculiarCardGame.Services.DeckManagement.DeckManagementService;
 
-namespace PeculiarCardGame.UnitTests.Services.DeckManagement
+namespace PeculiarCardGame.Tests.Services.DeckManagement
 {
     public class AddCard
     {
@@ -79,7 +79,7 @@ namespace PeculiarCardGame.UnitTests.Services.DeckManagement
             {
                 service.AddCard(_deck.Id, CardText, CardType);
             }
-            catch { }
+            catch (InvalidOperationException) { }
 
             _dbContext.Cards.Should().HaveCount(cardCountBefore);
         }
@@ -108,7 +108,7 @@ namespace PeculiarCardGame.UnitTests.Services.DeckManagement
                 service.AddCard(_deck.Id, null, CardType);
 #pragma warning restore CS8625
             }
-            catch { }
+            catch (ArgumentNullException) { }
 
             _dbContext.Cards.Should().HaveCount(cardCountBefore);
         }
@@ -129,7 +129,7 @@ namespace PeculiarCardGame.UnitTests.Services.DeckManagement
             var cardCountBefore = _dbContext.Cards.Count();
             var service = new Service(_dbContext, _authorFilledRequestContext);
 
-            var card = service.AddCard(_deck.Id, CardText, CardType);
+            service.AddCard(_deck.Id, CardText, CardType);
 
             _dbContext.Cards.Should().HaveCount(cardCountBefore);
         }
@@ -150,7 +150,7 @@ namespace PeculiarCardGame.UnitTests.Services.DeckManagement
             var cardCountBefore = _dbContext.Cards.Count();
             var service = new Service(_dbContext, _notAuthorFilledRequestContext);
 
-            var card = service.AddCard(_deck.Id, CardText, CardType);
+            service.AddCard(_deck.Id, CardText, CardType);
 
             _dbContext.Cards.Should().HaveCount(cardCountBefore);
         }
@@ -165,8 +165,8 @@ namespace PeculiarCardGame.UnitTests.Services.DeckManagement
 
             card.Should().NotBeNull();
             card!.DeckId.Should().Be(_deck.Id);
-            card!.Text.Should().Be(CardText);
-            card!.CardType.Should().Be(CardType);
+            card.Text.Should().Be(CardText);
+            card.CardType.Should().Be(CardType);
         }
 
         [Fact]
@@ -181,9 +181,9 @@ namespace PeculiarCardGame.UnitTests.Services.DeckManagement
 
             _dbContext.Cards.Should().HaveCount(cardCountBefore + 1);
             card.Should().NotBeNull();
-            card!.DeckId.Should().Be(_deck.Id);
-            card!.Text.Should().Be(CardText);
-            card!.CardType.Should().Be(CardType);
+            card.DeckId.Should().Be(_deck.Id);
+            card.Text.Should().Be(CardText);
+            card.CardType.Should().Be(CardType);
         }
     }
 }

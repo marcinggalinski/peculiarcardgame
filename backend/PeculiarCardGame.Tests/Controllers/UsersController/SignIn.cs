@@ -1,15 +1,15 @@
-﻿using FluentAssertions;
+﻿using System.Net;
+using System.Net.Http.Json;
+using System.Text;
+using FluentAssertions;
 using NSubstitute;
 using PeculiarCardGame.Data.Models;
 using PeculiarCardGame.Services.Authentication;
 using PeculiarCardGame.Services.DeckManagement;
 using PeculiarCardGame.Services.Users;
 using PeculiarCardGame.WebApi.Models.Responses;
-using System.Net;
-using System.Net.Http.Json;
-using System.Text;
 
-namespace PeculiarCardGame.UnitTests.Controllers.UsersController
+namespace PeculiarCardGame.Tests.Controllers.UsersController
 {
     public class SignIn
     {

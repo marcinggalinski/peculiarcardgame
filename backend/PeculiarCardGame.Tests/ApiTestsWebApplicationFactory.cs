@@ -6,7 +6,7 @@ using PeculiarCardGame.Services.Authentication;
 using PeculiarCardGame.Services.DeckManagement;
 using PeculiarCardGame.Services.Users;
 
-namespace PeculiarCardGame.UnitTests
+namespace PeculiarCardGame.Tests
 {
     internal class ApiTestsWebApplicationFactory<TEntryPoint> : WebApplicationFactory<TEntryPoint>
         where TEntryPoint : class

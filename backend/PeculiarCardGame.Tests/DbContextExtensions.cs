@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace PeculiarCardGame.UnitTests
+namespace PeculiarCardGame.Tests
 {
     internal static class DbContextExtensions
     {

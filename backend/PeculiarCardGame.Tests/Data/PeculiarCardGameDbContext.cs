@@ -3,20 +3,20 @@ using Microsoft.Extensions.Options;
 using PeculiarCardGame.Shared.Options;
 using DbContext = PeculiarCardGame.Data.PeculiarCardGameDbContext;
 
-namespace PeculiarCardGame.UnitTests.Data
+namespace PeculiarCardGame.Tests.Data
 {
     public class PeculiarCardGameDbContext
     {
         [Fact]
-        public void Contructor_BothNulls_ShouldThrowArgumentException()
+        public void Constructor_BothNulls_ShouldThrowArgumentException()
         {
-            var action = () => new DbContext(null, null);
+            var action = () => new DbContext(null);
 
             action.Should().Throw<ArgumentException>();
         }
 
         [Fact]
-        public void Contructor_BothNotNulls_ShouldThrowArgumentException()
+        public void Constructor_BothNotNulls_ShouldThrowArgumentException()
         {
             var action = () => new DbContext(Options.Create(new DbOptions { ConnectionString = "" }), _ => { });
 
@@ -24,15 +24,15 @@ namespace PeculiarCardGame.UnitTests.Data
         }
 
         [Fact]
-        public void Contructor_OptionsNotNull_ShouldNotThrowAnyException()
+        public void Constructor_OptionsNotNull_ShouldNotThrowAnyException()
         {
-            var action = () => new DbContext(Options.Create(new DbOptions { ConnectionString = "" }), null);
+            var action = () => new DbContext(Options.Create(new DbOptions { ConnectionString = "" }));
 
             action.Should().NotThrow();
         }
 
         [Fact]
-        public void Contructor_ActionNotNull_ShouldNotThrowAnyException()
+        public void Constructor_ActionNotNull_ShouldNotThrowAnyException()
         {
             var action = () => new DbContext(null, _ => { });
 

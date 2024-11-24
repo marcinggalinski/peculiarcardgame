@@ -4,7 +4,7 @@ using PeculiarCardGame.Data.Models;
 using PeculiarCardGame.Services;
 using Service = PeculiarCardGame.Services.Users.UsersService;
 
-namespace PeculiarCardGame.UnitTests.Services.UsersService
+namespace PeculiarCardGame.Tests.Services.UsersService
 {
     public class AddUser
     {
@@ -66,7 +66,7 @@ namespace PeculiarCardGame.UnitTests.Services.UsersService
                 service.AddUser(username, _user.DisplayedName, password);
 #pragma warning restore CS8604
             }
-            catch { }
+            catch (ArgumentNullException) { }
 
             _dbContext.Users.Should().HaveCount(userCountBefore);
         }
@@ -91,7 +91,7 @@ namespace PeculiarCardGame.UnitTests.Services.UsersService
             {
                 service.AddUser(_user.Username, _user.DisplayedName, Password);
             }
-            catch { }
+            catch (InvalidOperationException) { }
 
             _dbContext.Users.Should().HaveCount(userCountBefore);
         }
@@ -129,8 +129,8 @@ namespace PeculiarCardGame.UnitTests.Services.UsersService
             var user = _dbContext.Users.Single(x => x.Username == _user.Username);
 
             _dbContext.Users.Should().HaveCount(userCountBefore + 1);
-            user!.Username.Should().Be(_user.Username);
-            user!.DisplayedName.Should().Be(_user.DisplayedName);
+            user.Username.Should().Be(_user.Username);
+            user.DisplayedName.Should().Be(_user.DisplayedName);
         }
 
         [Fact]
@@ -142,7 +142,7 @@ namespace PeculiarCardGame.UnitTests.Services.UsersService
 
             user.Should().NotBeNull();
             user!.Username.Should().Be(_user.Username);
-            user!.DisplayedName.Should().Be(_user.DisplayedName);
+            user.DisplayedName.Should().Be(_user.DisplayedName);
         }
     }
 }

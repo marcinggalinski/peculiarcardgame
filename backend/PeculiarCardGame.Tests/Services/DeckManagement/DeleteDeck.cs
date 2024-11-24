@@ -4,7 +4,7 @@ using PeculiarCardGame.Data.Models;
 using PeculiarCardGame.Services;
 using Service = PeculiarCardGame.Services.DeckManagement.DeckManagementService;
 
-namespace PeculiarCardGame.UnitTests.Services.DeckManagement
+namespace PeculiarCardGame.Tests.Services.DeckManagement
 {
     public class DeleteDeck
     {
@@ -79,7 +79,7 @@ namespace PeculiarCardGame.UnitTests.Services.DeckManagement
             {
                 service.DeleteDeck(_deck.Id);
             }
-            catch { }
+            catch (InvalidOperationException) { }
 
             _dbContext.Decks.Should().HaveCount(deckCountBefore);
         }

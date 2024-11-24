@@ -4,7 +4,7 @@ using PeculiarCardGame.Data.Models;
 using PeculiarCardGame.Services;
 using Service = PeculiarCardGame.Services.Users.UsersService;
 
-namespace PeculiarCardGame.UnitTests.Services.UsersService
+namespace PeculiarCardGame.Tests.Services.UsersService
 {
     public class GetUser
     {
@@ -55,8 +55,8 @@ namespace PeculiarCardGame.UnitTests.Services.UsersService
 
             user.Should().NotBeNull();
             user!.Username.Should().Be(_user.Username);
-            user!.DisplayedName.Should().Be(_user.DisplayedName);
-            user!.PasswordHash.Should().Be(_user.PasswordHash);
+            user.DisplayedName.Should().Be(_user.DisplayedName);
+            user.PasswordHash.Should().Be(_user.PasswordHash);
         }
 
         [Theory]

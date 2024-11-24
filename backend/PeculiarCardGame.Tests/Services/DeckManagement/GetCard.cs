@@ -5,12 +5,12 @@ using PeculiarCardGame.Services;
 using PeculiarCardGame.Shared;
 using Service = PeculiarCardGame.Services.DeckManagement.DeckManagementService;
 
-namespace PeculiarCardGame.UnitTests.Services.DeckManagement
+namespace PeculiarCardGame.Tests.Services.DeckManagement
 {
     public class GetCard
     {
-        public const int ExistingCardId = 1;
-        public const int NotExistingCardId = 2;
+        private const int ExistingCardId = 1;
+        private const int NotExistingCardId = 2;
 
         private readonly Deck _deck;
         private readonly Card _card;
@@ -66,9 +66,9 @@ namespace PeculiarCardGame.UnitTests.Services.DeckManagement
 
             card.Should().NotBeNull();
             card!.Id.Should().Be(_card.Id);
-            card!.DeckId.Should().Be(_card.DeckId);
-            card!.Text.Should().Be(_card.Text);
-            card!.CardType.Should().Be(_card.CardType);
+            card.DeckId.Should().Be(_card.DeckId);
+            card.Text.Should().Be(_card.Text);
+            card.CardType.Should().Be(_card.CardType);
         }
 
         [Theory]

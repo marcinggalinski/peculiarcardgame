@@ -1,4 +1,6 @@
-﻿using FluentAssertions;
+﻿using System.Net;
+using System.Net.Http.Json;
+using FluentAssertions;
 using NSubstitute;
 using PeculiarCardGame.Data.Models;
 using PeculiarCardGame.Services.Authentication;
@@ -6,10 +8,8 @@ using PeculiarCardGame.Services.DeckManagement;
 using PeculiarCardGame.Services.Users;
 using PeculiarCardGame.WebApi.Models.Requests;
 using PeculiarCardGame.WebApi.Models.Responses;
-using System.Net;
-using System.Net.Http.Json;
 
-namespace PeculiarCardGame.UnitTests.Controllers.DeckManagementController
+namespace PeculiarCardGame.Tests.Controllers.DeckManagementController
 {
     public class UpdateDeck
     {

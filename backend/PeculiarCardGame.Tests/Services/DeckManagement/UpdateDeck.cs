@@ -4,7 +4,7 @@ using PeculiarCardGame.Data.Models;
 using PeculiarCardGame.Services;
 using Service = PeculiarCardGame.Services.DeckManagement.DeckManagementService;
 
-namespace PeculiarCardGame.UnitTests.Services.DeckManagement
+namespace PeculiarCardGame.Tests.Services.DeckManagement
 {
     public class UpdateDeck
     {
@@ -87,7 +87,7 @@ namespace PeculiarCardGame.UnitTests.Services.DeckManagement
             {
                 service.UpdateDeck(_deck.Id, NewName, NewDescription);
             }
-            catch { }
+            catch (InvalidOperationException) { }
             var deck = _dbContext.Decks.Single(x => x.Id == _deck.Id);
 
             deck.AuthorId.Should().Be(_deck.AuthorId);
@@ -160,9 +160,9 @@ namespace PeculiarCardGame.UnitTests.Services.DeckManagement
 
             deck.Should().NotBeNull();
             deck!.AuthorId.Should().Be(_deck.AuthorId);
-            deck!.Id.Should().Be(_deck.Id);
-            deck!.Name.Should().Be(nameUpdate ?? _deck.Name);
-            deck!.Description.StartsWith(descriptionUpdate ?? _deck.Description);
+            deck.Id.Should().Be(_deck.Id);
+            deck.Name.Should().Be(nameUpdate ?? _deck.Name);
+            deck.Description.Should().Be(descriptionUpdate ?? _deck.Description);
         }
 
         [Theory]
@@ -176,10 +176,10 @@ namespace PeculiarCardGame.UnitTests.Services.DeckManagement
             service.UpdateDeck(_deck.Id, nameUpdate, descriptionUpdate);
             var deck = _dbContext.Decks.Single(x => x.Id == _deck.Id);
 
-            deck!.AuthorId.Should().Be(_deck.AuthorId);
-            deck!.Id.Should().Be(_deck.Id);
-            deck!.Name.Should().Be(nameUpdate ?? _deck.Name);
-            deck!.Description.StartsWith(descriptionUpdate ?? _deck.Description);
+            deck.AuthorId.Should().Be(_deck.AuthorId);
+            deck.Id.Should().Be(_deck.Id);
+            deck.Name.Should().Be(nameUpdate ?? _deck.Name);
+            deck.Description.Should().Be(descriptionUpdate ?? _deck.Description);
         }
 
         [Fact]
