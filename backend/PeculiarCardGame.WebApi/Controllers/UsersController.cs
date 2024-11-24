@@ -47,7 +47,7 @@ namespace PeculiarCardGame.WebApi.Controllers
             }
         }
 
-        [HttpGet("{id}", Name = "GetUser")]
+        [HttpGet("{id:int}", Name = "GetUser")]
         [SwaggerOperation("Gets specified user.", "Doesn't require any authentication data. Only returns basic information about user, not their decks.")]
         [SwaggerResponse(200, "User found", typeof(GetUserResponse))]
         [SwaggerResponse(404, "User not found")]
@@ -59,7 +59,7 @@ namespace PeculiarCardGame.WebApi.Controllers
             return Ok(GetUserResponse.FromUser(user));
         }
 
-        [HttpPatch("{id}")]
+        [HttpPatch("{id:int}")]
         [Authorize(AuthenticationSchemes = BearerTokenAuthenticationHandler.SchemeName)]
         [SwaggerOperation("Updates specified used.", "Requires valid bearer token authentication data to be sent in 'Authorization' header. Doesn't allow modifying other users. Displayed name is trimmed of any leading or trailing whitespace characters.")]
         [SwaggerResponse(200, "User updated", typeof(GetUserResponse))]
@@ -73,7 +73,7 @@ namespace PeculiarCardGame.WebApi.Controllers
             return Ok(GetUserResponse.FromUser(user));
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:int}")]
         [Authorize(AuthenticationSchemes = BearerTokenAuthenticationHandler.SchemeName)]
         [SwaggerOperation("Deletes specified used.", "Requires valid bearer token authentication data to be sent in 'Authorization' header. Doesn't allow deleting other users.")]
         [SwaggerResponse(200, "User deleted")]

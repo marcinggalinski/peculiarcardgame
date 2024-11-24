@@ -7,6 +7,6 @@ namespace PeculiarCardGame.Shared.Options
         public const string ConfigurationKey = "Authentication:Bearer";
 
         public IReadOnlyList<string> Audiences { get; set; } = new List<string>();
-        public string Key { get; set; }
+        public string Key { get; set; } = null!;
     }
 }

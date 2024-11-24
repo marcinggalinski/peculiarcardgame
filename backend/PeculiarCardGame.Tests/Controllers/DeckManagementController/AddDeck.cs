@@ -85,6 +85,7 @@ namespace PeculiarCardGame.Tests.Controllers.DeckManagementController
                 RequestUri = new Uri(_client.BaseAddress!, "/api/decks"),
                 Content = JsonContent.Create(new AddDeckRequest
                 {
+                    Name = null!,
                     Description = _deck.Description
                 }),
                 Headers =

@@ -41,7 +41,7 @@ namespace PeculiarCardGame.WebApi.Controllers
             }
         }
 
-        [HttpGet("decks/{id}")]
+        [HttpGet("decks/{id:int}")]
         [AllowAnonymous]
         [SwaggerOperation("Gets specified deck.", "Doesn't require any authentication data. Only returns information about the deck, not the cards it consists of.")]
         [SwaggerResponse(200, "Deck found", typeof(GetDeckResponse))]
@@ -77,7 +77,7 @@ namespace PeculiarCardGame.WebApi.Controllers
             return Ok(GetDeckResponse.FromDeck(deck));
         }
 
-        [HttpDelete("decks/{id}")]
+        [HttpDelete("decks/{id:int}")]
         [SwaggerOperation("Deletes specified deck.", "Requires valid bearer token authentication data to be sent in 'Authorization' header. Doesn't allow deleting other users' decks.")]
         [SwaggerResponse(200, "Deck deleted")]
         [SwaggerResponse(401, "Invalid authentication data", typeof(string))]
@@ -92,7 +92,7 @@ namespace PeculiarCardGame.WebApi.Controllers
 
         #region cards
 
-        [HttpPost("decks/{deckId}/cards")]
+        [HttpPost("decks/{deckId:int}/cards")]
         [SwaggerOperation("Adds a new card to the specified deck.", "Requires valid bearer token authentication data to be sent in 'Authorization' header. Doesn't allow adding cards to other users' decks. Card text is trimmed of any leading or trailing whitespaces.")]
         [SwaggerResponse(201, "Card created", typeof(GetCardResponse))]
         [SwaggerResponse(401, "Invalid authentication data", typeof(string))]
@@ -114,7 +114,7 @@ namespace PeculiarCardGame.WebApi.Controllers
         }
 
         [AllowAnonymous]
-        [HttpGet("cards/{id}")]
+        [HttpGet("cards/{id:int}")]
         [SwaggerOperation("Gets specified card.", "Doesn't require any authentication data.")]
         [SwaggerResponse(200, "Card found", typeof(GetDeckResponse))]
         [SwaggerResponse(404, "Card not found")]
@@ -126,7 +126,7 @@ namespace PeculiarCardGame.WebApi.Controllers
             return Ok(GetCardResponse.FromCard(card));
         }
 
-        [HttpGet("decks/{deckId}/cards")]
+        [HttpGet("decks/{deckId:int}/cards")]
         [AllowAnonymous]
         [SwaggerOperation("Gets all cards belonging to the specified deck that match given query.", "Doesn't require any authentication data. Does not support paging.")]
         [SwaggerResponse(200, "Cards found", typeof(List<GetCardResponse>))]
@@ -139,7 +139,7 @@ namespace PeculiarCardGame.WebApi.Controllers
             return Ok(cards.ConvertAll(GetCardResponse.FromCard));
         }
 
-        [HttpPatch("cards/{id}")]
+        [HttpPatch("cards/{id:int}")]
         [SwaggerOperation("Updates specified card.", "Requires valid bearer token authentication data to be sent in 'Authorization' header. Doesn't allow modifying cards from other users' decks. Card text is trimmed of any leading or trailing whitespaces.")]
         [SwaggerResponse(200, "Card updated", typeof(GetDeckResponse))]
         [SwaggerResponse(401, "Invalid authentication data", typeof(string))]
@@ -152,7 +152,7 @@ namespace PeculiarCardGame.WebApi.Controllers
             return Ok(GetCardResponse.FromCard(card));
         }
 
-        [HttpDelete("cards/{id}")]
+        [HttpDelete("cards/{id:int}")]
         [SwaggerOperation("Deletes specified card.", "Requires valid bearer token authentication data to be sent in 'Authorization' header. Doesn't allow deleting cards from other users' decks.")]
         [SwaggerResponse(200, "Card deleted")]
         [SwaggerResponse(401, "Invalid authentication data", typeof(string))]
