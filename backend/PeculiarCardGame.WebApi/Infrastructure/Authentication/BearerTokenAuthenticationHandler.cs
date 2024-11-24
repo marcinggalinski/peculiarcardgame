@@ -21,9 +21,8 @@ namespace PeculiarCardGame.WebApi.Infrastructure.Authentication
             IOptionsMonitor<BearerTokenAuthenticationSchemeOptions> options,
             ILoggerFactory logger,
             UrlEncoder encoder,
-            ISystemClock clock,
             IAuthenticationService authenticationService,
-            RequestContext requestContext) : base(options, logger, encoder, clock)
+            RequestContext requestContext) : base(options, logger, encoder)
         {
             _authenticationService = authenticationService;
             _requestContext = requestContext;
