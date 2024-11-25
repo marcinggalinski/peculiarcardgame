@@ -1,5 +1,6 @@
 ﻿using PeculiarCardGame.Data;
 using PeculiarCardGame.Data.Models;
+using PeculiarCardGame.Shared;
 using System.Web.Helpers;
 
 namespace PeculiarCardGame.Services.Users
@@ -15,7 +16,7 @@ namespace PeculiarCardGame.Services.Users
             _requestContext = requestContext;
         }
 
-        public User? AddUser(string username, string? displayedName, string password)
+        public Either<ErrorType, User> AddUser(string username, string? displayedName, string password)
         {
             if (string.IsNullOrWhiteSpace(username))
                 throw new ArgumentNullException(nameof(username));
@@ -27,10 +28,13 @@ namespace PeculiarCardGame.Services.Users
 
             username = username.Trim();
             displayedName = displayedName?.Trim();
+            
+            if (username.Length > User.MaxUsernameLength || displayedName?.Length > User.MaxDisplayNameLength)
+                return ErrorType.ConstraintsNotMet;
 
             var user = _dbContext.Users.SingleOrDefault(x => x.Username == username);
             if (user is not null)
-                return null;
+                return ErrorType.Conflict;
 
             user = _dbContext.Users.Add(new User
             {
@@ -43,26 +47,29 @@ namespace PeculiarCardGame.Services.Users
             return user;
         }
 
-        public User? GetUser(int userId)
+        public Either<ErrorType, User> GetUser(int userId)
         {
             var user = _dbContext.Users.SingleOrDefault(x => x.Id == userId);
+            if (user is null)
+                return ErrorType.NotFound;
             return user;
         }
 
-        public User? UpdateUser(int userId, string? displayedNameUpdate, string? passwordUpdate)
+        public Either<ErrorType, User> UpdateUser(int userId, string? displayedNameUpdate, string? passwordUpdate)
         {
             if (_requestContext.CallingUser is null)
                 throw new InvalidOperationException($"{nameof(UpdateUser)} can only be called by an authenticated user.");
 
             if (userId != _requestContext.CallingUser.Id)
-                return null;
+                return ErrorType.Unauthorized;
 
             var user = _dbContext.Users.SingleOrDefault(x => x.Id == userId);
             if (user is null)
-                return null;
+                return ErrorType.NotFound;
 
             displayedNameUpdate = displayedNameUpdate?.Trim();
-            passwordUpdate = passwordUpdate?.Trim();
+            if (displayedNameUpdate is not null && displayedNameUpdate.Length > User.MaxDisplayNameLength)
+                return ErrorType.ConstraintsNotMet;
 
             if (!string.IsNullOrEmpty(displayedNameUpdate))
                 user.DisplayedName = displayedNameUpdate;
@@ -76,22 +83,22 @@ namespace PeculiarCardGame.Services.Users
         }
 
         // TODO: Handle case when deleted user has decks
-        public bool DeleteUser(int userId)
+        public ErrorType? DeleteUser(int userId)
         {
             if (_requestContext.CallingUser is null)
                 throw new InvalidOperationException($"{nameof(UpdateUser)} can only be called by an authenticated user.");
 
             if (userId != _requestContext.CallingUser.Id)
-                return false;
+                return ErrorType.Unauthorized;
 
             var user = _dbContext.Users.SingleOrDefault(x => x.Id == userId);
             if (user is null)
-                return false;
+                return ErrorType.NotFound;
 
             _dbContext.Users.Remove(user);
             _dbContext.SaveChanges();
-
-            return true;
+            
+            return null;
         }
     }
 }

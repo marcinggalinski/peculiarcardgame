@@ -2,6 +2,7 @@
 using PeculiarCardGame.Data;
 using PeculiarCardGame.Data.Models;
 using PeculiarCardGame.Services;
+using PeculiarCardGame.Shared;
 using Service = PeculiarCardGame.Services.Users.UsersService;
 
 namespace PeculiarCardGame.Tests.Services.UsersService
@@ -97,14 +98,15 @@ namespace PeculiarCardGame.Tests.Services.UsersService
         }
 
         [Fact]
-        public void ExistingUsername_ShouldReturnNull()
+        public void ExistingUsername_ShouldReturnErrorTypeConflict()
         {
             _dbContext.SetupTest(_user);
             var service = new Service(_dbContext, _emptyRequestContext);
 
-            var user = service.AddUser(_user.Username, _user.DisplayedName, Password);
+            var result = service.AddUser(_user.Username, _user.DisplayedName, Password);
 
-            user.Should().BeNull();
+            result.Should().BeLeft();
+            result.Left.Should().Be(ErrorType.Conflict);
         }
 
         [Fact]
@@ -138,11 +140,11 @@ namespace PeculiarCardGame.Tests.Services.UsersService
         {
             var service = new Service(_dbContext, _emptyRequestContext);
 
-            var user = service.AddUser(_user.Username, _user.DisplayedName, Password);
+            var result = service.AddUser(_user.Username, _user.DisplayedName, Password);
 
-            user.Should().NotBeNull();
-            user!.Username.Should().Be(_user.Username);
-            user.DisplayedName.Should().Be(_user.DisplayedName);
+            result.Should().BeRight();
+            result.Right.Username.Should().Be(_user.Username);
+            result.Right.DisplayedName.Should().Be(_user.DisplayedName);
         }
     }
 }

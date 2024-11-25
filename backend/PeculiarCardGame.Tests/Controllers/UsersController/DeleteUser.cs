@@ -5,6 +5,7 @@ using PeculiarCardGame.Data.Models;
 using PeculiarCardGame.Services.Authentication;
 using PeculiarCardGame.Services.DeckManagement;
 using PeculiarCardGame.Services.Users;
+using PeculiarCardGame.Shared;
 
 namespace PeculiarCardGame.Tests.Controllers.UsersController
 {
@@ -43,8 +44,8 @@ namespace PeculiarCardGame.Tests.Controllers.UsersController
 
             _usersService = Substitute.For<IUsersService>();
             _usersService.GetUser(_existingUser.Id).Returns(_existingUser);
-            _usersService.DeleteUser(_existingUser.Id).Returns(true);
-            _usersService.DeleteUser(_notExistingUser.Id).Returns(false);
+            _usersService.DeleteUser(_existingUser.Id).Returns((ErrorType?)null);
+            _usersService.DeleteUser(_notExistingUser.Id).Returns(ErrorType.NotFound);
 
             var authenticationService = Substitute.For<IAuthenticationService>();
             authenticationService.Authenticate(Arg.Any<string>()).Returns(_existingUser);

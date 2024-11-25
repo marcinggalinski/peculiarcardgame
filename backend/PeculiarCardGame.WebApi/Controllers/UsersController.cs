@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PeculiarCardGame.Services;
 using PeculiarCardGame.Services.Users;
+using PeculiarCardGame.Shared;
 using PeculiarCardGame.WebApi.Infrastructure.Authentication;
 using PeculiarCardGame.WebApi.Models.Requests;
 using PeculiarCardGame.WebApi.Models.Responses;
@@ -24,7 +26,7 @@ namespace PeculiarCardGame.WebApi.Controllers
         }
 
         [HttpPost]
-        [SwaggerOperation("Signs user up.", "Requires no authentication data to be sent. Username for each user must be unique. If displayed name is null, username will be used. Username and displayed name are trimmed of any leading or trailing whitespace characters.")]
+        [SwaggerOperation("Signs user up.", $"Requires no authentication data to be sent. Username for each user must be unique. If displayed name is null, username will be used. Username and displayed name are trimmed of any leading or trailing whitespace characters.")]
         [SwaggerResponse(201, Description = "User created", Type = typeof(GetUserResponse))]
         [SwaggerResponse(409, "Username already in use", typeof(string))]
         [SwaggerResponse(422, "Endpoint invoked with authentication data", typeof(string))]
@@ -36,10 +38,16 @@ namespace PeculiarCardGame.WebApi.Controllers
 
             try
             {
-                var user = _usersService.AddUser(request.Username, request.DisplayedName, request.Password);
-                if (user is null)
-                    return Conflict($"User {request.Username} already exists.");
-                return CreatedAtAction(nameof(GetUser), new { id = user.Id }, GetUserResponse.FromUser(user));
+                var result = _usersService.AddUser(request.Username, request.DisplayedName, request.Password);
+                if (result.IsRight)
+                    return CreatedAtAction(nameof(GetUser), new { id = result.Right!.Id }, GetUserResponse.FromUser(result.Right));
+
+                return result.Left! switch
+                {
+                    ErrorType.Conflict => Conflict($"User {request.Username} already exists."),
+                    ErrorType.ConstraintsNotMet => UnprocessableEntity($"Username or displayed name too short."),
+                    _ => throw new UnreachableException($"result.Left = {result.Left.ToString()}")
+                };
             }
             catch (ArgumentNullException ex)
             {
@@ -53,10 +61,15 @@ namespace PeculiarCardGame.WebApi.Controllers
         [SwaggerResponse(404, "User not found")]
         public ActionResult<GetUserResponse> GetUser(int id)
         {
-            var user = _usersService.GetUser(id);
-            if (user is null)
-                return NotFound();
-            return Ok(GetUserResponse.FromUser(user));
+            var result = _usersService.GetUser(id);
+            if (result.IsRight)
+                return Ok(GetUserResponse.FromUser(result.Right!));
+            
+            return result.Left! switch
+            {
+                ErrorType.NotFound => NotFound("User not found"),
+                _ => throw new UnreachableException($"result.Left = {result.Left.ToString()}")
+            };
         }
 
         [HttpPatch("{id:int}")]
@@ -67,10 +80,16 @@ namespace PeculiarCardGame.WebApi.Controllers
         [SwaggerResponse(404, "User not found")]
         public ActionResult<GetUserResponse> UpdateUser(int id, UpdateUserRequest request)
         {
-            var user = _usersService.UpdateUser(id, request.DisplayedNameUpdate, request.PasswordUpdate);
-            if (user is null)
-                return NotFound();
-            return Ok(GetUserResponse.FromUser(user));
+            var result = _usersService.UpdateUser(id, request.DisplayedNameUpdate, request.PasswordUpdate);
+            if (result.IsRight)
+                return Ok(GetUserResponse.FromUser(result.Right!));
+
+            return result.Left! switch
+            {
+                ErrorType.ConstraintsNotMet => UnprocessableEntity("Displayed name too short."),
+                ErrorType.NotFound or ErrorType.Unauthorized => NotFound("User not found."),
+                _ => throw new UnreachableException($"result.Left = {result.Left.ToString()}")
+            };
         }
 
         [HttpDelete("{id:int}")]
@@ -81,8 +100,13 @@ namespace PeculiarCardGame.WebApi.Controllers
         [SwaggerResponse(404, "User not found")]
         public IActionResult DeleteUser(int id)
         {
-            var isDeleted = _usersService.DeleteUser(id);
-            return isDeleted ? Ok() : NotFound();
+            var error = _usersService.DeleteUser(id);
+            return error switch
+            {
+                null => Ok(),
+                ErrorType.NotFound or ErrorType.Unauthorized => NotFound("User not found."),
+                _ => throw new UnreachableException($"error = {error.ToString()}")
+            };
         }
 
         [HttpPost("signin")]

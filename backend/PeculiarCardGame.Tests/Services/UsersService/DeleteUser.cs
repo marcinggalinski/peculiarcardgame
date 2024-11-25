@@ -2,6 +2,7 @@
 using PeculiarCardGame.Data;
 using PeculiarCardGame.Data.Models;
 using PeculiarCardGame.Services;
+using PeculiarCardGame.Shared;
 using Service = PeculiarCardGame.Services.Users.UsersService;
 
 namespace PeculiarCardGame.Tests.Services.UsersService
@@ -90,13 +91,13 @@ namespace PeculiarCardGame.Tests.Services.UsersService
         }
 
         [Fact]
-        public void NotExistingUser_ShouldReturnFalse()
+        public void NotExistingUser_ShouldReturnErrorTypeNotFound()
         {
             var service = new Service(_dbContext, _filledRequestContext);
 
-            var deleted = service.DeleteUser(_user.Id);
+            var error = service.DeleteUser(_user.Id);
 
-            deleted.Should().BeFalse();
+            error.Should().Be(ErrorType.NotFound);
         }
 
         [Fact]
@@ -116,14 +117,15 @@ namespace PeculiarCardGame.Tests.Services.UsersService
         }
 
         [Fact]
-        public void AnotherUser_ShouldReturnFalse()
+        public void AnotherUser_ShouldReturnErrorTypeUnauthorized()
         {
             _dbContext.SetupTest(_user, _anotherUser);
             var service = new Service(_dbContext, _filledRequestContext);
 
-            var deleted = service.DeleteUser(_anotherUser.Id);
+            var error = service.DeleteUser(_anotherUser.Id);
 
-            deleted.Should().BeFalse();
+            error.Should().NotBeNull();
+            error.Should().Be(ErrorType.Unauthorized);
         }
 
         [Fact]
@@ -141,14 +143,14 @@ namespace PeculiarCardGame.Tests.Services.UsersService
         }
 
         [Fact]
-        public void ExistingUser_ShouldReturnTrue()
+        public void ExistingUser_ShouldReturnNull()
         {
             _dbContext.SetupTest(_user);
             var service = new Service(_dbContext, _filledRequestContext);
 
-            var deleted = service.DeleteUser(_user.Id);
+            var error = service.DeleteUser(_user.Id);
 
-            deleted.Should().BeTrue();
+            error.Should().BeNull();
         }
     }
 }

@@ -2,6 +2,7 @@
 using PeculiarCardGame.Data;
 using PeculiarCardGame.Data.Models;
 using PeculiarCardGame.Services;
+using PeculiarCardGame.Shared;
 using Service = PeculiarCardGame.Services.Users.UsersService;
 
 namespace PeculiarCardGame.Tests.Services.UsersService
@@ -36,13 +37,14 @@ namespace PeculiarCardGame.Tests.Services.UsersService
         }
 
         [Fact]
-        public void NotExistingUserId_ShouldReturnNull()
+        public void NotExistingUserId_ShouldReturnErrorTypeNotFound()
         {
             var service = new Service(_dbContext, _requestContext);
 
-            var user = service.GetUser(_user.Id);
+            var result = service.GetUser(_user.Id);
 
-            user.Should().BeNull();
+            result.Should().BeLeft();
+            result.Left.Should().Be(ErrorType.NotFound);
         }
 
         [Fact]
@@ -51,12 +53,12 @@ namespace PeculiarCardGame.Tests.Services.UsersService
             _dbContext.SetupTest(_user);
             var service = new Service(_dbContext, _requestContext);
 
-            var user = service.GetUser(_user.Id);
+            var result = service.GetUser(_user.Id);
 
-            user.Should().NotBeNull();
-            user!.Username.Should().Be(_user.Username);
-            user.DisplayedName.Should().Be(_user.DisplayedName);
-            user.PasswordHash.Should().Be(_user.PasswordHash);
+            result.Should().BeRight();
+            result.Right.Username.Should().Be(_user.Username);
+            result.Right.DisplayedName.Should().Be(_user.DisplayedName);
+            result.Right.PasswordHash.Should().Be(_user.PasswordHash);
         }
 
         [Theory]
