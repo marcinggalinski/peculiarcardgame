@@ -40,15 +40,15 @@ namespace PeculiarCardGame.WebApi.Infrastructure.Authentication
                 return Task.FromResult(AuthenticateResult.Fail("Missing token"));
 
             var token = authentication.Parameter;
-            var user = _authenticationService.Authenticate(token);
-            if (user is null)
+            var authenticationResult = _authenticationService.Authenticate(token);
+            if (authenticationResult.IsLeft)
                 return Task.FromResult(AuthenticateResult.Fail("Invalid credentials"));
 
-            _requestContext.SetOnce(user);
+            _requestContext.SetOnce(authenticationResult.Right);
 
             var identity = new ClaimsIdentity(SchemeName);
             identity.AddClaim(new Claim("BearerToken", token));
-            identity.AddClaim(new Claim("UserId", user.Username));
+            identity.AddClaim(new Claim("UserId", authenticationResult.Right.Username));
 
             var principal = new ClaimsPrincipal(identity);
             var ticket = new AuthenticationTicket(principal, SchemeName);

@@ -7,6 +7,7 @@ using PeculiarCardGame.Data.Models;
 using PeculiarCardGame.Services.Authentication;
 using PeculiarCardGame.Services.DeckManagement;
 using PeculiarCardGame.Services.Users;
+using PeculiarCardGame.Shared;
 using PeculiarCardGame.WebApi.Models.Responses;
 
 namespace PeculiarCardGame.Tests.Controllers.UsersController
@@ -27,25 +28,28 @@ namespace PeculiarCardGame.Tests.Controllers.UsersController
             const string ExistingUsername = "test";
             const string NotExistingUsername = "notexisting";
             const string DisplayedName = "test";
-            const string PasswordHash = "test";
+            const string ValidPasswordHash = "test";
+            const string InvalidPasswordHash = "invalid";
 
             _existingUser = new User
             {
                 Id = ExistingUserId,
                 Username = ExistingUsername,
                 DisplayedName = DisplayedName,
-                PasswordHash = PasswordHash
+                PasswordHash = ValidPasswordHash
             };
             _notExistingUser = new User
             {
                 Id = NotExistingUserId,
                 Username = NotExistingUsername,
                 DisplayedName = DisplayedName,
-                PasswordHash = PasswordHash
+                PasswordHash = InvalidPasswordHash
             };
 
             var authenticationService = Substitute.For<IAuthenticationService>();
             authenticationService.Authenticate(_existingUser.Username, _existingUser.PasswordHash).Returns(_existingUser);
+            authenticationService.Authenticate(_existingUser.Username, _notExistingUser.PasswordHash).Returns(ErrorType.AuthenticationFailed);
+            authenticationService.Authenticate(_notExistingUser.Username, Arg.Any<string>()).Returns(ErrorType.NotFound);
             authenticationService.GenerateBearerToken(Arg.Any<string>()).Returns(BearerToken);
 
             var usersService = Substitute.For<IUsersService>();

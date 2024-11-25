@@ -26,5 +26,9 @@ public enum ErrorType
     /// <summary>
     /// User was unauthorized for the specified action.
     /// </summary>
-    Unauthorized
+    Unauthorized,
+    /// <summary>
+    /// Password or token was invalid.
+    /// </summary>
+    AuthenticationFailed
 }

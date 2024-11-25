@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using PeculiarCardGame.Data;
 using PeculiarCardGame.Data.Models;
 using PeculiarCardGame.Services;
+using PeculiarCardGame.Shared;
 using PeculiarCardGame.Shared.Options;
 using Service = PeculiarCardGame.Services.Authentication.AuthenticationService;
 
@@ -11,7 +12,6 @@ namespace PeculiarCardGame.Tests.Services.AuthenticationService
 {
     public class Authenticate
     {
-        private readonly IReadOnlyList<string> Audiences = new List<string>() { "test" };
         private const string Issuer = "test";
         private const string Key = "testtesttesttest";
 
@@ -20,6 +20,8 @@ namespace PeculiarCardGame.Tests.Services.AuthenticationService
         private const string ValidPassword = "test";
         private const string InvalidPassword = "invalid";
         private const string InvalidToken = "invalid";
+        
+        private readonly IReadOnlyList<string> _audiences = new List<string> { "test" };
 
         private readonly User _user;
 
@@ -44,7 +46,7 @@ namespace PeculiarCardGame.Tests.Services.AuthenticationService
 
             _options = Options.Create(new BearerTokenAuthenticationSchemeOptions
             {
-                Audiences = Audiences,
+                Audiences = _audiences,
                 ClaimsIssuer = Issuer,
                 Key = Key
             });
@@ -78,17 +80,29 @@ namespace PeculiarCardGame.Tests.Services.AuthenticationService
         }
 
         [Theory]
-        [InlineData(NotExistingUsername, InvalidPassword)]
-        [InlineData(NotExistingUsername, ValidPassword)]
-        [InlineData(ExistingUsername, InvalidPassword)]
-        public void InvalidUsernameOrPassword_ShouldReturnNull(string username, string password)
+        [InlineData(InvalidPassword)]
+        [InlineData(ValidPassword)]
+        public void NotExistingUsername_ShouldReturnErrorTypeNotFound(string password)
         {
             _dbContext.SetupTest(_user);
             var service = new Service(_options, _dbContext, _emptyRequestContext);
 
-            var user = service.Authenticate(username, password);
+            var result = service.Authenticate(NotExistingUsername, password);
 
-            user.Should().BeNull();
+            result.Should().BeLeft();
+            result.Left.Should().Be(ErrorType.NotFound);
+        }
+        
+        [Fact]
+        public void InvalidPassword_ShouldReturnErrorTypeAuthenticationFailed()
+        {
+            _dbContext.SetupTest(_user);
+            var service = new Service(_options, _dbContext, _emptyRequestContext);
+
+            var result = service.Authenticate(ExistingUsername, InvalidPassword);
+
+            result.Should().BeLeft();
+            result.Left.Should().Be(ErrorType.AuthenticationFailed);
         }
 
         [Fact]
@@ -97,12 +111,12 @@ namespace PeculiarCardGame.Tests.Services.AuthenticationService
             _dbContext.SetupTest(_user);
             var service = new Service(_options, _dbContext, _emptyRequestContext);
 
-            var user = service.Authenticate(_user.Username, ValidPassword);
+            var result = service.Authenticate(_user.Username, ValidPassword);
 
-            user!.Should().NotBeNull();
-            user!.Id.Should().Be(user.Id);
-            user.Username.Should().Be(_user.Username);
-            user.DisplayedName.Should().Be(_user.DisplayedName);
+            result.Should().BeRight();
+            result.Right.Id.Should().Be(_user.Id);
+            result.Right.Username.Should().Be(_user.Username);
+            result.Right.DisplayedName.Should().Be(_user.DisplayedName);
         }
 
         [Fact]
@@ -118,24 +132,26 @@ namespace PeculiarCardGame.Tests.Services.AuthenticationService
         }
 
         [Fact]
-        public void InvalidToken_ShouldReturnNull()
+        public void InvalidToken_ShouldReturnErrorTypeAuthenticationFailed()
         {
             var service = new Service(_options, _dbContext, _emptyRequestContext);
 
-            var user = service.Authenticate(InvalidToken);
+            var result = service.Authenticate(InvalidToken);
 
-            user.Should().BeNull();
+            result.Should().BeLeft();
+            result.Left.Should().Be(ErrorType.AuthenticationFailed);
         }
 
         [Fact]
-        public void ValidTokenForNotExistingUser_ShouldReturnNull()
+        public void ValidTokenForNotExistingUser_ShouldReturnErrorTypeNotfound()
         {
             var service = new Service(_options, _dbContext, _notExistingUserFilledRequestContext);
-            var token = service.GenerateBearerToken(Audiences.First());
+            var token = service.GenerateBearerToken(_audiences[0]);
 
-            var user = service.Authenticate(token);
+            var result = service.Authenticate(token);
 
-            user.Should().BeNull();
+            result.Should().BeLeft();
+            result.Left.Should().Be(ErrorType.NotFound);
         }
 
         [Fact]
@@ -143,14 +159,14 @@ namespace PeculiarCardGame.Tests.Services.AuthenticationService
         {
             _dbContext.SetupTest(_user);
             var service = new Service(_options, _dbContext, _existingUserFilledRequestContext);
-            var token = service.GenerateBearerToken(Audiences.First());
+            var token = service.GenerateBearerToken(_audiences[0]);
 
-            var user = service.Authenticate(token);
+            var result = service.Authenticate(token);
 
-            user.Should().NotBeNull();
-            user!.Id.Should().Be(user.Id);
-            user.Username.Should().Be(_user.Username);
-            user.DisplayedName.Should().Be(_user.DisplayedName);
+            result.Should().BeRight();
+            result.Right.Id.Should().Be(_user.Id);
+            result.Right.Username.Should().Be(_user.Username);
+            result.Right.DisplayedName.Should().Be(_user.DisplayedName);
         }
     }
 }

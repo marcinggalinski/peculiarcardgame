@@ -44,12 +44,12 @@ namespace PeculiarCardGame.WebApi.Infrastructure.Authentication
             if (credentials.Length != 2)
                 return Task.FromResult(AuthenticateResult.Fail("Invalid parameter"));
 
-            var user = _authenticationService.Authenticate(credentials[0], credentials[1]);
-            if (user is null)
+            var authenticationResult = _authenticationService.Authenticate(credentials[0], credentials[1]);
+            if (authenticationResult.IsLeft)
                 return Task.FromResult(AuthenticateResult.Fail("Invalid credentials"));
 
-            _requestContext.SetOnce(user);
-            var bearerToken = _authenticationService.GenerateBearerToken(Request.Headers["Origin"].ToString());
+            _requestContext.SetOnce(authenticationResult.Right);
+            var bearerToken = _authenticationService.GenerateBearerToken(Request.Headers.Origin.ToString());
 
             var identity = new ClaimsIdentity(SchemeName);
             identity.AddClaim(new Claim("BearerToken", bearerToken));

@@ -7,6 +7,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Web.Helpers;
+using PeculiarCardGame.Shared;
 
 namespace PeculiarCardGame.Services.Authentication
 {
@@ -25,7 +26,7 @@ namespace PeculiarCardGame.Services.Authentication
             _requestContext = requestContext;
         }
 
-        public User? Authenticate(string username, string password)
+        public Either<ErrorType, User> Authenticate(string username, string password)
         {
             if (username is null)
                 throw new ArgumentNullException(nameof(username));
@@ -34,15 +35,15 @@ namespace PeculiarCardGame.Services.Authentication
 
             var user = _dbContext.Users.SingleOrDefault(x => x.Username == username);
             if (user is null)
-                return null;
+                return ErrorType.NotFound;
 
             if (!Crypto.VerifyHashedPassword(user.PasswordHash, password))
-                return null;
+                return ErrorType.AuthenticationFailed;
 
             return user;
         }
 
-        public User? Authenticate(string token)
+        public Either<ErrorType, User> Authenticate(string token)
         {
             if (token is null)
                 throw new ArgumentNullException(nameof(token));
@@ -69,12 +70,12 @@ namespace PeculiarCardGame.Services.Authentication
             }
             catch
             {
-                return null;
+                return ErrorType.AuthenticationFailed;
             }
 
             var user = _dbContext.Users.SingleOrDefault(x => x.Username == username);
             if (user is null)
-                return null;
+                return ErrorType.NotFound;
 
             return user;
         }
