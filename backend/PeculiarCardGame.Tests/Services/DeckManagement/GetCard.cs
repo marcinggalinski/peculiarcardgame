@@ -46,13 +46,14 @@ namespace PeculiarCardGame.Tests.Services.DeckManagement
         }
 
         [Fact]
-        public void NotExistingCardId_ShouldReturnNull()
+        public void NotExistingCardId_ShouldReturnErrorTypeNotFound()
         {
             var service = new Service(_dbContext, _requestContext);
 
-            var card = service.GetCard(_card.Id);
+            var result = service.GetCard(_card.Id);
 
-            card.Should().BeNull();
+            result.Should().BeLeft();
+            result.Left.Should().Be(ErrorType.NotFound);
         }
 
         [Fact]
@@ -62,13 +63,13 @@ namespace PeculiarCardGame.Tests.Services.DeckManagement
             _dbContext.SetupTest(_card);
             var service = new Service(_dbContext, _requestContext);
 
-            var card = service.GetCard(_card.Id);
+            var result = service.GetCard(_card.Id);
 
-            card.Should().NotBeNull();
-            card!.Id.Should().Be(_card.Id);
-            card.DeckId.Should().Be(_card.DeckId);
-            card.Text.Should().Be(_card.Text);
-            card.CardType.Should().Be(_card.CardType);
+            result.Should().BeRight();
+            result.Right.Id.Should().Be(_card.Id);
+            result.Right.DeckId.Should().Be(_card.DeckId);
+            result.Right.Text.Should().Be(_card.Text);
+            result.Right.CardType.Should().Be(_card.CardType);
         }
 
         [Theory]

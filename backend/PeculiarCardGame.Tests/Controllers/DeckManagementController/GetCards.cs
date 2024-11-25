@@ -72,9 +72,12 @@ namespace PeculiarCardGame.Tests.Controllers.DeckManagementController
 
             _deckManagementService = Substitute.For<IDeckManagementService>();
             _deckManagementService.GetDeck(_existingDeck.Id).Returns(_existingDeck);
+            _deckManagementService.GetDeck(_notExistingDeck.Id).Returns(ErrorType.NotFound);
             _deckManagementService.GetAllCards(_existingDeck.Id).Returns(cards);
+            _deckManagementService.GetAllCards(_notExistingDeck.Id).Returns(ErrorType.NotFound);
             _deckManagementService.SearchCards(_existingDeck.Id, Arg.Any<string?>()).Returns(new List<Card>());
             _deckManagementService.SearchCards(_existingDeck.Id, MatchingQuery).Returns(cards);
+            _deckManagementService.SearchCards(_notExistingDeck.Id, Arg.Any<string?>()).Returns(ErrorType.NotFound);
 
             var authenticationService = Substitute.For<IAuthenticationService>();
             var usersService = Substitute.For<IUsersService>();

@@ -11,6 +11,8 @@ namespace PeculiarCardGame.Tests.Services.DeckManagement
     {
         private const string NewText = "new";
 
+        private readonly string _tooLongText = new string('x', Card.MaxTextLength + 1);
+
         private readonly Deck _deck;
         private readonly Card _card;
         private readonly Card _anotherCard;
@@ -111,14 +113,15 @@ namespace PeculiarCardGame.Tests.Services.DeckManagement
         }
 
         [Fact]
-        public void NotExistingCardId_ShouldReturnNull()
+        public void NotExistingCardId_ShouldReturnErrorTypeNotFound()
         {
             _dbContext.SetupTest(_deck);
             var service = new Service(_dbContext, _authorFilledRequestContext);
 
-            var card = service.UpdateCard(_card.Id, NewText);
+            var result = service.UpdateCard(_card.Id, NewText);
 
-            card.Should().BeNull();
+            result.Should().BeLeft();
+            result.Left.Should().Be(ErrorType.NotFound);
         }
 
         [Fact]
@@ -138,15 +141,16 @@ namespace PeculiarCardGame.Tests.Services.DeckManagement
         }
 
         [Fact]
-        public void NotAuthor_ShouldReturnNull()
+        public void NotAuthor_ShouldReturnErrorTypeUnauthorized()
         {
             _dbContext.SetupTest(_deck);
             _dbContext.SetupTest(_card);
             var service = new Service(_dbContext, _notAuthorFilledRequestContext);
 
-            var card = service.UpdateCard(_card.Id, NewText);
+            var result = service.UpdateCard(_card.Id, NewText);
 
-            card.Should().BeNull();
+            result.Should().BeLeft();
+            result.Left.Should().Be(ErrorType.Unauthorized);
         }
 
         [Fact]
@@ -166,18 +170,47 @@ namespace PeculiarCardGame.Tests.Services.DeckManagement
         }
 
         [Fact]
+        public void TooLongText_ShouldReturnErrorTypeConstraintsNotMet()
+        {
+            _dbContext.SetupTest(_deck);
+            _dbContext.SetupTest(_card);
+            var service = new Service(_dbContext, _authorFilledRequestContext);
+
+            var result = service.UpdateCard(_card.Id, _tooLongText);
+
+            result.Should().BeLeft();
+            result.Left.Should().Be(ErrorType.ConstraintsNotMet);
+        }
+
+        [Fact]
+        public void TooLongText_ShouldNotUpdateCard()
+        {
+            _dbContext.SetupTest(_deck);
+            _dbContext.SetupTest(_card);
+            var service = new Service(_dbContext, _authorFilledRequestContext);
+
+            service.UpdateCard(_card.Id, _tooLongText);
+            var card = _dbContext.Cards.Single(x => x.Id == _card.Id);
+
+            card.Id.Should().Be(_card.Id);
+            card.DeckId.Should().Be(_card.DeckId);
+            card.Text.Should().Be(_card.Text);
+            card.CardType.Should().Be(_card.CardType);
+        }
+
+        [Fact]
         public void ExistingCardId_ShouldReturnUpdatedCard()
         {
             _dbContext.SetupTest(_deck);
             _dbContext.SetupTest(_card);
             var service = new Service(_dbContext, _authorFilledRequestContext);
 
-            var card = service.UpdateCard(_card.Id, NewText);
+            var result = service.UpdateCard(_card.Id, NewText);
 
-            card.Should().NotBeNull();
-            card!.Id.Should().Be(_card.Id);
-            card.DeckId.Should().Be(_card.DeckId);
-            card.Text.Should().Be(NewText);
+            result.Should().BeRight();
+            result.Right.Id.Should().Be(_card.Id);
+            result.Right.DeckId.Should().Be(_card.DeckId);
+            result.Right.Text.Should().Be(NewText);
         }
 
         [Fact]

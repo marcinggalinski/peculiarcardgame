@@ -18,7 +18,7 @@ namespace PeculiarCardGame.Services.DeckManagement
 
         #region decks
 
-        public Deck AddDeck(string name, string? description)
+        public Either<ErrorType, Deck> AddDeck(string name, string? description)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentNullException(nameof(name));
@@ -28,6 +28,9 @@ namespace PeculiarCardGame.Services.DeckManagement
 
             name = name.Trim();
             description = description?.Trim() ?? string.Empty;
+
+            if (name.Length > Deck.MaxNameLength || description.Length > Deck.MaxDescriptionLength)
+                return ErrorType.ConstraintsNotMet;
 
             var deck = _dbContext.Decks.Add(new Deck
             {
@@ -40,9 +43,11 @@ namespace PeculiarCardGame.Services.DeckManagement
             return deck;
         }
 
-        public Deck? GetDeck(int id)
+        public Either<ErrorType, Deck> GetDeck(int id)
         {
             var deck = _dbContext.Decks.SingleOrDefault(x => x.Id == id);
+            if (deck is null)
+                return ErrorType.NotFound;
             return deck;
         }
 
@@ -60,17 +65,24 @@ namespace PeculiarCardGame.Services.DeckManagement
             return decks;
         }
 
-        public Deck? UpdateDeck(int id, string? nameUpdate, string? descriptionUpdate)
+        public Either<ErrorType, Deck> UpdateDeck(int id, string? nameUpdate, string? descriptionUpdate)
         {
             if (_requestContext.CallingUser is null)
                 throw new InvalidOperationException($"{nameof(UpdateDeck)} can only be called by an authenticated user.");
 
-            var deck = _dbContext.Decks.SingleOrDefault(x => x.Id == id && x.AuthorId == _requestContext.CallingUser.Id);
+            var deck = _dbContext.Decks.SingleOrDefault(x => x.Id == id);
             if (deck is null)
-                return null;
+                return ErrorType.NotFound;
+
+            if (_requestContext.CallingUser.Id != deck.AuthorId)
+                return ErrorType.Unauthorized;
 
             nameUpdate = nameUpdate?.Trim();
             descriptionUpdate = descriptionUpdate?.Trim();
+
+            if (nameUpdate is not null && nameUpdate.Length > Deck.MaxNameLength
+                || descriptionUpdate is not null && descriptionUpdate.Length > Deck.MaxDescriptionLength)
+                return ErrorType.ConstraintsNotMet;
 
             if (!string.IsNullOrEmpty(nameUpdate))
                 deck.Name = nameUpdate;
@@ -83,26 +95,29 @@ namespace PeculiarCardGame.Services.DeckManagement
             return deck;
         }
 
-        public bool DeleteDeck(int id)
+        public ErrorType? DeleteDeck(int id)
         {
             if (_requestContext.CallingUser is null)
                 throw new InvalidOperationException($"{nameof(DeleteDeck)} can only be called by an authenticated user.");
 
-            var deck = _dbContext.Decks.SingleOrDefault(x => x.Id == id && x.AuthorId == _requestContext.CallingUser.Id);
+            var deck = _dbContext.Decks.SingleOrDefault(x => x.Id == id);
             if (deck is null)
-                return false;
+                return ErrorType.NotFound;
+
+            if (_requestContext.CallingUser.Id != deck.AuthorId)
+                return ErrorType.Unauthorized;
 
             _dbContext.Decks.Remove(deck);
             _dbContext.SaveChanges();
 
-            return true;
+            return null;
         }
 
         #endregion
 
         #region cards
 
-        public Card? AddCard(int deckId, string text, CardType type)
+        public Either<ErrorType, Card> AddCard(int deckId, string text, CardType type)
         {
             if (string.IsNullOrWhiteSpace(text))
                 throw new ArgumentNullException(nameof(text));
@@ -110,11 +125,16 @@ namespace PeculiarCardGame.Services.DeckManagement
             if (_requestContext.CallingUser is null)
                 throw new InvalidOperationException($"{nameof(AddCard)} can only be called by an authenticated user.");
 
-            var deck = _dbContext.Decks.SingleOrDefault(x => x.Id == deckId && x.AuthorId == _requestContext.CallingUser.Id);
+            var deck = _dbContext.Decks.SingleOrDefault(x => x.Id == deckId);
             if (deck is null)
-                return null;
+                return ErrorType.NotFound;
+
+            if (_requestContext.CallingUser.Id != deck.AuthorId)
+                return ErrorType.Unauthorized;
 
             text = text.Trim();
+            if (text.Length > Card.MaxTextLength)
+                return ErrorType.ConstraintsNotMet;
 
             var card = _dbContext.Cards.Add(new Card
             {
@@ -127,35 +147,37 @@ namespace PeculiarCardGame.Services.DeckManagement
             return card;
         }
 
-        public List<Card> GetAllCards(int deckId)
+        public Either<ErrorType, List<Card>> GetAllCards(int deckId)
         {
-            var deck = _dbContext.Decks.Include(deck => deck.Cards).SingleOrDefault(x => x.Id == deckId);
+            var deck = _dbContext.Decks.Include(x => x.Cards).SingleOrDefault(x => x.Id == deckId);
             if (deck is null)
-                return new List<Card>();
+                return ErrorType.NotFound;
 
             var cards = deck.Cards.ToList();
             return cards;
         }
 
-        public Card? GetCard(int id)
+        public Either<ErrorType, Card> GetCard(int id)
         {
             var card = _dbContext.Cards.SingleOrDefault(x => x.Id == id);
+            if (card is null)
+                return ErrorType.NotFound;
             return card;
         }
 
-        public List<Card>? SearchCards(int deckId, string? query)
+        public Either<ErrorType, List<Card>> SearchCards(int deckId, string? query)
         {
             query ??= string.Empty;
 
-            var deck = _dbContext.Decks.Include(deck => deck.Cards).SingleOrDefault(x => x.Id == deckId);
+            var deck = _dbContext.Decks.Include(x => x.Cards).SingleOrDefault(x => x.Id == deckId);
             if (deck is null)
-                return null;
+                return ErrorType.NotFound;
 
             var cards = deck.Cards.Where(x => x.Text.Contains(query)).ToList();
             return cards;
         }
 
-        public Card? UpdateCard(int id, string textUpdate)
+        public Either<ErrorType, Card> UpdateCard(int id, string textUpdate)
         {
             if (string.IsNullOrWhiteSpace(textUpdate))
                 throw new ArgumentNullException(nameof(textUpdate));
@@ -163,11 +185,16 @@ namespace PeculiarCardGame.Services.DeckManagement
             if (_requestContext.CallingUser is null)
                 throw new InvalidOperationException($"{nameof(UpdateCard)} can only be called by an authenticated user.");
 
-            var card = _dbContext.Cards.SingleOrDefault(x => x.Id == id && x.Deck.AuthorId == _requestContext.CallingUser.Id);
+            var card = _dbContext.Cards.Include(x => x.Deck).SingleOrDefault(x => x.Id == id);
             if (card is null)
-                return null;
+                return ErrorType.NotFound;
+
+            if (_requestContext.CallingUser.Id != card.Deck.AuthorId)
+                return ErrorType.Unauthorized;
 
             textUpdate = textUpdate.Trim();
+            if (textUpdate.Length > Card.MaxTextLength)
+                return ErrorType.ConstraintsNotMet;
 
             if (!string.IsNullOrEmpty(textUpdate))
                 card.Text = textUpdate;
@@ -178,19 +205,22 @@ namespace PeculiarCardGame.Services.DeckManagement
             return card;
         }
 
-        public bool DeleteCard(int id)
+        public ErrorType? DeleteCard(int id)
         {
             if (_requestContext.CallingUser is null)
                 throw new InvalidOperationException($"{nameof(DeleteCard)} can only be called by an authenticated user.");
 
-            var card = _dbContext.Cards.SingleOrDefault(x => x.Id == id && x.Deck.AuthorId == _requestContext.CallingUser.Id);
+            var card = _dbContext.Cards.Include(x => x.Deck).SingleOrDefault(x => x.Id == id);
             if (card is null)
-                return false;
+                return ErrorType.NotFound;
+
+            if (_requestContext.CallingUser.Id != card.Deck.AuthorId)
+                return ErrorType.Unauthorized;
 
             _dbContext.Cards.Remove(card);
             _dbContext.SaveChanges();
 
-            return true;
+            return null;
         }
 
         #endregion

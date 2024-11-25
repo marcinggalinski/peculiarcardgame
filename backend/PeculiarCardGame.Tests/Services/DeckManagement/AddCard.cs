@@ -12,6 +12,8 @@ namespace PeculiarCardGame.Tests.Services.DeckManagement
         private const string CardText = "test";
         private const CardType CardType = PeculiarCardGame.Shared.CardType.Black;
 
+        private readonly string _tooLongCardText = new string('x', Card.MaxTextLength + 1); 
+
         private readonly Deck _deck;
 
         private readonly PeculiarCardGameDbContext _dbContext;
@@ -114,13 +116,14 @@ namespace PeculiarCardGame.Tests.Services.DeckManagement
         }
 
         [Fact]
-        public void NotExistingDeckId_ShouldReturnNull()
+        public void NotExistingDeckId_ShouldReturnErrorTypeNotFound()
         {
             var service = new Service(_dbContext, _authorFilledRequestContext);
 
-            var card = service.AddCard(_deck.Id, CardText, CardType);
+            var result = service.AddCard(_deck.Id, CardText, CardType);
 
-            card.Should().BeNull();
+            result.Should().BeLeft();
+            result.Left.Should().Be(ErrorType.NotFound);
         }
 
         [Fact]
@@ -135,22 +138,49 @@ namespace PeculiarCardGame.Tests.Services.DeckManagement
         }
 
         [Fact]
-        public void NotAuthor_ShouldReturnNull()
+        public void NotAuthor_ShouldReturnErrorTypeUnauthorized()
         {
+            _dbContext.SetupTest(_deck);
             var service = new Service(_dbContext, _notAuthorFilledRequestContext);
 
-            var card = service.AddCard(_deck.Id, CardText, CardType);
+            var result = service.AddCard(_deck.Id, CardText, CardType);
 
-            card.Should().BeNull();
+            result.Should().BeLeft();
+            result.Left.Should().Be(ErrorType.Unauthorized);
         }
 
         [Fact]
         public void NotAuthor_ShouldNotAddCard()
         {
+            _dbContext.SetupTest(_deck);
             var cardCountBefore = _dbContext.Cards.Count();
             var service = new Service(_dbContext, _notAuthorFilledRequestContext);
 
             service.AddCard(_deck.Id, CardText, CardType);
+
+            _dbContext.Cards.Should().HaveCount(cardCountBefore);
+        }
+
+        [Fact]
+        public void TooLongText_ShouldReturnErrorTypeConstraintsNotMet()
+        {
+            _dbContext.SetupTest(_deck);
+            var service = new Service(_dbContext, _authorFilledRequestContext);
+
+            var result = service.AddCard(_deck.Id, _tooLongCardText, CardType);
+
+            result.Should().BeLeft();
+            result.Left.Should().Be(ErrorType.ConstraintsNotMet);
+        }
+
+        [Fact]
+        public void TooLongText_ShouldNotAddCard()
+        {
+            _dbContext.SetupTest(_deck);
+            var cardCountBefore = _dbContext.Cards.Count();
+            var service = new Service(_dbContext, _authorFilledRequestContext);
+
+            service.AddCard(_deck.Id, _tooLongCardText, CardType);
 
             _dbContext.Cards.Should().HaveCount(cardCountBefore);
         }
@@ -161,12 +191,12 @@ namespace PeculiarCardGame.Tests.Services.DeckManagement
             _dbContext.SetupTest(_deck);
             var service = new Service(_dbContext, _authorFilledRequestContext);
 
-            var card = service.AddCard(_deck.Id, CardText, CardType);
+            var result = service.AddCard(_deck.Id, CardText, CardType);
 
-            card.Should().NotBeNull();
-            card!.DeckId.Should().Be(_deck.Id);
-            card.Text.Should().Be(CardText);
-            card.CardType.Should().Be(CardType);
+            result.Should().BeRight();
+            result.Right.DeckId.Should().Be(_deck.Id);
+            result.Right.Text.Should().Be(CardText);
+            result.Right.CardType.Should().Be(CardType);
         }
 
         [Fact]

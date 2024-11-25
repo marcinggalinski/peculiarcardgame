@@ -68,9 +68,10 @@ namespace PeculiarCardGame.Tests.Services.DeckManagement
             _dbContext.SetupTest(card => card.Id = 0, Enumerable.Repeat(_searchedCard, SearchedCardCount).ToArray());
             var service = new Service(_dbContext, _requestContext);
 
-            var cards = service.SearchCards(_deck.Id, query);
+            var result = service.SearchCards(_deck.Id, query);
 
-            cards.Should().HaveCount(SearchedCardCount);
+            result.Should().BeRight();
+            result.Right.Should().HaveCount(SearchedCardCount);
         }
 
         [Fact]
@@ -81,19 +82,21 @@ namespace PeculiarCardGame.Tests.Services.DeckManagement
             _dbContext.SetupTest(card => card.Id = 0, Enumerable.Repeat(_searchedCard, SearchedCardCount).ToArray());
             var service = new Service(_dbContext, _requestContext);
 
-            var cards = service.SearchCards(_deck.Id, Query);
+            var result = service.SearchCards(_deck.Id, Query);
 
-            cards.Should().HaveCount(SearchedCardCount);
+            result.Should().BeRight();
+            result.Right.Should().HaveCount(SearchedCardCount);
         }
 
         [Fact]
-        public void NotExistingDeckId_ShouldReturnNull()
+        public void NotExistingDeckId_ShouldReturnErrorTypeNotFound()
         {
             var service = new Service(_dbContext, _requestContext);
 
-            var cards = service.SearchCards(_deck.Id, Query);
+            var result = service.SearchCards(_deck.Id, Query);
 
-            cards.Should().BeNull();
+            result.Should().BeLeft();
+            result.Left.Should().Be(ErrorType.NotFound);
         }
 
         [Fact]

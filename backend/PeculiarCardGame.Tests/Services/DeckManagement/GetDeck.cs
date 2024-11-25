@@ -2,6 +2,7 @@
 using PeculiarCardGame.Data;
 using PeculiarCardGame.Data.Models;
 using PeculiarCardGame.Services;
+using PeculiarCardGame.Shared;
 using Service = PeculiarCardGame.Services.DeckManagement.DeckManagementService;
 
 namespace PeculiarCardGame.Tests.Services.DeckManagement
@@ -36,13 +37,14 @@ namespace PeculiarCardGame.Tests.Services.DeckManagement
         }
 
         [Fact]
-        public void NotExistingDeckId_ShouldReturnNull()
+        public void NotExistingDeckId_ShouldReturnErrorTypeNotFound()
         {
             var service = new Service(_dbContext, _requestContext);
 
-            var deck = service.GetDeck(NotExistingDeckId);
+            var result = service.GetDeck(NotExistingDeckId);
 
-            deck.Should().BeNull();
+            result.Should().BeLeft();
+            result.Left.Should().Be(ErrorType.NotFound);
         }
 
         [Fact]
@@ -51,13 +53,13 @@ namespace PeculiarCardGame.Tests.Services.DeckManagement
             _dbContext.SetupTest(_deck);
             var service = new Service(_dbContext, _requestContext);
 
-            var deck = service.GetDeck(_deck.Id);
+            var result = service.GetDeck(_deck.Id);
 
-            deck.Should().NotBeNull();
-            deck!.Id.Should().Be(_deck.Id);
-            deck.AuthorId.Should().Be(_deck.AuthorId);
-            deck.Name.Should().Be(_deck.Name);
-            deck.Description.Should().Be(_deck.Description);
+            result.Should().BeRight();
+            result.Right.Id.Should().Be(_deck.Id);
+            result.Right.AuthorId.Should().Be(_deck.AuthorId);
+            result.Right.Name.Should().Be(_deck.Name);
+            result.Right.Description.Should().Be(_deck.Description);
         }
 
         [Theory]

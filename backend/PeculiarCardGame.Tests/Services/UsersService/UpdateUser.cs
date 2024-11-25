@@ -9,8 +9,10 @@ namespace PeculiarCardGame.Tests.Services.UsersService
 {
     public class UpdateUser
     {
-        const string NewDisplayedName = "new";
-        const string NewPassword = "new";
+        private const string NewDisplayedName = "new";
+        private const string NewPassword = "new";
+
+        private readonly string _tooLongDisplayedName = new string('x', User.MaxDisplayNameLength + 1);
 
         private readonly User _user;
         private readonly User _anotherUser;
@@ -125,6 +127,33 @@ namespace PeculiarCardGame.Tests.Services.UsersService
             var service = new Service(_dbContext, _filledRequestContext);
 
             service.UpdateUser(_anotherUser.Id, null, null);
+            var user = _dbContext.Users.Single(x => x.Id == _user.Id);
+
+            user.Id.Should().Be(_user.Id);
+            user.Username.Should().Be(_user.Username);
+            user.DisplayedName.Should().Be(_user.DisplayedName);
+            user.PasswordHash.Should().Be(_user.PasswordHash);
+        }
+
+        [Fact]
+        public void ExistingUser_TooLongDisplayedName_ShouldReturnErrorTypeConstraintsNotMet()
+        {
+            _dbContext.SetupTest(_user);
+            var service = new Service(_dbContext, _filledRequestContext);
+
+            var result = service.UpdateUser(_user.Id, _tooLongDisplayedName, null);
+
+            result.Should().BeLeft();
+            result.Left.Should().Be(ErrorType.ConstraintsNotMet);
+        }
+
+        [Fact]
+        public void ExistingUser_TooLongDisplayedName_ShouldNotUpdateUser()
+        {
+            _dbContext.SetupTest(_user);
+            var service = new Service(_dbContext, _filledRequestContext);
+
+            service.UpdateUser(_user.Id, _tooLongDisplayedName, null);
             var user = _dbContext.Users.Single(x => x.Id == _user.Id);
 
             user.Id.Should().Be(_user.Id);

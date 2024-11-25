@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PeculiarCardGame.Services.DeckManagement;
+using PeculiarCardGame.Shared;
 using PeculiarCardGame.WebApi.Infrastructure.Authentication;
 using PeculiarCardGame.WebApi.Models.Requests;
 using PeculiarCardGame.WebApi.Models.Responses;
@@ -32,8 +34,15 @@ namespace PeculiarCardGame.WebApi.Controllers
         {
             try
             {
-                var deck = _deckManagementService.AddDeck(request.Name, request.Description);
-                return CreatedAtAction(nameof(GetDeck), new { id = deck.Id }, GetDeckResponse.FromDeck(deck));
+                var result = _deckManagementService.AddDeck(request.Name, request.Description);
+                if (result.IsRight)
+                    return CreatedAtAction(nameof(GetDeck), new { id = result.Right.Id }, GetDeckResponse.FromDeck(result.Right));
+
+                return result.Left switch
+                {
+                    ErrorType.ConstraintsNotMet => UnprocessableEntity("Deck name or description too long."),
+                    _ => throw new UnreachableException($"result.Left = {result.Left.ToString()}")
+                };
             }
             catch (ArgumentNullException ex)
             {
@@ -48,10 +57,15 @@ namespace PeculiarCardGame.WebApi.Controllers
         [SwaggerResponse(404, "Deck not found")]
         public ActionResult<GetDeckResponse> GetDeck(int id)
         {
-            var deck = _deckManagementService.GetDeck(id);
-            if (deck is null)
-                return NotFound();
-            return Ok(GetDeckResponse.FromDeck(deck));
+            var result = _deckManagementService.GetDeck(id);
+            if (result.IsRight)
+                return Ok(GetDeckResponse.FromDeck(result.Right));
+
+            return result.Left switch
+            {
+                ErrorType.NotFound => NotFound("Deck not found."),
+                _ => throw new UnreachableException($"result.Left = {result.Left.ToString()}")
+            };
         }
 
         [HttpGet("decks")]
@@ -64,17 +78,23 @@ namespace PeculiarCardGame.WebApi.Controllers
             return Ok(decks.ConvertAll(GetDeckResponse.FromDeck));
         }
 
-        [HttpPatch("decks/{id}")]
+        [HttpPatch("decks/{id:int}")]
         [SwaggerOperation("Updates specified deck.", "Requires valid bearer token authentication data to be sent in 'Authorization' header. Only updates basic information about the deck, to add, delete or modify cards the deck consists of use other endpoints. Doesn't allow modifying other users' decks. Deck name and description are trimmed of any leading or trailing whitespaces.")]
         [SwaggerResponse(200, "Deck updated", typeof(GetDeckResponse))]
         [SwaggerResponse(401, "Invalid authentication data", typeof(string))]
         [SwaggerResponse(404, "Deck not found")]
         public ActionResult<GetDeckResponse> UpdateDeck(int id, UpdateDeckRequest request)
         {
-            var deck = _deckManagementService.UpdateDeck(id, request.NameUpdate, request.DescriptionUpdate);
-            if (deck is null)
-                return NotFound();
-            return Ok(GetDeckResponse.FromDeck(deck));
+            var result = _deckManagementService.UpdateDeck(id, request.NameUpdate, request.DescriptionUpdate);
+            if (result.IsRight)
+                return Ok(GetDeckResponse.FromDeck(result.Right));
+
+            return result.Left switch
+            {
+                ErrorType.ConstraintsNotMet => UnprocessableEntity("Deck name or description too long."),
+                ErrorType.NotFound or ErrorType.Unauthorized => NotFound("Deck not found."),
+                _ => throw new UnreachableException($"result.Left = {result.Left.ToString()}")
+            };
         }
 
         [HttpDelete("decks/{id:int}")]
@@ -84,8 +104,13 @@ namespace PeculiarCardGame.WebApi.Controllers
         [SwaggerResponse(404, "Deck not found")]
         public IActionResult DeleteDeck(int id)
         {
-            var isDeleted = _deckManagementService.DeleteDeck(id);
-            return isDeleted ? Ok() : NotFound();
+            var error = _deckManagementService.DeleteDeck(id);
+            return error switch
+            {
+                null => Ok(),
+                ErrorType.NotFound or ErrorType.Unauthorized => NotFound("User not found."),
+                _ => throw new UnreachableException($"error = {error.ToString()}")
+            };
         }
 
         #endregion
@@ -102,10 +127,16 @@ namespace PeculiarCardGame.WebApi.Controllers
         {
             try
             {
-                var card = _deckManagementService.AddCard(deckId, request.Text, request.CardType);
-                if (card is null)
-                    return NotFound();
-                return CreatedAtAction(nameof(GetCard), new { id = card.Id }, GetCardResponse.FromCard(card));
+                var result = _deckManagementService.AddCard(deckId, request.Text, request.CardType);
+                if (result.IsRight)
+                    return CreatedAtAction(nameof(GetCard), new { id = result.Right.Id }, GetCardResponse.FromCard(result.Right));
+
+                return result.Left switch
+                {
+                    ErrorType.ConstraintsNotMet => UnprocessableEntity("Card text too long."),
+                    ErrorType.NotFound or ErrorType.Unauthorized => NotFound("Deck not found."),
+                    _ => throw new UnreachableException($"result.Left = {result.Left.ToString()}")
+                };
             }
             catch (ArgumentNullException ex)
             {
@@ -120,10 +151,15 @@ namespace PeculiarCardGame.WebApi.Controllers
         [SwaggerResponse(404, "Card not found")]
         public ActionResult<GetCardResponse> GetCard(int id)
         {
-            var card = _deckManagementService.GetCard(id);
-            if (card is null)
-                return NotFound();
-            return Ok(GetCardResponse.FromCard(card));
+            var result = _deckManagementService.GetCard(id);
+            if (result.IsRight)
+                return Ok(GetCardResponse.FromCard(result.Right));
+
+            return result.Left switch
+            {
+                ErrorType.NotFound => NotFound("Deck not found."),
+                _ => throw new UnreachableException($"result.Left = {result.Left.ToString()}")
+            };
         }
 
         [HttpGet("decks/{deckId:int}/cards")]
@@ -133,10 +169,15 @@ namespace PeculiarCardGame.WebApi.Controllers
         [SwaggerResponse(404, "Deck not found")]
         public ActionResult<List<GetCardResponse>> GetCards(int deckId, [FromQuery] string? query)
         {
-            var cards = string.IsNullOrEmpty(query) ? _deckManagementService.GetAllCards(deckId) : _deckManagementService.SearchCards(deckId, query);
-            if (cards is null)
-                return NotFound();
-            return Ok(cards.ConvertAll(GetCardResponse.FromCard));
+            var result = string.IsNullOrEmpty(query) ? _deckManagementService.GetAllCards(deckId) : _deckManagementService.SearchCards(deckId, query);
+            if (result.IsRight)
+                return Ok(result.Right.ConvertAll(GetCardResponse.FromCard));
+
+            return result.Left switch
+            {
+                ErrorType.NotFound => NotFound("Deck not found."),
+                _ => throw new UnreachableException($"result.Left = {result.Left.ToString()}")
+            };
         }
 
         [HttpPatch("cards/{id:int}")]
@@ -146,10 +187,16 @@ namespace PeculiarCardGame.WebApi.Controllers
         [SwaggerResponse(404, "Card not found")]
         public ActionResult<GetCardResponse> UpdateCard(int id, UpdateCardRequest request)
         {
-            var card = _deckManagementService.UpdateCard(id, request.TextUpdate);
-            if (card is null)
-                return NotFound();
-            return Ok(GetCardResponse.FromCard(card));
+            var result = _deckManagementService.UpdateCard(id, request.TextUpdate);
+            if (result.IsRight)
+                return Ok(GetCardResponse.FromCard(result.Right));
+
+            return result.Left switch
+            {
+                ErrorType.ConstraintsNotMet => UnprocessableEntity("Card text too long."),
+                ErrorType.NotFound or ErrorType.Unauthorized => NotFound("Card not found."),
+                _ => throw new UnreachableException($"result.Left = {result.Left.ToString()}")
+            };
         }
 
         [HttpDelete("cards/{id:int}")]
@@ -159,8 +206,13 @@ namespace PeculiarCardGame.WebApi.Controllers
         [SwaggerResponse(404, "Card not found")]
         public IActionResult DeleteCard(int id)
         {
-            var isDeleted = _deckManagementService.DeleteCard(id);
-            return isDeleted ? Ok() : NotFound();
+            var error = _deckManagementService.DeleteCard(id);
+            return error switch
+            {
+                null => Ok(),
+                ErrorType.NotFound => NotFound("Card not found."),
+                _ => throw new UnreachableException($"error = {error.ToString()}")
+            };
         }
 
         #endregion

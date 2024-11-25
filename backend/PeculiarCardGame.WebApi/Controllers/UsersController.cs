@@ -40,12 +40,12 @@ namespace PeculiarCardGame.WebApi.Controllers
             {
                 var result = _usersService.AddUser(request.Username, request.DisplayedName, request.Password);
                 if (result.IsRight)
-                    return CreatedAtAction(nameof(GetUser), new { id = result.Right!.Id }, GetUserResponse.FromUser(result.Right));
+                    return CreatedAtAction(nameof(GetUser), new { id = result.Right.Id }, GetUserResponse.FromUser(result.Right));
 
                 return result.Left! switch
                 {
                     ErrorType.Conflict => Conflict($"User {request.Username} already exists."),
-                    ErrorType.ConstraintsNotMet => UnprocessableEntity($"Username or displayed name too short."),
+                    ErrorType.ConstraintsNotMet => UnprocessableEntity($"Username or displayed name too long."),
                     _ => throw new UnreachableException($"result.Left = {result.Left.ToString()}")
                 };
             }
@@ -86,7 +86,7 @@ namespace PeculiarCardGame.WebApi.Controllers
 
             return result.Left! switch
             {
-                ErrorType.ConstraintsNotMet => UnprocessableEntity("Displayed name too short."),
+                ErrorType.ConstraintsNotMet => UnprocessableEntity("Displayed name too long."),
                 ErrorType.NotFound or ErrorType.Unauthorized => NotFound("User not found."),
                 _ => throw new UnreachableException($"result.Left = {result.Left.ToString()}")
             };

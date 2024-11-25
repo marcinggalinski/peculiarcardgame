@@ -2,6 +2,7 @@
 using PeculiarCardGame.Data;
 using PeculiarCardGame.Data.Models;
 using PeculiarCardGame.Services;
+using PeculiarCardGame.Shared;
 using Service = PeculiarCardGame.Services.DeckManagement.DeckManagementService;
 
 namespace PeculiarCardGame.Tests.Services.DeckManagement
@@ -14,6 +15,9 @@ namespace PeculiarCardGame.Tests.Services.DeckManagement
 
         private const string DeckName = "test";
         private const string DeckDescription = "test";
+
+        private readonly string _tooLongDeckName = new string('x', Deck.MaxNameLength + 1);
+        private readonly string _tooLongDescription = new string('x', Deck.MaxDescriptionLength + 1);
 
         private readonly PeculiarCardGameDbContext _dbContext;
         private readonly RequestContext _emptyRequestContext;
@@ -89,6 +93,50 @@ namespace PeculiarCardGame.Tests.Services.DeckManagement
         }
 
         [Fact]
+        public void TooLongDeckName_ShouldReturnErrorTypeConstraintsNotMet()
+        {
+            var service = new Service(_dbContext, _filledRequestContext);
+
+            var result = service.AddDeck(_tooLongDeckName, DeckDescription);
+
+            result.Should().BeLeft();
+            result.Left.Should().Be(ErrorType.ConstraintsNotMet);
+        }
+
+        [Fact]
+        public void TooLongDeckName_ShouldNotAddDeck()
+        {
+            var deckCountBefore = _dbContext.Decks.Count();
+            var service = new Service(_dbContext, _filledRequestContext);
+
+            service.AddDeck(_tooLongDeckName, DeckDescription);
+
+            _dbContext.Decks.Should().HaveCount(deckCountBefore);
+        }
+
+        [Fact]
+        public void TooLongDescription_ShouldReturnErrorTypeConstraintsNotMet()
+        {
+            var service = new Service(_dbContext, _filledRequestContext);
+
+            var result = service.AddDeck(DeckName, _tooLongDescription);
+
+            result.Should().BeLeft();
+            result.Left.Should().Be(ErrorType.ConstraintsNotMet);
+        }
+
+        [Fact]
+        public void TooLongDescription_ShouldNotAddDeck()
+        {
+            var deckCountBefore = _dbContext.Decks.Count();
+            var service = new Service(_dbContext, _filledRequestContext);
+
+            service.AddDeck(DeckName, _tooLongDescription);
+
+            _dbContext.Decks.Should().HaveCount(deckCountBefore);
+        }
+
+        [Fact]
         public void FilledRequestContext_ShouldAddDeck()
         {
             var deckCountBefore = _dbContext.Decks.Count();
@@ -104,11 +152,12 @@ namespace PeculiarCardGame.Tests.Services.DeckManagement
         {
             var service = new Service(_dbContext, _filledRequestContext);
 
-            var deck = service.AddDeck(DeckName, DeckDescription);
+            var result = service.AddDeck(DeckName, DeckDescription);
 
-            deck.Name.Should().Be(DeckName);
-            deck.Description.Should().Be(DeckDescription);
-            deck.AuthorId.Should().Be(UserId);
+            result.Should().BeRight();
+            result.Right.Name.Should().Be(DeckName);
+            result.Right.Description.Should().Be(DeckDescription);
+            result.Right.AuthorId.Should().Be(UserId);
         }
 
         [Fact]
@@ -118,7 +167,7 @@ namespace PeculiarCardGame.Tests.Services.DeckManagement
 
             var deck = service.AddDeck(DeckName, null);
 
-            deck.Description.Should().Be("");
+            deck.Right.Description.Should().Be("");
         }
     }
 }

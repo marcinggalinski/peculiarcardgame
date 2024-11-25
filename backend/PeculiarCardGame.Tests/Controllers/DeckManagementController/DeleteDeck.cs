@@ -5,6 +5,7 @@ using PeculiarCardGame.Data.Models;
 using PeculiarCardGame.Services.Authentication;
 using PeculiarCardGame.Services.DeckManagement;
 using PeculiarCardGame.Services.Users;
+using PeculiarCardGame.Shared;
 
 namespace PeculiarCardGame.Tests.Controllers.DeckManagementController
 {
@@ -53,8 +54,8 @@ namespace PeculiarCardGame.Tests.Controllers.DeckManagementController
 
             _deckManagementService = Substitute.For<IDeckManagementService>();
             _deckManagementService.GetDeck(_existingDeck.Id).Returns(_existingDeck);
-            _deckManagementService.DeleteDeck(_existingDeck.Id).Returns(true);
-            _deckManagementService.DeleteDeck(_notExistingDeck.Id).Returns(false);
+            _deckManagementService.DeleteDeck(_existingDeck.Id).Returns((ErrorType?)null);
+            _deckManagementService.DeleteDeck(_notExistingDeck.Id).Returns(ErrorType.NotFound);
 
             var authenticationService = Substitute.For<IAuthenticationService>();
             authenticationService.Authenticate(Arg.Any<string>()).Returns(user);

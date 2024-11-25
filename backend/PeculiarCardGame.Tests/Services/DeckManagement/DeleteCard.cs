@@ -108,15 +108,16 @@ namespace PeculiarCardGame.Tests.Services.DeckManagement
         }
 
         [Fact]
-        public void NotExistingCardId_ShouldReturnFalse()
+        public void NotExistingCardId_ShouldReturnErrorTypeNotFound()
         {
             _dbContext.SetupTest(_deck);
             _dbContext.SetupTest(_card);
             var service = new Service(_dbContext, _authorFilledRequestContext);
 
-            var deleted = service.DeleteCard(_anotherCard.Id);
+            var error = service.DeleteCard(_anotherCard.Id);
 
-            deleted.Should().BeFalse();
+            error.Should().NotBeNull();
+            error.Should().Be(ErrorType.NotFound);
         }
 
         [Fact]
@@ -135,15 +136,16 @@ namespace PeculiarCardGame.Tests.Services.DeckManagement
         }
 
         [Fact]
-        public void NotAuthor_ShouldReturnFalse()
+        public void NotAuthor_ShouldReturnErrorTypeUnauthorized()
         {
             _dbContext.SetupTest(_deck);
             _dbContext.SetupTest(_card);
             var service = new Service(_dbContext, _notAuthorFilledRequestContext);
 
-            var deleted = service.DeleteCard(_card.Id);
+            var error = service.DeleteCard(_card.Id);
 
-            deleted.Should().BeFalse();
+            error.Should().NotBeNull();
+            error.Should().Be(ErrorType.Unauthorized);
         }
 
         [Fact]
@@ -162,15 +164,15 @@ namespace PeculiarCardGame.Tests.Services.DeckManagement
         }
 
         [Fact]
-        public void ExistingCardId_ShouldReturnTrue()
+        public void ExistingCardId_ShouldReturnNull()
         {
             _dbContext.SetupTest(_deck);
             _dbContext.SetupTest(_card);
             var service = new Service(_dbContext, _authorFilledRequestContext);
 
-            var deleted = service.DeleteCard(_card.Id);
+            var error = service.DeleteCard(_card.Id);
 
-            deleted.Should().BeTrue();
+            error.Should().BeNull();
         }
 
         [Fact]

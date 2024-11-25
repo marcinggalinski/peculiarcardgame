@@ -12,6 +12,9 @@ namespace PeculiarCardGame.Tests.Services.UsersService
         private const string Username = "test";
         private const string Password = "test";
 
+        private readonly string _tooLongUsername = new string('x', User.MaxUsernameLength + 1);
+        private readonly string _tooLongDisplayedName = new string('x', User.MaxDisplayNameLength + 1);
+
         private readonly User _user;
 
         private readonly PeculiarCardGameDbContext _dbContext;
@@ -117,6 +120,50 @@ namespace PeculiarCardGame.Tests.Services.UsersService
             var service = new Service(_dbContext, _emptyRequestContext);
 
             service.AddUser(_user.Username, _user.DisplayedName, Password);
+
+            _dbContext.Users.Should().HaveCount(userCountBefore);
+        }
+
+        [Fact]
+        public void TooLongUsername_ShouldReturnErrorTypeConstraintsNotMet()
+        {
+            var service = new Service(_dbContext, _emptyRequestContext);
+
+            var result = service.AddUser(_tooLongUsername, _user.DisplayedName, Password);
+
+            result.Should().BeLeft();
+            result.Left.Should().Be(ErrorType.ConstraintsNotMet);
+        }
+
+        [Fact]
+        public void TooLongUsername_ShouldNotAddUser()
+        {
+            var userCountBefore = _dbContext.Users.Count();
+            var service = new Service(_dbContext, _emptyRequestContext);
+
+            service.AddUser(_tooLongUsername, _user.DisplayedName, Password);
+
+            _dbContext.Users.Should().HaveCount(userCountBefore);
+        }
+
+        [Fact]
+        public void TooLongDisplayedName_ShouldReturnErrorTypeConstraintsNotMet()
+        {
+            var service = new Service(_dbContext, _emptyRequestContext);
+
+            var result = service.AddUser(_user.Username, _tooLongDisplayedName, Password);
+
+            result.Should().BeLeft();
+            result.Left.Should().Be(ErrorType.ConstraintsNotMet);
+        }
+
+        [Fact]
+        public void TooLongDisplayedName_ShouldNotAddUser()
+        {
+            var userCountBefore = _dbContext.Users.Count();
+            var service = new Service(_dbContext, _emptyRequestContext);
+
+            service.AddUser(_user.Username, _tooLongDisplayedName, Password);
 
             _dbContext.Users.Should().HaveCount(userCountBefore);
         }

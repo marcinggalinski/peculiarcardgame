@@ -2,13 +2,14 @@
 using PeculiarCardGame.Data;
 using PeculiarCardGame.Data.Models;
 using PeculiarCardGame.Services;
+using PeculiarCardGame.Shared;
 using Service = PeculiarCardGame.Services.DeckManagement.DeckManagementService;
 
 namespace PeculiarCardGame.Tests.Services.DeckManagement
 {
     public class DeleteDeck
     {
-        const int NotExistingDeckId = 2;
+        private const int NotExistingDeckId = 2;
 
         private readonly Deck _deck;
 
@@ -85,14 +86,15 @@ namespace PeculiarCardGame.Tests.Services.DeckManagement
         }
 
         [Fact]
-        public void NotExistingDeck_ShouldReturnFalse()
+        public void NotExistingDeck_ShouldReturnErrorTypeNotFound()
         {
             _dbContext.SetupTest(_deck);
             var service = new Service(_dbContext, _authorFilledRequestContext);
 
-            var deleted = service.DeleteDeck(NotExistingDeckId);
+            var error = service.DeleteDeck(NotExistingDeckId);
 
-            deleted.Should().BeFalse();
+            error.Should().NotBeNull();
+            error.Should().Be(ErrorType.NotFound);
         }
 
         [Fact]
@@ -113,14 +115,15 @@ namespace PeculiarCardGame.Tests.Services.DeckManagement
         }
 
         [Fact]
-        public void NotAuthor_ShouldReturnFalse()
+        public void NotAuthor_ShouldReturnErrorTypeUnauthorized()
         {
             _dbContext.SetupTest(_deck);
             var service = new Service(_dbContext, _notAuthorFilledRequestContext);
 
-            var deleted = service.DeleteDeck(_deck.Id);
+            var error = service.DeleteDeck(_deck.Id);
 
-            deleted.Should().BeFalse();
+            error.Should().NotBeNull();
+            error.Should().Be(ErrorType.Unauthorized);
         }
 
         [Fact]
@@ -141,14 +144,14 @@ namespace PeculiarCardGame.Tests.Services.DeckManagement
         }
 
         [Fact]
-        public void ExistingDeck_ShouldReturnTrue()
+        public void ExistingDeck_ShouldReturnNull()
         {
             _dbContext.SetupTest(_deck);
             var service = new Service(_dbContext, _authorFilledRequestContext);
 
-            var deleted = service.DeleteDeck(_deck.Id);
+            var error = service.DeleteDeck(_deck.Id);
 
-            deleted.Should().BeTrue();
+            error.Should().BeNull();
         }
 
         [Fact]

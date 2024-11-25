@@ -44,6 +44,17 @@ namespace PeculiarCardGame.Tests.Services.DeckManagement
         }
 
         [Fact]
+        public void NotExistingDeckId_ShouldReturnErrorTypeNotFound()
+        {
+            var service = new Service(_dbContext, _requestContext);
+
+            var result = service.GetAllCards(_card.DeckId);
+
+            result.Should().BeLeft();
+            result.Left.Should().Be(ErrorType.NotFound);
+        }
+
+        [Fact]
         public void ShouldReturnAllCards()
         {
             _dbContext.SetupTest(_deck);
@@ -51,10 +62,10 @@ namespace PeculiarCardGame.Tests.Services.DeckManagement
             var cardCountBefore = _dbContext.Cards.Count();
             var service = new Service(_dbContext, _requestContext);
 
-            var cards = service.GetAllCards(_card.DeckId);
+            var result = service.GetAllCards(_card.DeckId);
 
-            cards.Should().NotBeNull();
-            cards.Should().HaveCount(cardCountBefore);
+            result.Should().BeRight();
+            result.Right.Should().HaveCount(cardCountBefore);
         }
 
         [Fact]
