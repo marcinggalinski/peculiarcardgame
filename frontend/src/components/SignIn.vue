@@ -1,18 +1,30 @@
 <template>
-  <header>Sign In</header>
-  <div id="sign-in-form">
+  <Dialog modal v-model:visible="visible">
     <div>Username <InputText v-model="username" /></div>
     <div>Password <InputText type="password" v-model="password" /></div>
-    <Button label="Sign in" @click="signIn()" />
-  </div>
-</template>
 
+    <template #footer>
+      <Button
+        class="float-left"
+        severity="secondary"
+        label="Cancel"
+        @click="
+          () => {
+            visible = false;
+          }
+        "
+      />
+      <Button class="float-right" label="Save" @click="signIn()" />
+    </template>
+  </Dialog>
+</template>
 <script setup lang="ts">
 import { inject, ref } from "vue";
 
 import { AxiosError } from "axios";
 import { jwtDecode } from "jwt-decode";
 import Button from "primevue/button";
+import Dialog from "primevue/dialog";
 import InputText from "primevue/inputtext";
 import { useToast } from "primevue/usetoast";
 
@@ -20,14 +32,8 @@ import { DeckManagementApiServiceKey, UsersApiServiceKey } from "@/keys";
 import DeckManagementApiService from "@/services/deck-management/apiService";
 import UsersApiService from "@/services/users/apiService";
 import { useUserStore } from "@/stores/user";
-import { useRouter } from "vue-router";
 
-const { returnUrl } = defineProps({
-  returnUrl: {
-    type: String,
-    default: "/",
-  },
-});
+const visible = defineModel<boolean>("visible", { required: true });
 
 const deckManagementApiService = inject<DeckManagementApiService>(DeckManagementApiServiceKey);
 if (!deckManagementApiService) {
@@ -39,7 +45,6 @@ if (!usersApiService) {
   throw new Error("UsersApiService not initialized");
 }
 
-const router = useRouter();
 const toast = useToast();
 const userStore = useUserStore();
 
@@ -63,7 +68,7 @@ const signIn = async () => {
     deckManagementApiService.setBearerToken(token);
     usersApiService.setBearerToken(token);
 
-    router.push(returnUrl);
+    visible.value = false;
     toast.add({
       summary: "Success",
       detail: `You are now signed in as ${decodedToken.name}.`,
@@ -93,5 +98,4 @@ const signIn = async () => {
   }
 };
 </script>
-
-<style scoped lang="stylus"></style>
+<style lang="stylus"></style>

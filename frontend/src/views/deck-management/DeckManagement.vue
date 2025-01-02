@@ -1,51 +1,10 @@
 <template>
-  <header>
-    <div id="deck-management-logo" class="topbar-item">
-      <RouterLink :to="{ name: 'decks-list' }" class="clear">
-        <h1>Deck Management</h1>
-      </RouterLink>
-    </div>
-
-    <div id="deck-management-pcg-logo" class="topbar-item">
-      <RouterLink :to="{ name: 'home' }" class="clear">
-        <h1>Peculiar Card Game</h1>
-      </RouterLink>
-    </div>
-
-    <div id="deck-management-user" class="topbar-item">
-      <h1>
-        <div v-if="userStore.isSignedIn">
-          Signed in as {{ userStore.username }} | <a @click="signOut()" id="sign-out">Sign out</a>
-        </div>
-        <div v-else>
-          <RouterLink :to="{ name: 'sign-in', query: { returnUrl: route.path } }" class="clear">Sign in</RouterLink>
-        </div>
-      </h1>
-    </div>
-  </header>
+  <Navbar title="Peculiar Card Game" title-href="/" subtitle="Deck Management" subtitle-href="/decks" />
   <RouterView />
 </template>
 
 <script setup lang="ts">
-import { RouterLink, useRoute } from "vue-router";
-
-import { useToast } from "primevue/usetoast";
-
-import { useUserStore } from "@/stores/user";
-
-const route = useRoute();
-const toast = useToast();
-const userStore = useUserStore();
-
-const signOut = () => {
-  userStore.signOut();
-  toast.add({
-    summary: "Success",
-    detail: "You are now signed out.",
-    severity: "success",
-    life: 3000,
-  });
-};
+import Navbar from "@/components/Navbar.vue";
 </script>
 
 <style scoped lang="stylus">
