@@ -26,15 +26,17 @@
     </div>
   </header>
 
-  <SignIn v-model:visible="isSignInDialogVisible" />
+  <SignInUpDialog v-model:visible="isSignInDialogVisible" />
 </template>
 <script setup lang="ts">
-import { ref } from "vue";
+import { inject, ref } from "vue";
 import { RouterLink } from "vue-router";
 
 import { useToast } from "primevue/usetoast";
 
-import SignIn from "@/components/SignIn.vue";
+import SignInUpDialog from "@/components/SignInUpDialog.vue";
+import { UsersServiceKey } from "@/keys";
+import UsersService from "@/services/users/UsersService";
 import { useUserStore } from "@/stores/user";
 
 const props = defineProps<{
@@ -43,6 +45,11 @@ const props = defineProps<{
   subtitle?: string;
   subtitleHref?: string;
 }>();
+
+const usersService = inject<UsersService>(UsersServiceKey);
+if (!usersService) {
+  throw new Error("UsersService is not initialized");
+}
 
 const toast = useToast();
 const userStore = useUserStore();
@@ -54,7 +61,7 @@ const signIn = () => {
 };
 
 const signOut = () => {
-  userStore.signOut();
+  usersService.signOut();
   toast.add({
     summary: "Success",
     detail: "You are now signed out.",

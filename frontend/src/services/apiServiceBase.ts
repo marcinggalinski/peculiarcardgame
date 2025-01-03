@@ -10,8 +10,10 @@ export default abstract class ApiServiceBase {
   }
 
   setBearerToken(token: string) {
-    this.instance.defaults.headers.post.Authorization = `Bearer ${token}`;
-    this.instance.defaults.headers.patch.Authorization = `Bearer ${token}`;
-    this.instance.defaults.headers.delete.Authorization = `Bearer ${token}`;
+    this.instance.defaults.headers.common.Authorization = `Bearer ${token}`;
+  }
+
+  unsetBearerToken() {
+    delete this.instance.defaults.headers.common.Authorization;
   }
 }

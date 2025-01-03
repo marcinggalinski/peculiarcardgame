@@ -9,12 +9,6 @@ const router = createRouter({
       component: () => import("../views/LandingPage.vue"),
     },
     {
-      path: "/sign-in",
-      name: "sign-in",
-      component: () => import("../views/SignIn.vue"),
-      props: route => ({ returnUrl: route.query.returnUrl }),
-    },
-    {
       path: "/decks",
       name: "deck-management",
       // route level code-splitting

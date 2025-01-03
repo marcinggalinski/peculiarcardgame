@@ -7,6 +7,7 @@
 
 <script setup lang="ts">
 import { inject } from "vue";
+
 import { DeckManagementApiServiceKey } from "@/keys";
 import DeckManagementApiService from "@/services/deck-management/apiService";
 import DeckPreview from "@/components/deck-management/DeckPreview.vue";
