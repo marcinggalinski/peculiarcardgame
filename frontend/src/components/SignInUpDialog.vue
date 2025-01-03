@@ -19,11 +19,23 @@
         <div id="sign-in-form-container">
           <div class="field">
             <div>Username</div>
-            <InputText v-model="signinFields.username" :disabled="isDisabled" />
+            <InputText
+              v-model="signin.fields.username"
+              :disabled="isDisabled"
+              :invalid="signin.invalid"
+              @change="() => (signin.invalid = false)"
+              maxlength="30"
+            />
           </div>
           <div class="field">
             <div>Password</div>
-            <InputText type="password" v-model="signinFields.password" :disabled="isDisabled" />
+            <InputText
+              type="password"
+              v-model="signin.fields.password"
+              :disabled="isDisabled"
+              :invalid="signin.invalid"
+              @change="() => (signin.invalid = false)"
+            />
           </div>
         </div>
       </TabPanel>
@@ -31,15 +43,27 @@
         <div id="sign-up-form-container">
           <div class="field">
             <div>Username</div>
-            <InputText v-model="signupFields.username" :disabled="isDisabled" />
+            <InputText
+              v-model="signup.fields.username"
+              :disabled="isDisabled"
+              :invalid="signup.invalid.username"
+              @change="() => (signup.invalid.username = false)"
+              maxlength="30"
+            />
           </div>
           <div class="field">
             <div>Displayed name</div>
-            <InputText v-model="signupFields.displayedName" :disabled="isDisabled" />
+            <InputText v-model="signup.fields.displayedName" :disabled="isDisabled" maxlength="30" />
           </div>
           <div class="field">
             <div>Password</div>
-            <InputText type="password" v-model="signupFields.password" :disabled="isDisabled" />
+            <InputText
+              type="password"
+              v-model="signup.fields.password"
+              :disabled="isDisabled"
+              :invalid="signup.invalid.password"
+              @change="() => (signup.invalid.password = false)"
+            />
           </div>
         </div>
       </TabPanel>
@@ -83,6 +107,29 @@ enum Step {
   SignUp = 1,
 }
 
+const signinDefault = () => {
+  return {
+    fields: {
+      username: "",
+      password: "",
+    },
+    invalid: false,
+  };
+};
+const signupDefault = () => {
+  return {
+    fields: {
+      username: "",
+      displayedName: "",
+      password: "",
+    },
+    invalid: {
+      username: false,
+      password: false,
+    },
+  };
+};
+
 const visible = defineModel<boolean>("visible", { required: true });
 
 const usersService = inject<UsersService>(UsersServiceKey);
@@ -93,31 +140,33 @@ if (!usersService) {
 const toast = useToast();
 
 const activeIndex = ref(0);
-const signinFields = ref<{
-  username: string;
-  password: string;
-}>({ username: "", password: "" });
-const signupFields = ref<{
-  username: string;
-  displayedName: string;
-  password: string;
-}>({ username: "", displayedName: "", password: "" });
+const signin = ref<{
+  fields: {
+    username: string;
+    password: string;
+  };
+  invalid: boolean;
+}>(signinDefault());
+const signup = ref<{
+  fields: {
+    username: string;
+    displayedName: string;
+    password: string;
+  };
+  invalid: {
+    username: boolean;
+    password: boolean;
+  };
+}>(signupDefault());
 const isDisabled = ref(false);
 
 watch(activeIndex, () => {
   switch (activeIndex.value) {
     case Step.SignIn:
-      signupFields.value = {
-        username: "",
-        displayedName: "",
-        password: "",
-      };
+      signup.value = signupDefault();
       break;
     case Step.SignUp:
-      signinFields.value = {
-        username: "",
-        password: "",
-      };
+      signin.value = signinDefault();
       break;
   }
 });
@@ -125,17 +174,18 @@ watch(activeIndex, () => {
 watch(visible, () => {
   if (!visible.value) {
     activeIndex.value = Step.SignIn;
-    signinFields.value = { username: "", password: "" };
-    signupFields.value = { username: "", displayedName: "", password: "" };
+    signin.value = signinDefault();
+    signup.value = signupDefault();
   }
 });
 
 const signIn = async () => {
   isDisabled.value = true;
+  signin.value.invalid = false;
 
   usersService.signIn(
-    signinFields.value.username,
-    signinFields.value.password,
+    signin.value.fields.username.trim(),
+    signin.value.fields.password,
     decodedToken => {
       visible.value = false;
       toast.add({
@@ -149,6 +199,7 @@ const signIn = async () => {
       if (error instanceof AxiosError) {
         const axiosError = error as AxiosError;
         if (axiosError.response?.status == 401) {
+          signin.value.invalid = true;
           toast.add({
             summary: "Sign in failed",
             detail: "Make sure you entered correct username and password and try again.",
@@ -173,11 +224,13 @@ const signIn = async () => {
 
 const signUp = async () => {
   isDisabled.value = true;
+  signup.value.invalid.username = false;
+  signup.value.invalid.password = false;
 
   usersService.signUp(
-    signupFields.value.username,
-    signupFields.value.password,
-    signupFields.value.displayedName,
+    signup.value.fields.username.trim(),
+    signup.value.fields.password,
+    signup.value.fields.displayedName.trim(),
     decodedToken => {
       visible.value = false;
       toast.add({
@@ -191,6 +244,7 @@ const signUp = async () => {
       if (error instanceof AxiosError) {
         const axiosError = error as AxiosError;
         if (axiosError.response?.status == 409) {
+          signup.value.invalid.username = true;
           toast.add({
             summary: "Sign up failed",
             detail: "Requested username is already in use. Please use a different one.",
@@ -238,4 +292,10 @@ const signUp = async () => {
 
   .p-tabview-panels
     padding 0
+
+.field
+  margin-bottom 15px
+
+.field:last-of-type
+  margin-bottom unset
 </style>
