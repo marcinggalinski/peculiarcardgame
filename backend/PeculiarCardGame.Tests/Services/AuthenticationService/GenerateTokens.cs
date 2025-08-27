@@ -9,9 +9,9 @@ using Service = PeculiarCardGame.Services.Authentication.AuthenticationService;
 
 namespace PeculiarCardGame.Tests.Services.AuthenticationService
 {
-    public class GenerateBearerToken
+    public class GenerateTokens
     {
-        private readonly IReadOnlyList<string> Audiences = new List<string>() { "test" };
+        private readonly IReadOnlyList<string> Audiences = new List<string> { "test" };
         private const string Issuer = "test";
         private const string Key = "testtesttesttest";
 
@@ -20,7 +20,7 @@ namespace PeculiarCardGame.Tests.Services.AuthenticationService
         private readonly RequestContext _emptyRequestContext;
         private readonly RequestContext _filledRequestContext;
 
-        public GenerateBearerToken()
+        public GenerateTokens()
         {
             const string Username = "test";
             const string DisplayedName = "test";
@@ -49,7 +49,7 @@ namespace PeculiarCardGame.Tests.Services.AuthenticationService
         {
             var service = new Service(_options, _dbContext, _emptyRequestContext);
 
-            var action = () => service.GenerateBearerToken("");
+            var action = () => service.GenerateTokens("");
 
             action.Should().Throw<InvalidOperationException>();
         }
@@ -60,20 +60,21 @@ namespace PeculiarCardGame.Tests.Services.AuthenticationService
             var service = new Service(_options, _dbContext, _emptyRequestContext);
 
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            var action = () => service.GenerateBearerToken(null);
+            var action = () => service.GenerateTokens(null);
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
             action.Should().Throw<ArgumentNullException>();
         }
 
         [Fact]
-        public void FilledRequestContextAndNotNullAudience_ShouldReturnToken()
+        public void FilledRequestContextAndNotNullAudience_ShouldReturnTokenPair()
         {
             var service = new Service(_options, _dbContext, _filledRequestContext);
 
-            var token = service.GenerateBearerToken("");
+            var (accessToken, refreshToken) = service.GenerateTokens("");
 
-            token.Should().NotBeNull();
+            accessToken.Should().NotBeNull();
+            refreshToken.Should().NotBeNull();
         }
     }
 }

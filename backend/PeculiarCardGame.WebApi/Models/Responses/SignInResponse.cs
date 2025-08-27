@@ -2,6 +2,7 @@
 {
     public class SignInResponse
     {
-        public required string Token { get; set; }
+        public required string AccessToken { get; set; }
+        public required string RefreshToken { get; set; }
     }
 }

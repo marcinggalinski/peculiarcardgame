@@ -19,7 +19,18 @@ namespace PeculiarCardGame.Services.Authentication
         /// </returns>
         Either<ErrorType, User> Authenticate(string token);
 
-        /// <remarks>Requires request context to be set.</remarks>
-        string GenerateBearerToken(string audience);
+        /// <remarks>Requires <see cref="RequestContext"/> to be set.</remarks>
+        /// <returns>A pair of access token and refresh token.</returns>
+        (string AccessToken, string RefreshToken) GenerateTokens(string audience);
+
+        /// <remarks>Requires <see cref="RequestContext"/> to not be set. Old refresh token is revoked.</remarks>
+        /// <returns>
+        /// A new pair of access token and refresh token.
+        /// Possible <see cref="ErrorType"/>s:
+        /// <see cref="ErrorType.AuthenticationFailed"/>
+        /// </returns>
+        Either<ErrorType, (string AccessToken, string RefreshToken)> RefreshTokens(string refreshToken, string audience);
+
+        void RevokeRefreshToken(string refreshToken);
     }
 }

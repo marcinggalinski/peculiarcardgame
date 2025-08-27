@@ -2,59 +2,60 @@ import { jwtDecode } from "jwt-decode";
 
 import type DeckManagementApiService from "@/services/deck-management/apiService";
 import type UsersApiService from "@/services/users/apiService";
+import type AuthApiService from "@/services/auth/apiService";
 import { useUserStore } from "@/stores/user";
+import { useToast } from "primevue/usetoast";
+
+const localStorageKeys = {
+  accessToken: "jwt",
+  refreshToken: "refresh",
+};
 
 export default class UsersService {
-  private userStore;
+  private userStore = useUserStore();
+  private toast = useToast();
+  private refreshTokensTimeoutIdentifier: number = 0;
 
   constructor(
+    private authApiService: AuthApiService,
     private usersApiService: UsersApiService,
     private deckManagementApiService: DeckManagementApiService
   ) {
-    this.userStore = useUserStore();
-    this.trySignInFromLocalStorage();
+    this.refreshTokens(false);
   }
 
-  async trySignInFromLocalStorage() {
-    const token = localStorage.getItem("jwt");
-    if (!token) return;
+  async refreshTokens(notifySignOut: boolean = true): Promise<void> {
+    const refreshToken = localStorage.getItem(localStorageKeys.refreshToken);
+    if (!refreshToken) return;
 
-    const decodedToken = this.decodeToken(token);
-    if (!decodedToken.id || !decodedToken.name || !decodedToken.nickname) {
-      localStorage.removeItem("jwt");
+    const tokens = await this.authApiService.refreshAccessToken(refreshToken);
+    if (!tokens) {
+      if (notifySignOut)
+        this.toast.add({
+          summary: "Signed out",
+          detail: "You have been signed out",
+          severity: "warn",
+          life: 3000,
+        });
+
+      this.clearTokens();
+      if (this.refreshTokensTimeoutIdentifier) clearTimeout(this.refreshTokensTimeoutIdentifier);
       return;
     }
 
-    this.deckManagementApiService.setBearerToken(token);
-    this.usersApiService.setBearerToken(token);
-    this.userStore.signIn(
-      {
-        id: Number(decodedToken.id),
-        username: decodedToken.name,
-        displayedName: decodedToken.nickname,
-      },
-      token
-    );
+    const decoded = this.decodeJwt(tokens.accessToken);
+
+    localStorage.setItem(localStorageKeys.accessToken, tokens.accessToken);
+    localStorage.setItem(localStorageKeys.refreshToken, tokens.refreshToken);
+    this.deckManagementApiService.setBearerToken(tokens.accessToken);
+    this.usersApiService.setBearerToken(tokens.accessToken);
+    this.userStore.signIn({ id: Number(decoded.id), username: decoded.name, displayedName: decoded.nickname });
+
+    this.refreshTokensTimeoutIdentifier = setTimeout(() => {
+      this.refreshTokens();
+    }, decoded.ttlMilliseconds - 60000);
   }
 
-  decodeToken(token: string): { id: string; name: string; nickname: string } {
-    try {
-      const decoded = jwtDecode<{ id: string; name: string; nickname: string; exp: number }>(token);
-      if (Date.now() > decoded.exp * 1000) {
-        return { id: "", name: "", nickname: "" };
-      }
-      return { id: decoded.id, name: decoded.name, nickname: decoded.nickname };
-    } catch (error: unknown) {
-      console.error("Error while decoding JWT:");
-      console.error(error);
-      return { id: "", name: "", nickname: "" };
-    }
-  }
-
-  /**
-   * @remarks
-   * Returns bearer token
-   */
   async signIn(
     username: string,
     password: string,
@@ -62,21 +63,19 @@ export default class UsersService {
     failureCallback?: (error: unknown) => void
   ): Promise<void> {
     try {
-      const token = (await this.usersApiService.signIn(username, password)).token;
-      const decodedToken = jwtDecode<{ id: string; name: string; nickname: string }>(token);
+      const tokens = await this.authApiService.signIn(username, password);
+      const decodedToken = jwtDecode<{ id: string; name: string; nickname: string }>(tokens.accessToken);
 
-      this.deckManagementApiService.setBearerToken(token);
-      this.usersApiService.setBearerToken(token);
-      this.userStore.signIn(
-        {
-          id: Number(decodedToken.id),
-          username: decodedToken.name,
-          displayedName: decodedToken.nickname,
-        },
-        token
-      );
+      localStorage.setItem(localStorageKeys.accessToken, tokens.accessToken);
+      localStorage.setItem(localStorageKeys.refreshToken, tokens.refreshToken);
 
-      localStorage.setItem("jwt", token);
+      this.deckManagementApiService.setBearerToken(tokens.accessToken);
+      this.usersApiService.setBearerToken(tokens.accessToken);
+      this.userStore.signIn({
+        id: Number(decodedToken.id),
+        username: decodedToken.name,
+        displayedName: decodedToken.nickname,
+      });
 
       if (successCallback) {
         successCallback(decodedToken);
@@ -95,38 +94,38 @@ export default class UsersService {
     successCallback?: (decodedToken: { id: string; name: string; nickname: string }) => void,
     failureCallback?: (error: unknown) => void
   ): Promise<void> {
-    try {
-      await this.usersApiService.addUser(username, password, displayedName);
-      const token = (await this.usersApiService.signIn(username, password)).token;
-      const decodedToken = jwtDecode<{ id: string; name: string; nickname: string }>(token);
-
-      this.deckManagementApiService.setBearerToken(token);
-      this.usersApiService.setBearerToken(token);
-      this.userStore.signIn(
-        {
-          id: Number(decodedToken.id),
-          username: decodedToken.name,
-          displayedName: decodedToken.nickname,
-        },
-        token
-      );
-
-      localStorage.setItem("jwt", token);
-
-      if (successCallback) {
-        successCallback(decodedToken);
-      }
-    } catch (error: unknown) {
-      if (failureCallback) {
-        failureCallback(error);
-      }
-    }
+    await this.usersApiService.addUser(username, password, displayedName);
+    await this.signIn(username, password, successCallback, failureCallback);
   }
 
-  signOut(): void {
+  async signOut(): Promise<void> {
+    const refreshToken = localStorage.getItem(localStorageKeys.refreshToken)!;
+
+    await this.authApiService.revokeRefreshToken(refreshToken);
+    this.clearTokens();
+  }
+
+  clearTokens(): void {
     this.usersApiService.unsetBearerToken();
     this.deckManagementApiService.unsetBearerToken();
     this.userStore.signOut();
-    localStorage.removeItem("jwt");
+
+    localStorage.removeItem(localStorageKeys.accessToken);
+    localStorage.removeItem(localStorageKeys.refreshToken);
+  }
+
+  private decodeJwt(jwt: string): { id: string; name: string; nickname: string; ttlMilliseconds: number } {
+    try {
+      const decoded = jwtDecode<{ id: string; name: string; nickname: string; exp: number }>(jwt);
+      const ttl = decoded.exp * 1000 - Date.now();
+      if (ttl < 0) {
+        return { id: "", name: "", nickname: "", ttlMilliseconds: 0 };
+      }
+      return { id: decoded.id, name: decoded.name, nickname: decoded.nickname, ttlMilliseconds: ttl };
+    } catch (error: unknown) {
+      console.error("Error while decoding JWT:");
+      console.error(error);
+      return { id: "", name: "", nickname: "", ttlMilliseconds: 0 };
+    }
   }
 }

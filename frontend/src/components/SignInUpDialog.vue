@@ -100,7 +100,7 @@ import { useToast } from "primevue/usetoast";
 import { AxiosError } from "axios";
 
 import { UsersServiceKey } from "@/keys";
-import UsersService from "@/services/users/UsersService";
+import UsersService from "@/services/users/usersService";
 
 enum Step {
   SignIn = 0,
@@ -208,7 +208,8 @@ const signIn = async () => {
           });
         }
       } else {
-        console.log(error);
+        console.error("Error signing in:");
+        console.error(error);
         toast.add({
           summary: "Unknown error",
           detail: "Try again later or contact the support if the issue persists.",
@@ -253,7 +254,8 @@ const signUp = async () => {
           });
         }
       } else {
-        console.log(error);
+        console.error("Error signing up:");
+        console.error(error);
         toast.add({
           summary: "Unknown error",
           detail: "Try again later or contact the support if the issue persists.",

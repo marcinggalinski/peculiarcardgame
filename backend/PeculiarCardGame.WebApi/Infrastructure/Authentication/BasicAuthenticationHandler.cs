@@ -49,10 +49,11 @@ namespace PeculiarCardGame.WebApi.Infrastructure.Authentication
                 return Task.FromResult(AuthenticateResult.Fail("Invalid credentials"));
 
             _requestContext.SetOnce(authenticationResult.Right);
-            var bearerToken = _authenticationService.GenerateBearerToken(Request.Headers.Origin.ToString());
+            var (accessToken, refreshToken) = _authenticationService.GenerateTokens(Request.Headers.Origin.ToString());
 
             var identity = new ClaimsIdentity(SchemeName);
-            identity.AddClaim(new Claim("BearerToken", bearerToken));
+            identity.AddClaim(new Claim("AccessToken", accessToken));
+            identity.AddClaim(new Claim("RefreshToken", refreshToken));
             identity.AddClaim(new Claim("UserId", credentials[0]));
 
             var principal = new ClaimsPrincipal(identity);

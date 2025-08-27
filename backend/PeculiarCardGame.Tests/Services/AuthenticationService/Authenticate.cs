@@ -146,7 +146,7 @@ namespace PeculiarCardGame.Tests.Services.AuthenticationService
         public void ValidTokenForNotExistingUser_ShouldReturnErrorTypeNotfound()
         {
             var service = new Service(_options, _dbContext, _notExistingUserFilledRequestContext);
-            var token = service.GenerateBearerToken(_audiences[0]);
+            var (token, _) = service.GenerateTokens(_audiences[0]);
 
             var result = service.Authenticate(token);
 
@@ -159,7 +159,7 @@ namespace PeculiarCardGame.Tests.Services.AuthenticationService
         {
             _dbContext.SetupTest(_user);
             var service = new Service(_options, _dbContext, _existingUserFilledRequestContext);
-            var token = service.GenerateBearerToken(_audiences[0]);
+            var (token, _) = service.GenerateTokens(_audiences[0]);
 
             var result = service.Authenticate(token);
 

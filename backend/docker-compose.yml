@@ -7,3 +7,12 @@ services:
     environment:
       - ACCEPT_EULA=Y
       - MSSQL_SA_PASSWORD
+    volumes:
+      - "./.docker/mssql/data/:/var/opt/mssql/data/"
+      - "./.docker/mssql/log/:/var/opt/mssql/log/"
+    healthcheck:
+      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "${MSSQL_SA_PASSWORD}" -Q "SELECT 1" -b -o /dev/null
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 5s

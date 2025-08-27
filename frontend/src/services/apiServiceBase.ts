@@ -6,6 +6,7 @@ export default abstract class ApiServiceBase {
   constructor(public baseUrl: string) {
     this.instance = axios.create({
       baseURL: this.baseUrl,
+      validateStatus: status => status >= 200 && status < 500,
     });
   }
 

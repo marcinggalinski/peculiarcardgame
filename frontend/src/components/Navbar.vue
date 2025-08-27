@@ -36,7 +36,7 @@ import { useToast } from "primevue/usetoast";
 
 import SignInUpDialog from "@/components/SignInUpDialog.vue";
 import { UsersServiceKey } from "@/keys";
-import UsersService from "@/services/users/UsersService";
+import UsersService from "@/services/users/usersService";
 import { useUserStore } from "@/stores/user";
 
 const props = defineProps<{

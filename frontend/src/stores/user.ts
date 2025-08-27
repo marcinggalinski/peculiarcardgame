@@ -8,18 +8,15 @@ export const useUserStore = defineStore("user", () => {
   const username = ref<string>();
   const displayedName = ref<string>();
 
-  const bearerToken = ref<string>();
-
   function anonymousSignIn(name: string) {
     displayedName.value = name;
   }
 
-  function signIn(user: { id: number; username: string; displayedName: string }, token: string) {
+  function signIn(user: { id: number; username: string; displayedName: string }) {
     isSignedIn.value = true;
     id.value = user.id;
     username.value = user.username;
     displayedName.value = user.displayedName;
-    bearerToken.value = token;
   }
 
   function signOut() {
@@ -27,7 +24,6 @@ export const useUserStore = defineStore("user", () => {
     id.value = undefined;
     username.value = undefined;
     displayedName.value = undefined;
-    bearerToken.value = undefined;
   }
 
   return {
@@ -35,7 +31,6 @@ export const useUserStore = defineStore("user", () => {
     id,
     username,
     displayedName,
-    bearerToken,
     anonymousSignIn,
     signIn,
     signOut,

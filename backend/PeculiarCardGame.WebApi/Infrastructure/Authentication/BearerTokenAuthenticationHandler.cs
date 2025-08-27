@@ -47,7 +47,6 @@ namespace PeculiarCardGame.WebApi.Infrastructure.Authentication
             _requestContext.SetOnce(authenticationResult.Right);
 
             var identity = new ClaimsIdentity(SchemeName);
-            identity.AddClaim(new Claim("BearerToken", token));
             identity.AddClaim(new Claim("UserId", authenticationResult.Right.Username));
 
             var principal = new ClaimsPrincipal(identity);

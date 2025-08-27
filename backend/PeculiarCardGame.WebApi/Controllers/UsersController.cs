@@ -63,7 +63,7 @@ namespace PeculiarCardGame.WebApi.Controllers
         {
             var result = _usersService.GetUser(id);
             if (result.IsRight)
-                return Ok(GetUserResponse.FromUser(result.Right!));
+                return Ok(GetUserResponse.FromUser(result.Right));
             
             return result.Left! switch
             {
@@ -82,7 +82,7 @@ namespace PeculiarCardGame.WebApi.Controllers
         {
             var result = _usersService.UpdateUser(id, request.DisplayedNameUpdate, request.PasswordUpdate);
             if (result.IsRight)
-                return Ok(GetUserResponse.FromUser(result.Right!));
+                return Ok(GetUserResponse.FromUser(result.Right));
 
             return result.Left! switch
             {
@@ -107,19 +107,6 @@ namespace PeculiarCardGame.WebApi.Controllers
                 ErrorType.NotFound or ErrorType.Unauthorized => NotFound("User not found."),
                 _ => throw new UnreachableException($"error = {error.ToString()}")
             };
-        }
-
-        [HttpPost("signin")]
-        [Authorize(AuthenticationSchemes = BasicAuthenticationHandler.SchemeName)]
-        [SwaggerOperation("Signs user in.", "Requires valid basic authentication data to be sent in 'Authorization' header. Returns bearer token to be used to authenticate in other endpoints.")]
-        [SwaggerResponse(200, "Signed in", typeof(SignInResponse))]
-        [SwaggerResponse(401, "Invalid authentication data", typeof(string))]
-        public ActionResult<SignInResponse> SignIn()
-        {
-            return Ok(new SignInResponse
-            {
-                Token = Request.HttpContext.User.Claims.Single(x => x.Type == "BearerToken").Value
-            });
         }
     }
 }

@@ -8,8 +8,15 @@ export interface GetUserResponse {
   id: number;
   username: string;
 }
+export interface RefreshAccessTokenRequest {
+  refreshToken: string;
+}
+export interface RevokeRefreshTokenRequest {
+  refreshToken: string;
+}
 export interface SignInResponse {
-  token: string;
+  accessToken: string;
+  refreshToken: string;
 }
 export interface UpdateUserRequest {
   displayedNameUpdate?: string;
