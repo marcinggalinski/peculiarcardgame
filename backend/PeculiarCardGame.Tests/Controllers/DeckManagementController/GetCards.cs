@@ -73,10 +73,9 @@ namespace PeculiarCardGame.Tests.Controllers.DeckManagementController
             _deckManagementService = Substitute.For<IDeckManagementService>();
             _deckManagementService.GetDeck(_existingDeck.Id).Returns(_existingDeck);
             _deckManagementService.GetDeck(_notExistingDeck.Id).Returns(ErrorType.NotFound);
-            _deckManagementService.GetAllCards(_existingDeck.Id).Returns(cards);
-            _deckManagementService.GetAllCards(_notExistingDeck.Id).Returns(ErrorType.NotFound);
             _deckManagementService.SearchCards(_existingDeck.Id, Arg.Any<string?>()).Returns(new List<Card>());
             _deckManagementService.SearchCards(_existingDeck.Id, MatchingQuery).Returns(cards);
+            _deckManagementService.SearchCards(Arg.Any<int>(), Arg.Is<string?>(x => string.IsNullOrEmpty(x))).Returns(cards);
             _deckManagementService.SearchCards(_notExistingDeck.Id, Arg.Any<string?>()).Returns(ErrorType.NotFound);
 
             var authenticationService = Substitute.For<IAuthenticationService>();
@@ -106,17 +105,9 @@ namespace PeculiarCardGame.Tests.Controllers.DeckManagementController
         }
 
         [Fact]
-        public async Task NoQuery_ShouldCallGetAllCards()
-        {
-            await _client.GetAsync($"/api/decks/{_existingDeck.Id}/cards");
-
-            _deckManagementService.Received().GetAllCards(_existingDeck.Id);
-        }
-
-        [Fact]
         public async Task NotMatchingQuery_ShouldReturnOkWithEmptyList()
         {
-            var message = await _client.GetAsync($"/api/decks/{_existingDeck.Id}/cards?query={NotMatchingQuery}");
+            var message = await _client.GetAsync($"/api/decks/{_existingDeck.Id}/cards?filter={NotMatchingQuery}");
             var response = await message.Content.ReadFromJsonAsync<List<GetCardResponse>>();
 
             message.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -127,7 +118,7 @@ namespace PeculiarCardGame.Tests.Controllers.DeckManagementController
         [Fact]
         public async Task MatchingQuery_ShouldReturnOkWithCards()
         {
-            var message = await _client.GetAsync($"/api/decks/{_existingDeck.Id}/cards?query={MatchingQuery}");
+            var message = await _client.GetAsync($"/api/decks/{_existingDeck.Id}/cards?filter={MatchingQuery}");
             var response = await message.Content.ReadFromJsonAsync<List<GetCardResponse>>();
 
             message.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -138,9 +129,9 @@ namespace PeculiarCardGame.Tests.Controllers.DeckManagementController
         [Theory]
         [InlineData(MatchingQuery)]
         [InlineData(NotMatchingQuery)]
-        public async Task ExistingDeckId_ShouldCallGetAllCards(string query)
+        public async Task ShouldCallSearchCards(string query)
         {
-            await _client.GetAsync($"/api/decks/{_existingDeck.Id}/cards?query={query}");
+            await _client.GetAsync($"/api/decks/{_existingDeck.Id}/cards?filter={query}");
 
             _deckManagementService.Received().SearchCards(_existingDeck.Id, query);
         }

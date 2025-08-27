@@ -74,10 +74,10 @@ export default class ApiService extends ApiServiceBase {
     }
   }
 
-  async getCards(deckId: number, query?: string): Promise<GetCardResponse[]> {
-    const response = await this.instance.get<GetCardResponse[]>(
-      query ? `decks/${deckId}/cards?query=${query}` : `decks/${deckId}/cards`
-    );
+  async getCards(deckId: number, filter?: string): Promise<GetCardResponse[]> {
+    const response = await this.instance.get<GetCardResponse[]>(`decks/${deckId}/cards`, {
+      params: { filter },
+    });
 
     switch (response.status) {
       case 200:
@@ -98,8 +98,13 @@ export default class ApiService extends ApiServiceBase {
     }
   }
 
-  async getDecks(query?: string): Promise<GetDeckResponse[]> {
-    const response = await this.instance.get<GetDeckResponse[]>(query ? `decks?query=${query}` : "decks");
+  async getDecks(filter?: string, authorId?: number): Promise<GetDeckResponse[]> {
+    const response = await this.instance.get<GetDeckResponse[]>("decks", {
+      params: {
+        filter,
+        authorId,
+      },
+    });
 
     switch (response.status) {
       case 200:

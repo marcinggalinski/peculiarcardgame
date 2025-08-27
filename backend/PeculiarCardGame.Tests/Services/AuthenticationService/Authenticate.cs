@@ -13,7 +13,7 @@ namespace PeculiarCardGame.Tests.Services.AuthenticationService
     public class Authenticate
     {
         private const string Issuer = "test";
-        private const string Key = "testtesttesttest";
+        private const string Key = "testtesttesttesttesttesttesttest";
 
         private const string ExistingUsername = "test";
         private const string NotExistingUsername = "invalid";

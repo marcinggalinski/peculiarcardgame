@@ -8,21 +8,20 @@ namespace PeculiarCardGame.Tests.Services.DeckManagement
 {
     public class SearchDecks
     {
+        private const int UserId = 1;
+        private const int AnotherUserId = 2;
         private const string Query = "arch";
-
-        private const int SearchedNameDeckCount = 2;
-        private const int SearchedDescriptionDeckCount = 2;
 
         private readonly Deck _deck;
         private readonly Deck _searchedNameDeck;
         private readonly Deck _searchedDescriptionDeck;
+        private readonly Deck _anotherUsersDeck;
 
         private readonly PeculiarCardGameDbContext _dbContext;
         private readonly RequestContext _requestContext;
 
         public SearchDecks()
         {
-            const int UserId = 1;
             const string DeckName = "test";
             const string DeckDescription = "test";
             const string SearchedName = "searched";
@@ -45,6 +44,12 @@ namespace PeculiarCardGame.Tests.Services.DeckManagement
                 AuthorId = UserId,
                 Name = DeckName,
                 Description = SearchedDescription
+            };
+            _anotherUsersDeck = new Deck
+            {
+                AuthorId = AnotherUserId,
+                Name = DeckName,
+                Description = DeckDescription
             };
 
             _dbContext = TestHelpers.GetDbContext();
@@ -70,6 +75,9 @@ namespace PeculiarCardGame.Tests.Services.DeckManagement
         [Fact]
         public void NotEmptyQuery_ShouldReturnAllMatchingDecks()
         {
+            const int SearchedNameDeckCount = 2;
+            const int SearchedDescriptionDeckCount = 2;
+            
             _dbContext.SetupTest(deck => deck.Id = 0, Enumerable.Repeat(_deck, 3).ToArray());
             _dbContext.SetupTest(deck => deck.Id = 0, Enumerable.Repeat(_searchedNameDeck, SearchedNameDeckCount).ToArray());
             _dbContext.SetupTest(deck => deck.Id = 0, Enumerable.Repeat(_searchedDescriptionDeck, SearchedDescriptionDeckCount).ToArray());
@@ -79,6 +87,8 @@ namespace PeculiarCardGame.Tests.Services.DeckManagement
 
             decks.Should().NotBeNull();
             decks.Should().HaveCount(SearchedNameDeckCount + SearchedDescriptionDeckCount);
+            decks.Should().AllSatisfy(x =>
+                x.Should().Match<Deck>(y => y.Name.Contains(Query) || y.Description.Contains(Query)));
         }
 
         [Fact]
@@ -91,6 +101,22 @@ namespace PeculiarCardGame.Tests.Services.DeckManagement
             service.SearchDecks(Query);
 
             _dbContext.Decks.Should().HaveCount(deckCountBefore);
+        }
+
+        [Fact]
+        public void NotEmptyAuthorId_ShouldFilterDecks()
+        {
+            const int UsersDeckCount = 3;
+            
+            _dbContext.SetupTest(deck => deck.Id = 0, Enumerable.Repeat(_deck, UsersDeckCount).ToArray());
+            _dbContext.SetupTest(deck => deck.Id = 0, Enumerable.Repeat(_anotherUsersDeck, 3).ToArray());
+            var service = new Service(_dbContext, _requestContext);
+
+            var decks = service.SearchDecks("", UserId);
+            
+            decks.Should().NotBeNull();
+            decks.Should().HaveCount(UsersDeckCount);
+            decks.Should().OnlyContain(x => x.AuthorId == UserId);
         }
     }
 }

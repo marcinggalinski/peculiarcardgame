@@ -18,8 +18,7 @@ namespace PeculiarCardGame.Services.DeckManagement
         /// </returns>
         Either<ErrorType, Deck> GetDeck(int id);
         
-        List<Deck> GetAllDecks();
-        List<Deck> SearchDecks(string? query);
+        List<Deck> SearchDecks(string? filter = null, int? authorId = null);
         
         /// <remarks>Requires request context to be set.</remarks>
         /// <returns>
@@ -57,13 +56,7 @@ namespace PeculiarCardGame.Services.DeckManagement
         /// Possible <see cref="ErrorType"/>s:
         /// <see cref="ErrorType.NotFound"/>
         /// </returns>
-        Either<ErrorType, List<Card>> GetAllCards(int deckId);
-        
-        /// <returns>
-        /// Possible <see cref="ErrorType"/>s:
-        /// <see cref="ErrorType.NotFound"/>
-        /// </returns>
-        Either<ErrorType, List<Card>> SearchCards(int deckId, string? query);
+        Either<ErrorType, List<Card>> SearchCards(int deckId, string? filter);
         
         /// <remarks>Requires request context to be set.</remarks>
         /// <returns>

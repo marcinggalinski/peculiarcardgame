@@ -15,7 +15,7 @@ public class RefreshTokens
     private readonly IReadOnlyList<string> Audiences = new List<string> { Audience };
     private const string Audience = "test";
     private const string Issuer = "test";
-    private const string Key = "testtesttesttest";
+    private const string Key = "testtesttesttesttesttesttesttest";
     private const string ValidToken = "valid";
     private const string ExpiredToken = "ExpiredToken";
     private const string RevokedToken = "revoked";

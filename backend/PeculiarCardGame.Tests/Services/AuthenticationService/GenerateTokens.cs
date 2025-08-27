@@ -13,7 +13,7 @@ namespace PeculiarCardGame.Tests.Services.AuthenticationService
     {
         private readonly IReadOnlyList<string> Audiences = new List<string> { "test" };
         private const string Issuer = "test";
-        private const string Key = "testtesttesttest";
+        private const string Key = "testtesttesttesttesttesttesttest";
 
         private readonly IOptions<BearerTokenAuthenticationSchemeOptions> _options;
         private readonly PeculiarCardGameDbContext _dbContext;

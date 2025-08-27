@@ -10,8 +10,9 @@ using PeculiarCardGame.WebApi.Models.Responses;
 
 namespace PeculiarCardGame.Tests.Controllers.DeckManagementController
 {
-    public class GetAllDecks
+    public class GetDecks
     {
+        private const int UserId = 1;
         private const string MatchingQuery = "matching";
         private const string NotMatchingQuery = "not matching";
 
@@ -21,11 +22,10 @@ namespace PeculiarCardGame.Tests.Controllers.DeckManagementController
 
         private readonly HttpClient _client;
 
-        public GetAllDecks()
+        public GetDecks()
         {
             const int DeckId = 1;
             const int AnotherDeckId = 2;
-            const int UserId = 1;
             const string Name = "test";
             const string Description = "test";
             const string Username = "test";
@@ -62,8 +62,8 @@ namespace PeculiarCardGame.Tests.Controllers.DeckManagementController
             _decks = decks;
 
             _deckManagementService = Substitute.For<IDeckManagementService>();
-            _deckManagementService.GetAllDecks().Returns(decks);
-            _deckManagementService.SearchDecks(Arg.Any<string?>()).Returns(new List<Deck>());
+            _deckManagementService.SearchDecks(Arg.Any<string?>(), Arg.Any<int?>()).Returns([]);
+            _deckManagementService.SearchDecks(Arg.Is<string?>(x => string.IsNullOrEmpty(x)), Arg.Any<int?>()).Returns(decks);
             _deckManagementService.SearchDecks(MatchingQuery).Returns(decks);
 
             var authenticationService = Substitute.For<IAuthenticationService>();
@@ -85,17 +85,9 @@ namespace PeculiarCardGame.Tests.Controllers.DeckManagementController
         }
 
         [Fact]
-        public async Task NoQuery_ShouldCallGetAllDecks()
-        {
-            await _client.GetAsync("/api/decks");
-
-            _deckManagementService.Received().GetAllDecks();
-        }
-
-        [Fact]
         public async Task MatchingQuery_ShouldReturnOkWithFoundDecks()
         {
-            var message = await _client.GetAsync($"/api/decks?query={MatchingQuery}");
+            var message = await _client.GetAsync($"/api/decks?filter={MatchingQuery}");
             var response = await message.Content.ReadFromJsonAsync<List<GetDeckResponse>>();
 
             message.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -106,7 +98,7 @@ namespace PeculiarCardGame.Tests.Controllers.DeckManagementController
         [Fact]
         public async Task NotMatchingQuery_ShouldReturnOkWithEmptyList()
         {
-            var message = await _client.GetAsync($"/api/decks?query={NotMatchingQuery}");
+            var message = await _client.GetAsync($"/api/decks?filter={NotMatchingQuery}");
             var response = await message.Content.ReadFromJsonAsync<List<GetDeckResponse>>();
 
             message.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -115,13 +107,14 @@ namespace PeculiarCardGame.Tests.Controllers.DeckManagementController
         }
 
         [Theory]
-        [InlineData(MatchingQuery)]
-        [InlineData(NotMatchingQuery)]
-        public async Task ShouldCallSearchDecks(string query)
+        [InlineData(null, UserId)]
+        [InlineData(MatchingQuery, null)]
+        [InlineData(NotMatchingQuery, null)]
+        public async Task ShouldCallSearchDecks(string? filter, int? authorId)
         {
-            await _client.GetAsync($"/api/decks?query={query}");
+            await _client.GetAsync($"/api/decks?filter={filter}&authorId={authorId}");
 
-            _deckManagementService.Received().SearchDecks(query);
+            _deckManagementService.Received().SearchDecks(filter, authorId);
         }
     }
 }

@@ -14,7 +14,7 @@ public class RevokeRefreshToken
     private readonly IReadOnlyList<string> Audiences = new List<string> { Audience };
     private const string Audience = "test";
     private const string Issuer = "test";
-    private const string Key = "testtesttesttest";
+    private const string Key = "testtesttesttesttesttesttesttest";
     private const string Token = "valid";
     
     private readonly IOptions<BearerTokenAuthenticationSchemeOptions> _options;

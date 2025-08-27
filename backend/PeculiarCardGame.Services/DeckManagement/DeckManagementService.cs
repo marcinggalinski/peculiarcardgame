@@ -51,17 +51,17 @@ namespace PeculiarCardGame.Services.DeckManagement
             return deck;
         }
 
-        public List<Deck> GetAllDecks()
+        public List<Deck> SearchDecks(string? filter = null, int? authorId = null)
         {
-            var decks = _dbContext.Decks.ToList();
-            return decks;
-        }
+            filter ??= string.Empty;
 
-        public List<Deck> SearchDecks(string? query)
-        {
-            query ??= string.Empty;
+            IQueryable<Deck> query = _dbContext.Decks;
+            if (filter != string.Empty)
+                query = query.Where(x => x.Name.Contains(filter) || x.Description.Contains(filter));
+            if (authorId is not null)
+                query = query.Where(x => x.AuthorId == authorId);
 
-            var decks = _dbContext.Decks.Where(x => x.Name.Contains(query) || x.Description.Contains(query)).ToList();
+            var decks = query.ToList();
             return decks;
         }
 
@@ -147,16 +147,6 @@ namespace PeculiarCardGame.Services.DeckManagement
             return card;
         }
 
-        public Either<ErrorType, List<Card>> GetAllCards(int deckId)
-        {
-            var deck = _dbContext.Decks.Include(x => x.Cards).SingleOrDefault(x => x.Id == deckId);
-            if (deck is null)
-                return ErrorType.NotFound;
-
-            var cards = deck.Cards.ToList();
-            return cards;
-        }
-
         public Either<ErrorType, Card> GetCard(int id)
         {
             var card = _dbContext.Cards.SingleOrDefault(x => x.Id == id);
@@ -165,15 +155,19 @@ namespace PeculiarCardGame.Services.DeckManagement
             return card;
         }
 
-        public Either<ErrorType, List<Card>> SearchCards(int deckId, string? query)
+        public Either<ErrorType, List<Card>> SearchCards(int deckId, string? filter = null)
         {
-            query ??= string.Empty;
+            filter ??= string.Empty;
 
             var deck = _dbContext.Decks.Include(x => x.Cards).SingleOrDefault(x => x.Id == deckId);
             if (deck is null)
                 return ErrorType.NotFound;
 
-            var cards = deck.Cards.Where(x => x.Text.Contains(query)).ToList();
+            IEnumerable<Card> query = deck.Cards;
+            if (filter != "")
+                query = query.Where(x => x.Text.Contains(filter));
+
+            var cards = query.ToList();
             return cards;
         }
 

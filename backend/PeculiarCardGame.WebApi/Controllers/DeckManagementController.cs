@@ -72,9 +72,9 @@ namespace PeculiarCardGame.WebApi.Controllers
         [AllowAnonymous]
         [SwaggerOperation("Gets all decks that match given query.", "Doesn't require any authentication data. Only returns information about decks, not the cards they consist of. Does not support paging.")]
         [SwaggerResponse(200, "Decks found", typeof(List<GetDeckResponse>))]
-        public ActionResult<List<GetDeckResponse>> GetAllDecks([FromQuery] string? query)
+        public ActionResult<List<GetDeckResponse>> GetDecks([FromQuery] string? filter, [FromQuery] int? authorId)
         {
-            var decks = string.IsNullOrEmpty(query) ? _deckManagementService.GetAllDecks() : _deckManagementService.SearchDecks(query);
+            var decks = _deckManagementService.SearchDecks(filter, authorId);
             return Ok(decks.ConvertAll(GetDeckResponse.FromDeck));
         }
 
@@ -167,9 +167,9 @@ namespace PeculiarCardGame.WebApi.Controllers
         [SwaggerOperation("Gets all cards belonging to the specified deck that match given query.", "Doesn't require any authentication data. Does not support paging.")]
         [SwaggerResponse(200, "Cards found", typeof(List<GetCardResponse>))]
         [SwaggerResponse(404, "Deck not found")]
-        public ActionResult<List<GetCardResponse>> GetCards(int deckId, [FromQuery] string? query)
+        public ActionResult<List<GetCardResponse>> GetCards(int deckId, [FromQuery] string? filter)
         {
-            var result = string.IsNullOrEmpty(query) ? _deckManagementService.GetAllCards(deckId) : _deckManagementService.SearchCards(deckId, query);
+            var result = _deckManagementService.SearchCards(deckId, filter);
             if (result.IsRight)
                 return Ok(result.Right.ConvertAll(GetCardResponse.FromCard));
 
