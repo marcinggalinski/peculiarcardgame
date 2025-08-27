@@ -75,14 +75,14 @@
         class="float-right"
         label="Sign in!"
         @click="signIn()"
-        :disabled="isDisabled"
+        :disabled="isDisabled || !signin.fields.username || !signin.fields.password"
       />
       <Button
         v-if="activeIndex == Step.SignUp"
         class="float-right"
         label="Sign up!"
         @click="signUp()"
-        :disabled="isDisabled"
+        :disabled="isDisabled || !signup.fields.username || !signup.fields.password"
       />
     </template>
   </Dialog>
@@ -269,22 +269,14 @@ const signUp = async () => {
   isDisabled.value = false;
 };
 </script>
+<style scoped lang="stylus">
+.field
+  margin-bottom 15px
+
+.field:last-of-type
+  margin-bottom unset
+</style>
 <style lang="stylus">
-.p-dialog-footer
-  align-items center
-
-.float-left
-  margin-right auto
-
-.float-right
-  margin-left auto
-
-.full-width
-  width 100%
-
-.display-none
-  display none
-
 .p-dialog-header .p-tabview-panels
   display none
 
@@ -294,10 +286,4 @@ const signUp = async () => {
 
   .p-tabview-panels
     padding 0
-
-.field
-  margin-bottom 15px
-
-.field:last-of-type
-  margin-bottom unset
 </style>

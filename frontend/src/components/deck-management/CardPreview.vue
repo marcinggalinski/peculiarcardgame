@@ -103,7 +103,7 @@ const hideEditTextDialog = (save: boolean) => {
 };
 </script>
 
-<style lang="stylus">
+<style scoped lang="stylus">
 .card-preview
   flex 1 0 20%
   max-width 150px
@@ -187,8 +187,10 @@ const hideEditTextDialog = (save: boolean) => {
   filter blur(3px)
 
 #edit-card-dialog
-  width 50%
-
   .edit-input
     width 100%
+</style>
+<style lang="stylus">
+#edit-card-dialog
+  width 50%
 </style>

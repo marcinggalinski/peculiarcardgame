@@ -93,7 +93,7 @@ const restoreCard = (id: number) => {
 };
 </script>
 
-<style lang="stylus">
+<style scoped lang="stylus">
 .cards-list
   display flex
   flex-wrap wrap
@@ -103,8 +103,10 @@ const restoreCard = (id: number) => {
   width 29px
 
 #add-card-dialog
-  width 50%
-
   .edit-input
     width 100%
+</style>
+<style lang="stylus">
+#add-card-dialog
+  width 50%
 </style>

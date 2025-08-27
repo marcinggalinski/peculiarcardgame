@@ -12,7 +12,7 @@ export default class ApiService extends ApiServiceBase {
     const response = await this.instance.post<GetUserResponse>("users", request);
 
     switch (response.status) {
-      case 200:
+      case 201:
         return response.data;
       default:
         throw new ApiError(response.status, response.statusText);

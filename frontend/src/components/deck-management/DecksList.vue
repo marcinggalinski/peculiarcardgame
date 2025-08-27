@@ -1,29 +1,132 @@
 <template>
-  <div id="decks-list">
-    <DeckPreview v-if="decks.length" v-for="deck in decks" :deck="deck" />
-    <span v-else>No decks yet!</span>
+  <div v-if="userStore.isSignedIn" class="padding">
+    <h1>
+      Your decks ({{ ownDecks.length }})
+      <Button rounded text icon="pi pi-plus" id="add-deck-button" @click="showAddDeckDialog()" />
+    </h1>
+    <div class="decks-list">
+      <DeckPreview v-if="ownDecks.length" v-for="deck in ownDecks" :deck="deck" />
+      <span v-else>You haven't created any deck yet!</span>
+    </div>
+    <h1>Others decks</h1>
+    <div class="decks-list">
+      <DeckPreview v-if="othersDecks.length" v-for="deck in othersDecks" :deck="deck" />
+      <span v-else>No decks yet!</span>
+    </div>
   </div>
+  <div v-else class="padding">
+    <h1>Decks</h1>
+    <div class="decks-list">
+      <DeckPreview v-if="othersDecks.length" v-for="deck in othersDecks" :deck="deck" />
+      <span v-else>No decks yet!</span>
+    </div>
+  </div>
+
+  <Dialog modal id="add-deck-dialog" v-model:visible="isAddDeckDialogVisible" header="Add new deck" :closable="false">
+    <div class="field">
+      <div>Name</div>
+      <InputText v-model="newDeckName" class="edit-input" />
+    </div>
+    <div class="field">
+      <div class="margin-top">Description</div>
+      <Textarea v-model="newDeckDescription" class="edit-input" />
+    </div>
+
+    <template #footer>
+      <Button class="float-left" severity="secondary" label="Cancel" @click="hideAddDeckDialog(false)" />
+      <Button class="float-right" label="Save" :disabled="!newDeckName" @click="hideAddDeckDialog(true)" />
+    </template>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
-import { inject } from "vue";
+import { computed, inject, ref } from "vue";
+import { useRouter } from "vue-router";
+
+import Button from "primevue/button";
+import Dialog from "primevue/dialog";
+import InputText from "primevue/inputtext";
+import Textarea from "primevue/textarea";
+import { useToast } from "primevue/usetoast";
 
 import { DeckManagementApiServiceKey } from "@/keys";
 import DeckManagementApiService from "@/services/deck-management/apiService";
 import DeckPreview from "@/components/deck-management/DeckPreview.vue";
+import { useUserStore } from "@/stores/user";
 
 const deckManagementApiService = inject<DeckManagementApiService>(DeckManagementApiServiceKey);
 if (!deckManagementApiService) {
   throw new Error("DeckManagementApiService not initialized");
 }
 
+const router = useRouter();
+const toast = useToast();
+const userStore = useUserStore();
+
+const isAddDeckDialogVisible = ref(false);
+const newDeckName = ref("");
+const newDeckDescription = ref("");
+
+const ownDecks = computed(() => decks.filter(x => x.authorId === userStore.id));
+const othersDecks = computed(() => decks.filter(x => x.authorId !== userStore.id));
+
 const decks = (await deckManagementApiService.getDecks()) ?? [];
+
+const showAddDeckDialog = () => {
+  newDeckName.value = "";
+  isAddDeckDialogVisible.value = true;
+};
+
+const hideAddDeckDialog = async (save: boolean) => {
+  if (save) {
+    try {
+      const deck = await deckManagementApiService.addDeck(newDeckName.value);
+      toast.add({
+        summary: "Success",
+        detail: "Deck created",
+        severity: "success",
+        life: 3000,
+      });
+      router.push({
+        name: "deck-editor",
+        params: { id: deck.id },
+      });
+    } catch (error) {
+      console.error("Error when creating deck:");
+      console.error(error);
+
+      toast.add({
+        summary: "An error has occurred",
+        detail: error?.toString(),
+        severity: "error",
+        life: 3000,
+      });
+    }
+  }
+  isAddDeckDialogVisible.value = false;
+};
 </script>
 
-<style lang="stylus">
-#decks-list
+<style scoped lang="stylus">
+.padding
+  padding 10px
+
+.decks-list
   display flex
   flex-wrap wrap
-  padding 10px
   align-items flex-start
+
+#add-deck-dialog
+  .edit-input
+    width 100%
+
+  .field
+    margin-bottom 15px
+
+  .field:last-of-type
+    margin-bottom unset
+</style>
+<style lang="stylus">
+#add-deck-dialog
+  width 50%
 </style>

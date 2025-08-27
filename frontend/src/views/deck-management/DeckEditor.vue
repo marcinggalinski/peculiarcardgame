@@ -319,7 +319,7 @@ watch(isChanged, () => {
 await getData();
 </script>
 
-<style lang="stylus">
+<style scoped lang="stylus">
 #deck-editor
   padding 10px
 
@@ -375,7 +375,8 @@ await getData();
     #edit-description-button
       transition 0.3s ease
       opacity 1
-
+</style>
+<style lang="stylus">
 .dialog
   width 50%
 

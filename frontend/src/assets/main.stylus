@@ -1,0 +1,11 @@
+.float-left
+  margin-right auto
+
+.float-right
+  margin-left auto
+
+.full-width
+  width 100%
+
+.display-none
+  display none
