@@ -5,7 +5,7 @@
       <Button rounded text icon="pi pi-plus" id="add-deck-button" @click="showAddDeckDialog()" />
     </h1>
     <div class="decks-list">
-      <DeckPreview v-if="ownDecks.length" v-for="deck in ownDecks" :deck="deck" />
+      <DeckPreview v-if="ownDecks.length" v-for="deck in ownDecks" :deck="deck" @delete="refreshDecks()" />
       <span v-else>You haven't created any deck yet!</span>
     </div>
     <h1>Others decks</h1>
@@ -53,6 +53,8 @@
       />
     </template>
   </Dialog>
+
+  <ConfirmDialog :draggable="false" />
 </template>
 
 <script setup lang="ts">
@@ -60,14 +62,16 @@ import { computed, inject, ref } from "vue";
 import { useRouter } from "vue-router";
 
 import Button from "primevue/button";
+import ConfirmDialog from "primevue/confirmdialog";
 import Dialog from "primevue/dialog";
 import InputText from "primevue/inputtext";
 import Textarea from "primevue/textarea";
 import { useToast } from "primevue/usetoast";
 
 import { DeckManagementApiServiceKey } from "@/keys";
-import DeckManagementApiService from "@/services/deck-management/apiService";
 import DeckPreview from "@/components/deck-management/DeckPreview.vue";
+import type { GetDeckResponse } from "@/models/deck-management/api";
+import type DeckManagementApiService from "@/services/deck-management/apiService";
 import { useUserStore } from "@/stores/user";
 
 const deckManagementApiService = inject<DeckManagementApiService>(DeckManagementApiServiceKey);
@@ -83,14 +87,18 @@ const isAddDeckDialogVisible = ref(false);
 const newDeckName = ref("");
 const newDeckDescription = ref("");
 const isLoading = ref(false);
+const decks = ref<GetDeckResponse[]>([]);
 
-const ownDecks = computed(() => decks.filter(x => x.authorId === userStore.id));
-const othersDecks = computed(() => decks.filter(x => x.authorId !== userStore.id));
+const ownDecks = computed(() => decks.value.filter(x => x.authorId === userStore.id));
+const othersDecks = computed(() => decks.value.filter(x => x.authorId !== userStore.id));
 
-const decks = (await deckManagementApiService.getDecks()) ?? [];
+const refreshDecks = async () => {
+  decks.value = (await deckManagementApiService.getDecks()) ?? [];
+};
 
 const showAddDeckDialog = () => {
   newDeckName.value = "";
+  newDeckDescription.value = "";
   isAddDeckDialogVisible.value = true;
 };
 
@@ -99,7 +107,7 @@ const hideAddDeckDialog = async (save: boolean) => {
     isLoading.value = true;
 
     try {
-      const deck = await deckManagementApiService.addDeck(newDeckName.value);
+      const deck = await deckManagementApiService.addDeck(newDeckName.value, newDeckDescription.value);
       toast.add({
         summary: "Success",
         detail: "Deck created",
@@ -126,6 +134,8 @@ const hideAddDeckDialog = async (save: boolean) => {
   }
   isAddDeckDialogVisible.value = false;
 };
+
+await refreshDecks();
 </script>
 
 <style scoped lang="stylus">
@@ -146,6 +156,9 @@ const hideAddDeckDialog = async (save: boolean) => {
 
   .field:last-of-type
     margin-bottom unset
+
+.accept-button
+  background red
 </style>
 <style lang="stylus">
 #add-deck-dialog

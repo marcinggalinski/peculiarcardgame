@@ -2,6 +2,10 @@ html, body
   margin 0
   padding 0
 
+.clear
+  text-decoration unset
+  color unset
+
 .float-left
   margin-right auto
 

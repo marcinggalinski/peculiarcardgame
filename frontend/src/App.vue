@@ -28,8 +28,4 @@ provide(DeckManagementApiServiceKey, deckManagementApiService);
 provide(UsersServiceKey, usersService);
 </script>
 
-<style lang="stylus">
-.clear
-  text-decoration unset
-  color unset
-</style>
+<style lang="stylus"></style>
