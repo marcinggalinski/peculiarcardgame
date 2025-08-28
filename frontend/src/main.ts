@@ -1,6 +1,5 @@
 import "primevue/resources/themes/aura-light-noir/theme.css";
 import "primeicons/primeicons.css";
-import "@/assets/main.css";
 import "@/assets/main.stylus";
 
 import { createPinia } from "pinia";

@@ -24,17 +24,33 @@
 
   <Dialog modal id="add-deck-dialog" v-model:visible="isAddDeckDialogVisible" header="Add new deck" :closable="false">
     <div class="field">
-      <div>Name</div>
-      <InputText v-model="newDeckName" class="edit-input" />
+      <div>Name <small class="red">*</small></div>
+      <InputText v-model="newDeckName" :disabled="isLoading" class="edit-input" />
     </div>
     <div class="field">
       <div class="margin-top">Description</div>
-      <Textarea v-model="newDeckDescription" class="edit-input" />
+      <Textarea v-model="newDeckDescription" :disabled="isLoading" class="edit-input" />
     </div>
 
+    <small class="red">* Field is required</small>
+
     <template #footer>
-      <Button class="float-left" severity="secondary" label="Cancel" @click="hideAddDeckDialog(false)" />
-      <Button class="float-right" label="Save" :disabled="!newDeckName" @click="hideAddDeckDialog(true)" />
+      <Button
+        class="float-left"
+        severity="secondary"
+        label="Cancel"
+        icon="pi pi-times"
+        :disabled="isLoading"
+        @click="hideAddDeckDialog(false)"
+      />
+      <Button
+        class="float-right"
+        label="Save"
+        icon="pi pi-check"
+        :loading="isLoading"
+        :disabled="isLoading || !newDeckName"
+        @click="hideAddDeckDialog(true)"
+      />
     </template>
   </Dialog>
 </template>
@@ -66,6 +82,7 @@ const userStore = useUserStore();
 const isAddDeckDialogVisible = ref(false);
 const newDeckName = ref("");
 const newDeckDescription = ref("");
+const isLoading = ref(false);
 
 const ownDecks = computed(() => decks.filter(x => x.authorId === userStore.id));
 const othersDecks = computed(() => decks.filter(x => x.authorId !== userStore.id));
@@ -79,6 +96,8 @@ const showAddDeckDialog = () => {
 
 const hideAddDeckDialog = async (save: boolean) => {
   if (save) {
+    isLoading.value = true;
+
     try {
       const deck = await deckManagementApiService.addDeck(newDeckName.value);
       toast.add({
@@ -102,6 +121,8 @@ const hideAddDeckDialog = async (save: boolean) => {
         life: 3000,
       });
     }
+
+    isLoading.value = false;
   }
   isAddDeckDialogVisible.value = false;
 };

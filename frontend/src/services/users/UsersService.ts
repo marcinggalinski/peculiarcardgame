@@ -77,13 +77,9 @@ export default class UsersService {
         displayedName: decodedToken.nickname,
       });
 
-      if (successCallback) {
-        successCallback(decodedToken);
-      }
-    } catch (error: unknown) {
-      if (failureCallback) {
-        failureCallback(error);
-      }
+      if (successCallback) successCallback(decodedToken);
+    } catch (error) {
+      if (failureCallback) failureCallback(error);
     }
   }
 
@@ -94,8 +90,12 @@ export default class UsersService {
     successCallback?: (decodedToken: { id: string; name: string; nickname: string }) => void,
     failureCallback?: (error: unknown) => void
   ): Promise<void> {
-    await this.usersApiService.addUser(username, password, displayedName);
-    await this.signIn(username, password, successCallback, failureCallback);
+    try {
+      await this.usersApiService.addUser(username, password, displayedName);
+      await this.signIn(username, password, successCallback, failureCallback);
+    } catch (error) {
+      if (failureCallback) failureCallback(error);
+    }
   }
 
   async signOut(): Promise<void> {

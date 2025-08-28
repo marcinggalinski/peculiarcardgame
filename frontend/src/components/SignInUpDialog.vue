@@ -18,34 +18,38 @@
       <TabPanel header="Sign in" header-style="{ display: none; }">
         <div id="sign-in-form-container">
           <div class="field">
-            <div>Username</div>
+            <div>Username <small class="red">*</small></div>
             <InputText
               v-model="signin.fields.username"
-              :disabled="isDisabled"
+              :disabled="isLoading"
               :invalid="signin.invalid"
               @change="() => (signin.invalid = false)"
               maxlength="30"
             />
           </div>
           <div class="field">
-            <div>Password</div>
+            <div>Password <small class="red">*</small></div>
             <InputText
               type="password"
               v-model="signin.fields.password"
-              :disabled="isDisabled"
+              :disabled="isLoading"
               :invalid="signin.invalid"
               @change="() => (signin.invalid = false)"
             />
+          </div>
+
+          <div class="field">
+            <small class="red">* Field is required</small>
           </div>
         </div>
       </TabPanel>
       <TabPanel header="Sign up">
         <div id="sign-up-form-container">
           <div class="field">
-            <div>Username</div>
+            <div>Username <small class="red">*</small></div>
             <InputText
               v-model="signup.fields.username"
-              :disabled="isDisabled"
+              :disabled="isLoading"
               :invalid="signup.invalid.username"
               @change="() => (signup.invalid.username = false)"
               maxlength="30"
@@ -53,17 +57,21 @@
           </div>
           <div class="field">
             <div>Displayed name</div>
-            <InputText v-model="signup.fields.displayedName" :disabled="isDisabled" maxlength="30" />
+            <InputText v-model="signup.fields.displayedName" :disabled="isLoading" maxlength="30" />
           </div>
           <div class="field">
-            <div>Password</div>
+            <div>Password <small class="red">*</small></div>
             <InputText
               type="password"
               v-model="signup.fields.password"
-              :disabled="isDisabled"
+              :disabled="isLoading"
               :invalid="signup.invalid.password"
               @change="() => (signup.invalid.password = false)"
             />
+          </div>
+
+          <div class="field">
+            <small class="red">* Field is required</small>
           </div>
         </div>
       </TabPanel>
@@ -74,15 +82,19 @@
         v-if="activeIndex == Step.SignIn"
         class="float-right"
         label="Sign in!"
+        icon="pi pi-sign-in"
         @click="signIn()"
-        :disabled="isDisabled || !signin.fields.username || !signin.fields.password"
+        :loading="isLoading"
+        :disabled="isLoading || !signin.fields.username || !signin.fields.password"
       />
       <Button
         v-if="activeIndex == Step.SignUp"
         class="float-right"
         label="Sign up!"
+        icon="pi pi-user-plus"
         @click="signUp()"
-        :disabled="isDisabled || !signup.fields.username || !signup.fields.password"
+        :loading="isLoading"
+        :disabled="isLoading || !signup.fields.username || !signup.fields.password"
       />
     </template>
   </Dialog>
@@ -97,10 +109,9 @@ import TabView from "primevue/tabview";
 import TabPanel from "primevue/tabpanel";
 import { useToast } from "primevue/usetoast";
 
-import { AxiosError } from "axios";
-
 import { UsersServiceKey } from "@/keys";
 import UsersService from "@/services/users/usersService";
+import ApiError from "@/models/apiError";
 
 enum Step {
   SignIn = 0,
@@ -158,7 +169,7 @@ const signup = ref<{
     password: boolean;
   };
 }>(signupDefault());
-const isDisabled = ref(false);
+const isLoading = ref(false);
 
 watch(activeIndex, () => {
   switch (activeIndex.value) {
@@ -180,10 +191,10 @@ watch(visible, () => {
 });
 
 const signIn = async () => {
-  isDisabled.value = true;
+  isLoading.value = true;
   signin.value.invalid = false;
 
-  usersService.signIn(
+  await usersService.signIn(
     signin.value.fields.username.trim(),
     signin.value.fields.password,
     decodedToken => {
@@ -196,9 +207,9 @@ const signIn = async () => {
       });
     },
     error => {
-      if (error instanceof AxiosError) {
-        const axiosError = error as AxiosError;
-        if (axiosError.response?.status == 401) {
+      if (error instanceof ApiError) {
+        const apiError = error as ApiError;
+        if (apiError.statusCode == 401) {
           signin.value.invalid = true;
           toast.add({
             summary: "Sign in failed",
@@ -220,15 +231,15 @@ const signIn = async () => {
     }
   );
 
-  isDisabled.value = false;
+  isLoading.value = false;
 };
 
 const signUp = async () => {
-  isDisabled.value = true;
+  isLoading.value = true;
   signup.value.invalid.username = false;
   signup.value.invalid.password = false;
 
-  usersService.signUp(
+  await usersService.signUp(
     signup.value.fields.username.trim(),
     signup.value.fields.password,
     signup.value.fields.displayedName.trim(),
@@ -242,9 +253,9 @@ const signUp = async () => {
       });
     },
     error => {
-      if (error instanceof AxiosError) {
-        const axiosError = error as AxiosError;
-        if (axiosError.response?.status == 409) {
+      if (error instanceof ApiError) {
+        const apiError = error as ApiError;
+        if (apiError.statusCode == 409) {
           signup.value.invalid.username = true;
           toast.add({
             summary: "Sign up failed",
@@ -266,7 +277,7 @@ const signUp = async () => {
     }
   );
 
-  isDisabled.value = false;
+  isLoading.value = false;
 };
 </script>
 <style scoped lang="stylus">
